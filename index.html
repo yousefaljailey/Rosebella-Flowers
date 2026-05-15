@@ -760,6 +760,12 @@
     }
     .test-name { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; display: block; }
     .test-loc { font-family: var(--sans); font-size: 10px; color: #999; letter-spacing: 0.05em; }
+    .test-stars-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .test-stars-row .test-stars { margin-bottom:0; }
+    .test-goog-badge { display:flex; align-items:center; gap:4px; font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#999; }
+    .test-avatar-img { width:44px; height:44px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+    .test-goog-attr { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:48px; font-family:var(--sans); font-size:10px; color:#bbb; letter-spacing:0.06em; }
+    .test-goog-attr svg { flex-shrink:0; }
 
     /* ── CTA BANNER ── */
     .cta-banner {
@@ -3733,40 +3739,44 @@
         </div>
         <div style="font-family:var(--serif);font-size:15px;color:#999;font-style:italic;max-width:260px;text-align:right;"><span data-tid="testSub">Over 5,000 smiles delivered across Doha, Qatar.</span></div>
       </div>
-      <div class="test-grid">
+      <div class="test-grid" id="testGrid">
         <div class="test-card reveal">
-          <div class="test-stars">★★★★★</div>
+          <div class="test-stars-row">
+            <span class="test-stars">★★★★★</span>
+            <span class="test-goog-badge"><svg viewBox="0 0 24 24" width="12" height="12"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Google</span>
+          </div>
           <blockquote data-tid="q1">"The flowers arrived perfectly arranged, just as shown. My wife was in tears — the good kind. Rosebella made our anniversary truly unforgettable."</blockquote>
           <div class="test-author">
             <div class="test-avatar">A</div>
-            <div>
-              <span class="test-name" data-tid="n1">Ahmed Al-Rashid</span>
-              <span class="test-loc" data-tid="l1">Doha, Qatar</span>
-            </div>
+            <div><span class="test-name" data-tid="n1">Ahmed Al-Rashid</span><span class="test-loc" data-tid="l1">Doha, Qatar</span></div>
           </div>
         </div>
         <div class="test-card reveal reveal-delay-1">
-          <div class="test-stars">★★★★★</div>
+          <div class="test-stars-row">
+            <span class="test-stars">★★★★★</span>
+            <span class="test-goog-badge"><svg viewBox="0 0 24 24" width="12" height="12"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Google</span>
+          </div>
           <blockquote data-tid="q2">"Ordered same-day and they delivered within 3 hours. The packaging was absolutely beautiful — it felt like an experience, not just a delivery."</blockquote>
           <div class="test-author">
             <div class="test-avatar">S</div>
-            <div>
-              <span class="test-name" data-tid="n2">Sara Mohammed</span>
-              <span class="test-loc" data-tid="l2">Doha, Qatar</span>
-            </div>
+            <div><span class="test-name" data-tid="n2">Sara Mohammed</span><span class="test-loc" data-tid="l2">Doha, Qatar</span></div>
           </div>
         </div>
         <div class="test-card reveal reveal-delay-2">
-          <div class="test-stars">★★★★★</div>
+          <div class="test-stars-row">
+            <span class="test-stars">★★★★★</span>
+            <span class="test-goog-badge"><svg viewBox="0 0 24 24" width="12" height="12"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Google</span>
+          </div>
           <blockquote data-tid="q3">"The chocolate and flower bundle was extraordinary. Everything felt considered and intentional. This is what luxury gifting should feel like."</blockquote>
           <div class="test-author">
             <div class="test-avatar">L</div>
-            <div>
-              <span class="test-name" data-tid="n3">Lara Khoury</span>
-              <span class="test-loc" data-tid="l3">Doha, Qatar</span>
-            </div>
+            <div><span class="test-name" data-tid="n3">Lara Khoury</span><span class="test-loc" data-tid="l3">Doha, Qatar</span></div>
           </div>
         </div>
+      </div>
+      <div class="test-goog-attr" id="testGoogAttr" style="display:none;">
+        <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Reviews sourced from Google Maps &nbsp;·&nbsp; <a id="testGoogLink" href="https://www.google.com/maps/search/Rosebella+Flowers+Doha+Qatar" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">View all reviews</a>
       </div>
     </div>
   </section>
@@ -4052,11 +4062,6 @@
         n3: 'لارا خوري', l3: 'الدوحة، قطر',
       }
     };
-    const td = testData[lang];
-    Object.keys(td).forEach(key => {
-      const el = document.querySelector(`[data-tid="${key}"]`);
-      if (el) el.textContent = td[key];
-    });
 
     // ── Stats labels ──
     const statLabels = document.querySelectorAll('.story-stat .lbl');
@@ -4069,7 +4074,63 @@
     // Lang bar left text
     const lbLeft = document.querySelector('.lb-left');
     if(lbLeft) lbLeft.innerHTML = t.lbLeft.replace('Doha, Qatar', '<span>Doha, Qatar</span>').replace('الدوحة، قطر', '<span>الدوحة، قطر</span>');
+
+    // Skip testimonial translation if Google reviews are already loaded
+    if (window._googleReviewsLoaded) return;
+    const td = testData[lang];
+    Object.keys(td).forEach(key => {
+      const el = document.querySelector(`[data-tid="${key}"]`);
+      if (el) el.textContent = td[key];
+    });
   }
+
+  // ── Google Places API (New) — Live Reviews ────
+  (async function loadGoogleReviews() {
+    const KEY = 'AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII';
+    const GOOGLE_LOGO = `<svg viewBox="0 0 24 24" width="12" height="12"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
+    try {
+      const searchRes = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': KEY, 'X-Goog-FieldMask': 'places.id,places.rating,places.userRatingCount,places.displayName,places.googleMapsUri' },
+        body: JSON.stringify({ textQuery: 'Rosebella Flowers & Chocolate Doha Qatar', locationBias: { circle: { center: { latitude: 25.2854, longitude: 51.5310 }, radius: 30000.0 } } })
+      });
+      if (!searchRes.ok) return;
+      const searchData = await searchRes.json();
+      const place = searchData.places?.[0];
+      if (!place?.id) return;
+      const detailRes = await fetch(`https://places.googleapis.com/v1/${place.id}?languageCode=en&fields=reviews,rating,userRatingCount,googleMapsUri`, { headers: { 'X-Goog-Api-Key': KEY } });
+      if (!detailRes.ok) return;
+      const detail = await detailRes.json();
+      const reviews = detail.reviews;
+      if (!reviews?.length) return;
+      const grid = document.getElementById('testGrid');
+      if (!grid) return;
+      const delayClasses = ['', ' reveal-delay-1', ' reveal-delay-2', ' reveal-delay-1', ' reveal-delay-2'];
+      grid.innerHTML = reviews.slice(0, 3).map((r, i) => {
+        const rating = r.rating || 5;
+        const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+        const name = r.authorAttribution?.displayName || 'Google Reviewer';
+        const photoUri = r.authorAttribution?.photoUri;
+        const text = (r.text?.text || r.originalText?.text || '').trim();
+        const excerpt = text.length > 280 ? text.slice(0, 278) + '…' : text;
+        const timeStr = r.relativePublishTimeDescription || 'Google Maps';
+        const initial = name.charAt(0).toUpperCase();
+        const avatarHtml = photoUri ? `<img src="${photoUri}" class="test-avatar-img" alt="${name}" referrerpolicy="no-referrer" />` : `<div class="test-avatar">${initial}</div>`;
+        return `<div class="test-card reveal${delayClasses[i]}">
+          <div class="test-stars-row"><span class="test-stars">${stars}</span><span class="test-goog-badge">${GOOGLE_LOGO}Google</span></div>
+          <blockquote>"${excerpt}"</blockquote>
+          <div class="test-author">${avatarHtml}<div><span class="test-name">${name}</span><span class="test-loc">${timeStr}</span></div></div>
+        </div>`;
+      }).join('');
+      if (place.rating && place.userRatingCount) {
+        const subEl = document.querySelector('[data-tid="testSub"]');
+        if (subEl) subEl.textContent = `${place.rating.toFixed(1)} ★ on Google · ${place.userRatingCount.toLocaleString()} reviews`;
+      }
+      const attrEl = document.getElementById('testGoogAttr');
+      if (attrEl) { attrEl.style.display = ''; const linkEl = document.getElementById('testGoogLink'); if (linkEl && detail.googleMapsUri) linkEl.href = detail.googleMapsUri; }
+      window._googleReviewsLoaded = true;
+    } catch (e) { /* keep hardcoded fallback */ }
+  })();
   </script>
 
 
