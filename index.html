@@ -4135,6 +4135,11 @@
       const lnk = document.getElementById('testGoogLink');
       if (lnk) lnk.href = 'https://www.google.com/maps/search/Rosebella+Flowers+%26+Chocolate+Doha+Qatar';
     }
+    // IntersectionObserver + 800ms timeout only run at page load —
+    // dynamically created .reveal cards need visible added manually.
+    requestAnimationFrame(() => {
+      grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    });
     window._googleReviewsLoaded = true;
   }
 
