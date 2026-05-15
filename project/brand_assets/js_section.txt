@@ -1,0 +1,1154 @@
+  const RECIPIENT_KEY = 'rosebella_recipient';
+
+  // Same-day: no new orders after this hour; slots must start ≥ SLOT_LEAD_HRS from now
+  const SAME_DAY_CUTOFF = 15;
+  const SLOT_LEAD_HRS   = 2;
+
+  const TIME_SLOTS = [
+    { id: 'slot1', label: '9 AM – 12 PM',  start: 9  },
+    { id: 'slot2', label: '12 PM – 3 PM',  start: 12 },
+    { id: 'slot3', label: '3 PM – 6 PM',   start: 15 },
+    { id: 'slot4', label: '6 PM – 9 PM',   start: 18 },
+  ];
+
+  const PROMO_CODES = [
+    { code: 'ROSEBELLA10', type: 'percent', value: 10,  label: '10% off — ROSEBELLA10' },
+    { code: 'WELCOME20',   type: 'percent', value: 20,  label: '20% off — WELCOME20'   },
+    { code: 'LOVE15',      type: 'percent', value: 15,  label: '15% off — LOVE15'       },
+    { code: 'FLAT50',      type: 'fixed',   value: 50,  label: 'QR 50 off — FLAT50'     },
+    { code: 'VIP100',      type: 'fixed',   value: 100, label: 'QR 100 off — VIP100'    },
+  ];
+
+  function loadCart() {
+    try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function loadPromo() {
+    try { return JSON.parse(localStorage.getItem(PROMO_KEY)) || null; }
+    catch (e) { return null; }
+  }
+
+  function loadGiftMsg() {
+    return localStorage.getItem(GIFT_MSG_KEY) || '';
+  }
+
+  function loadDelivery() {
+    try { return JSON.parse(localStorage.getItem(DELIVERY_KEY)) || { date: '', slot: '' }; }
+    catch(e) { return { date: '', slot: '' }; }
+  }
+
+  function loadRecipient() {
+    try {
+      return JSON.parse(localStorage.getItem(RECIPIENT_KEY)) ||
+        { name:'', phone:'', address:'', landmark:'', occasion:'', notes:'' };
+    } catch(e) {
+      return { name:'', phone:'', address:'', landmark:'', occasion:'', notes:'' };
+    }
+  }
+
+  function saveCart()      { localStorage.setItem(CART_KEY,      JSON.stringify(cart));          }
+  function savePromo()     { localStorage.setItem(PROMO_KEY,     JSON.stringify(appliedPromo));  }
+  function saveGiftMsg()   { localStorage.setItem(GIFT_MSG_KEY,  giftMessage);                   }
+  function saveDelivery()  { localStorage.setItem(DELIVERY_KEY,  JSON.stringify(deliverySlot));  }
+  function saveRecipient() { localStorage.setItem(RECIPIENT_KEY, JSON.stringify(recipient));     }
+
+  let cart         = loadCart();
+  let appliedPromo = loadPromo();
+  let giftMessage  = loadGiftMsg();
+  let deliverySlot = loadDelivery();
+  let recipient    = loadRecipient();
+
+  // ── Recipient helpers ─────────────────────────
+  function onRecipientInput(field, value) {
+    recipient[field] = value;
+    saveRecipient();
+    const id = 'rf' + field.charAt(0).toUpperCase() + field.slice(1);
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('error');
+    document.getElementById('rfCheckoutError').classList.remove('show');
+  }
+
+  function validateRecipient() {
+    let valid = true;
+    ['rfName', 'rfPhone', 'rfAddress'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || !el.value.trim()) {
+        if (el) el.classList.add('error');
+        valid = false;
+      }
+    });
+    return valid;
+  }
+
+  function validateAndOrder() {
+    if (!validateRecipient()) {
+      const err = document.getElementById('rfCheckoutError');
+      err.classList.add('show');
+      setTimeout(() => err.classList.remove('show'), 4000);
+      const firstErr = document.querySelector('#cartPanel .rf-input.error, #cartPanel .rf-textarea.error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+    return true;
+  }
+
+  // ── Delivery helpers ──────────────────────────
+  function toDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function getMinDate() {
+    const now = new Date();
+    const anySlotToday = TIME_SLOTS.some(s => s.start > now.getHours() + SLOT_LEAD_HRS);
+    if (!anySlotToday) {
+      const tom = new Date(now); tom.setDate(tom.getDate() + 1);
+      return toDateStr(tom);
+    }
+    return toDateStr(now);
+  }
+
+  function getAvailableSlots(dateStr) {
+    const now = new Date();
+    if (dateStr === toDateStr(now)) {
+      return TIME_SLOTS.filter(s => s.start > now.getHours() + SLOT_LEAD_HRS);
+    }
+    return TIME_SLOTS;
+  }
+
+  function formatDeliveryDate(dateStr) {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+  }
+
+  function onDeliveryDateChange(val) {
+    deliverySlot.date = val;
+    deliverySlot.slot = '';
+    saveDelivery();
+    renderDeliverySlots(val);
+    updateCartUI();
+  }
+
+  function selectDeliverySlot(slotId) {
+    deliverySlot.slot = slotId;
+    saveDelivery();
+    document.querySelectorAll('.delivery-slot-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.slot === slotId);
+    });
+    updateCartUI();
+  }
+
+  function resetDeliverySlot() {
+    deliverySlot.slot = '';
+    saveDelivery();
+    const slotsEl = document.getElementById('deliverySlots');
+    if (slotsEl) {
+      slotsEl.querySelectorAll('.delivery-slot-btn').forEach(b => b.classList.remove('active'));
+    }
+    updateCartUI();
+  }
+
+  function renderDeliverySlots(dateStr) {
+    const container = document.getElementById('deliverySlots');
+    const noteEl    = document.getElementById('deliveryNote');
+    if (!container) return;
+
+    if (!dateStr) { container.innerHTML = ''; noteEl.textContent = ''; return; }
+
+    const now      = new Date();
+    const slots    = getAvailableSlots(dateStr);
+    const isToday  = dateStr === toDateStr(now);
+
+    noteEl.textContent = isToday
+      ? `✦ Same-day delivery · cutoff ${SAME_DAY_CUTOFF}:00`
+      : '';
+    noteEl.className = 'delivery-note' + (isToday ? ' same-day' : '');
+
+    if (slots.length === 0) {
+      container.innerHTML = '<p class="delivery-no-slots">No slots available today — please pick another date.</p>';
+      return;
+    }
+
+    container.innerHTML = slots.map(s => `
+      <button class="delivery-slot-btn${deliverySlot.slot === s.id ? ' active' : ''}"
+        data-slot="${s.id}" onclick="selectDeliverySlot('${s.id}')">${s.label}</button>
+    `).join('');
+  }
+
+  // ── Open / Close ──────────────────────────────
+  function openCart() {
+    document.getElementById('cartPanel').classList.add('show');
+    document.getElementById('cartOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('cart-open');
+  }
+
+  function closeCart() {
+    document.getElementById('cartPanel').classList.remove('show');
+    document.getElementById('cartOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    document.body.classList.remove('cart-open');
+  }
+
+  // ── Add to cart ───────────────────────────────
+  function addToCart(btn, name) {
+    const card    = btn.closest('.prod-card');
+    const catEl   = card ? card.querySelector('.prod-cat')   : null;
+    const priceEl = card ? card.querySelector('.prod-price') : null;
+
+    let price = 0;
+    if (priceEl) {
+      const clone = priceEl.cloneNode(true);
+      const cur = clone.querySelector('.currency');
+      if (cur) cur.remove();
+      price = parseFloat(clone.textContent.trim()) || 0;
+    }
+
+    const cat = catEl ? catEl.textContent.trim() : '';
+    const existing = cart.find(i => i.name === name);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ id: Date.now(), name, cat, price, qty: 1 });
+    }
+
+    saveCart();
+    updateCartUI();
+    openCart();
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Added';
+    btn.style.background = '#4a8c4a';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 1400);
+  }
+
+  // ── Promo code ────────────────────────────────
+  function applyPromo() {
+    const input = document.getElementById('promoInput');
+    const msgEl = document.getElementById('promoMsg');
+    const code  = input.value.trim().toUpperCase();
+
+    msgEl.className = 'promo-msg';
+    msgEl.textContent = '';
+
+    if (!code) {
+      msgEl.className = 'promo-msg error';
+      msgEl.textContent = 'Please enter a promo code.';
+      return;
+    }
+
+    if (appliedPromo) {
+      msgEl.className = 'promo-msg error';
+      msgEl.textContent = 'Remove the current promo before applying a new one.';
+      return;
+    }
+
+    const match = PROMO_CODES.find(p => p.code === code);
+    if (!match) {
+      msgEl.className = 'promo-msg error';
+      msgEl.textContent = 'Invalid promo code. Please try again.';
+      input.value = '';
+      return;
+    }
+
+    appliedPromo = match;
+    savePromo();
+    input.value = '';
+    msgEl.className = 'promo-msg success';
+    msgEl.textContent = '✓ Promo code applied!';
+    updateCartUI();
+
+    setTimeout(() => { msgEl.textContent = ''; msgEl.className = 'promo-msg'; }, 3000);
+  }
+
+  function removePromo() {
+    appliedPromo = null;
+    savePromo();
+    document.getElementById('promoMsg').textContent = '';
+    document.getElementById('promoMsg').className = 'promo-msg';
+    updateCartUI();
+  }
+
+  // ── Update UI ─────────────────────────────────
+  function updateCartUI() {
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const count    = cart.reduce((s, i) => s + i.qty, 0);
+
+    let discount = 0;
+    if (appliedPromo && subtotal > 0) {
+      if (appliedPromo.type === 'percent') {
+        discount = subtotal * appliedPromo.value / 100;
+      } else {
+        discount = Math.min(appliedPromo.value, subtotal);
+      }
+    }
+    const total = Math.max(0, subtotal - discount);
+
+    // Badge
+    const badge = document.getElementById('cartCount');
+    badge.textContent = count;
+    badge.classList.toggle('visible', count > 0);
+
+    // Footer visibility
+    document.getElementById('cartFooter').style.display = cart.length ? 'block' : 'none';
+
+    // Subtotal row — only show when a promo is applied
+    const hasDiscount = appliedPromo && discount > 0;
+    document.getElementById('cartSubtotalRow').style.display    = hasDiscount ? 'flex'  : 'none';
+    document.getElementById('cartDiscountRow').style.display    = hasDiscount ? 'flex'  : 'none';
+    document.getElementById('cartTotalsDivider').style.display  = hasDiscount ? 'block' : 'none';
+    document.getElementById('cartSubtotalVal').textContent      = subtotal.toFixed(0);
+    document.getElementById('cartDiscountVal').textContent      = discount.toFixed(0);
+    document.getElementById('cartTotalVal').textContent         = total.toFixed(0);
+
+    // Applied promo tag
+    const appliedEl = document.getElementById('promoApplied');
+    if (appliedPromo) {
+      document.getElementById('promoAppliedLabel').textContent = appliedPromo.label;
+      appliedEl.style.display = 'flex';
+      document.getElementById('promoSection').style.display = 'none';
+    } else {
+      appliedEl.style.display = 'none';
+      document.getElementById('promoSection').style.display = 'block';
+    }
+
+    // WhatsApp message
+    let msg = 'Hello Rosebella! 🌸 I would like to order:\n\n';
+    cart.forEach(i => {
+      msg += `• ${i.name} x${i.qty} — QR ${(i.price * i.qty).toFixed(0)}\n`;
+      if (i.variants) {
+        const v = i.variants;
+        const parts = [];
+        if (v.size)                         parts.push(v.size);
+        if (v.packaging)                    parts.push(v.packaging);
+        if (v.addons && v.addons.length)    parts.push(v.addons.join(', '));
+        if (parts.length) msg += `  ↳ ${parts.join(' · ')}\n`;
+      }
+    });
+    if (appliedPromo && discount > 0) {
+      msg += `\nPromo: ${appliedPromo.code} (−QR ${discount.toFixed(0)})`;
+    }
+    msg += `\nTotal: QR ${total.toFixed(0)}`;
+    if (deliverySlot.date && deliverySlot.slot) {
+      const slotObj = TIME_SLOTS.find(s => s.id === deliverySlot.slot);
+      msg += `\n\n📦 Delivery: ${formatDeliveryDate(deliverySlot.date)}`;
+      msg += `\n⏰ Time Slot: ${slotObj ? slotObj.label : deliverySlot.slot}`;
+    }
+    if (recipient.name || recipient.phone || recipient.address) {
+      msg += '\n\n👤 Recipient Details:';
+      if (recipient.name)     msg += `\nName: ${recipient.name}`;
+      if (recipient.phone)    msg += `\nPhone: ${recipient.phone}`;
+      if (recipient.address)  msg += `\nAddress: ${recipient.address}`;
+      if (recipient.landmark) msg += `\nLandmark: ${recipient.landmark}`;
+      if (recipient.occasion) msg += `\nOccasion: ${recipient.occasion}`;
+      if (recipient.notes)    msg += `\nNotes: ${recipient.notes}`;
+    }
+    if (deliverySlot.date && deliverySlot.slot) {
+      const slotObj = TIME_SLOTS.find(s => s.id === deliverySlot.slot);
+      msg += `\n\n📦 Delivery: ${formatDeliveryDate(deliverySlot.date)}`;
+      msg += `\n⏰ Time Slot: ${slotObj ? slotObj.label : deliverySlot.slot}`;
+    }
+    if (giftMessage.trim()) {
+      msg += `\n\n💌 Gift Message:\n"${giftMessage.trim()}"`;
+    }
+    document.getElementById('cartWaBtn').href = 'https://wa.me/97433446618?text=' + encodeURIComponent(msg);
+
+    // Empty state
+    document.getElementById('cartEmptyState').style.display = cart.length ? 'none' : 'flex';
+
+    // Items
+    const container = document.getElementById('cartItemsContainer');
+    container.innerHTML = cart.map(item => {
+      const variantLine = (() => {
+        if (!item.variants) return '';
+        const v = item.variants;
+        const parts = [];
+        if (v.size)                      parts.push(v.size);
+        if (v.packaging)                 parts.push(v.packaging);
+        if (v.addons && v.addons.length) parts.push(...v.addons.map(a => `+${a}`));
+        return parts.length ? `<div class="cart-item-variants">${parts.join(' · ')}</div>` : '';
+      })();
+      return `
+      <div class="cart-item" id="ci-${item.id}">
+        <div class="cart-item-img" style="background:var(--charcoal2);border-radius:8px;flex-shrink:0;width:72px;height:72px;"></div>
+        <div class="cart-item-info">
+          <span class="cart-item-cat">${item.cat}</span>
+          <div class="cart-item-name">${item.name}</div>
+          ${variantLine}
+          <div class="cart-item-controls">
+            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="cart-item-price"><span class="ci-cur">QR</span>${(item.price * item.qty).toFixed(0)}</div>
+          <button class="cart-item-del" onclick="removeItem(${item.id})" title="Remove">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Recipient fields — sync on load/restore
+    const rfMap = { rfName:'name', rfPhone:'phone', rfAddress:'address', rfLandmark:'landmark', rfOccasion:'occasion', rfNotes:'notes' };
+    Object.entries(rfMap).forEach(([id, field]) => {
+      const el = document.getElementById(id);
+      if (el && el.value !== recipient[field]) el.value = recipient[field];
+    });
+
+    // Gift message — sync textarea value and counter on load/restore
+    const ta = document.getElementById('giftMsgInput');
+    if (ta && ta.value !== giftMessage) ta.value = giftMessage;
+    syncGiftCounter(giftMessage.length);
+
+    // Delivery scheduling — sync date input, validate stored date, render slots
+    const dateInput = document.getElementById('deliveryDateInput');
+    if (dateInput) {
+      const minDate = getMinDate();
+      dateInput.min = minDate;
+
+      // If a saved date is now in the past (e.g. yesterday), clear it
+      if (deliverySlot.date && deliverySlot.date < minDate) {
+        deliverySlot.date = '';
+        deliverySlot.slot = '';
+        saveDelivery();
+      }
+
+      if (dateInput.value !== deliverySlot.date) dateInput.value = deliverySlot.date;
+      if (deliverySlot.date) renderDeliverySlots(deliverySlot.date);
+    }
+
+    // Delivery confirmed badge
+    const confirmedEl   = document.getElementById('deliveryConfirmed');
+    const confirmedText = document.getElementById('deliveryConfirmedText');
+    const slotsEl       = document.getElementById('deliverySlots');
+    const noteEl        = document.getElementById('deliveryNote');
+    if (confirmedEl) {
+      if (deliverySlot.date && deliverySlot.slot) {
+        const slotObj = TIME_SLOTS.find(s => s.id === deliverySlot.slot);
+        confirmedText.textContent = `📦 ${formatDeliveryDate(deliverySlot.date)} · ${slotObj ? slotObj.label : ''}`;
+        confirmedEl.style.display = 'flex';
+        if (slotsEl) slotsEl.style.display = 'none';
+        if (noteEl)  noteEl.style.display  = 'none';
+      } else {
+        confirmedEl.style.display = 'none';
+        if (slotsEl) slotsEl.style.display = '';
+        if (noteEl)  noteEl.style.display  = '';
+      }
+    }
+  }
+
+  // ── Gift message ──────────────────────────────
+  function onGiftMsgInput(el) {
+    giftMessage = el.value;
+    saveGiftMsg();
+    syncGiftCounter(el.value.length);
+  }
+
+  function syncGiftCounter(len) {
+    const counter = document.getElementById('giftMsgCounter');
+    if (!counter) return;
+    counter.textContent = `${len} / 250`;
+    counter.className = 'gift-msg-counter' + (len >= 250 ? ' limit' : len >= 200 ? ' warn' : '');
+  }
+
+  // ── Qty / Remove ──────────────────────────────
+  function changeQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+    saveCart();
+    updateCartUI();
+  }
+
+  function removeItem(id) {
+    cart = cart.filter(i => i.id !== id);
+    saveCart();
+    updateCartUI();
+  }
+
+  function toggleWish(btn) {
+    btn.classList.toggle('liked');
+    btn.textContent = btn.classList.contains('liked') ? '♥' : '♡';
+  }
+
+  function clearCart() {
+    if (!confirm('Clear your gift bag?')) return;
+    cart         = [];
+    appliedPromo = null;
+    giftMessage  = '';
+    deliverySlot = { date: '', slot: '' };
+    recipient    = { name:'', phone:'', address:'', landmark:'', occasion:'', notes:'' };
+    saveCart(); savePromo(); saveGiftMsg(); saveDelivery(); saveRecipient();
+
+    const ta = document.getElementById('giftMsgInput');
+    if (ta) ta.value = '';
+    const di = document.getElementById('deliveryDateInput');
+    if (di) di.value = '';
+    const slotsEl = document.getElementById('deliverySlots');
+    if (slotsEl) slotsEl.innerHTML = '';
+    ['rfName','rfPhone','rfAddress','rfLandmark','rfOccasion','rfNotes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    updateCartUI();
+  }
+
+  // Restore state on page load
+  updateCartUI();
+
+  // ══════════════════════════════════════════════
+  //  VARIANT SYSTEM
+  // ══════════════════════════════════════════════
+  const VARIANTS = {
+    sizes: [
+      { id: 'small',   label: 'Small',    priceAdj: -50  },
+      { id: 'medium',  label: 'Medium',   priceAdj: 0    },
+      { id: 'large',   label: 'Large',    priceAdj: 80   },
+      { id: 'xlarge',  label: 'X-Large',  priceAdj: 160  },
+    ],
+    packaging: [
+      { id: 'standard',   label: 'Standard',    priceAdj: 0  },
+      { id: 'luxury-box', label: 'Luxury Box',  priceAdj: 40 },
+      { id: 'kraft-wrap', label: 'Kraft Wrap',  priceAdj: 15 },
+      { id: 'satin-bag',  label: 'Satin Bag',   priceAdj: 25 },
+    ],
+    addons: [
+      { id: 'balloon',   label: 'Balloon',    icon: '🎈', price: 35 },
+      { id: 'chocolate', label: 'Chocolates', icon: '🍫', price: 55 },
+      { id: 'vase',      label: 'Vase',       icon: '🏺', price: 45 },
+      { id: 'teddy',     label: 'Teddy Bear', icon: '🧸', price: 60 },
+      { id: 'candle',    label: 'Candle',     icon: '🕯', price: 30 },
+    ]
+  };
+
+  let activeVariant = { cardEl:null, name:'', cat:'', basePrice:0, size:'medium', packaging:'standard', addons:[] };
+
+  function openVariantModal(btn, name) {
+    const card    = btn.closest('.prod-card');
+    const catEl   = card ? card.querySelector('.prod-cat')   : null;
+    const priceEl = card ? card.querySelector('.prod-price') : null;
+    const bgEl    = card ? card.querySelector('.prod-img-bg'): null;
+    const imgEl   = card ? card.querySelector('.prod-img img'):null;
+
+    let basePrice = 0;
+    if (priceEl) {
+      const cl = priceEl.cloneNode(true);
+      const cu = cl.querySelector('.currency'); if (cu) cu.remove();
+      basePrice = parseFloat(cl.textContent.trim()) || 0;
+    }
+
+    activeVariant = { cardEl:card, name, cat: catEl ? catEl.textContent.trim() : '', basePrice, size:'medium', packaging:'standard', addons:[] };
+
+    // Populate header
+    document.getElementById('vmCat').textContent       = activeVariant.cat;
+    document.getElementById('vmName').textContent      = name;
+    document.getElementById('vmBasePrice').textContent = `QR ${basePrice}`;
+
+    // Thumbnail
+    const thumb = document.getElementById('vmThumb');
+    thumb.style.backgroundImage = '';
+    thumb.className = 'vm-thumb';
+    if (imgEl && imgEl.src) {
+      thumb.style.backgroundImage = `url(${imgEl.src})`;
+      thumb.style.backgroundSize  = 'cover';
+    } else if (bgEl) {
+      const cls = (bgEl.className.match(/pi-\d+/) || [''])[0];
+      if (cls) thumb.classList.add(cls);
+    }
+
+    // Render selectors
+    vmRenderPills('vmSizes',    VARIANTS.sizes,     'size',      'medium');
+    vmRenderPills('vmPackaging',VARIANTS.packaging, 'packaging', 'standard');
+    vmRenderAddons();
+    vmUpdatePrice();
+
+    document.getElementById('variantBg').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeVariantModal() {
+    document.getElementById('variantBg').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function vmRenderPills(containerId, options, type, selected) {
+    document.getElementById(containerId).innerHTML = options.map(opt => {
+      const adj = opt.priceAdj !== 0
+        ? `<span class="vm-pill-adj">${opt.priceAdj > 0 ? '+' : ''}QR ${opt.priceAdj}</span>`
+        : '';
+      return `<button class="vm-pill${opt.id === selected ? ' active' : ''}"
+        onclick="vmSelectOption('${type}','${opt.id}',this)">${opt.label} ${adj}</button>`;
+    }).join('');
+  }
+
+  function vmSelectOption(type, id, btn) {
+    activeVariant[type] = id;
+    btn.closest('.vm-pills').querySelectorAll('.vm-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    vmUpdatePrice();
+  }
+
+  function vmRenderAddons() {
+    document.getElementById('vmAddons').innerHTML = VARIANTS.addons.map(a => {
+      const on = activeVariant.addons.includes(a.id);
+      return `
+        <button class="vm-addon${on ? ' active' : ''}" onclick="vmToggleAddon('${a.id}',this)">
+          <span class="vm-addon-icon">${a.icon}</span>
+          <div class="vm-addon-body">
+            <span class="vm-addon-label">${a.label}</span>
+            <span class="vm-addon-price">+QR ${a.price}</span>
+          </div>
+          <span class="vm-addon-check">✓</span>
+        </button>`;
+    }).join('');
+  }
+
+  function vmToggleAddon(id, btn) {
+    const idx = activeVariant.addons.indexOf(id);
+    if (idx === -1) { activeVariant.addons.push(id); btn.classList.add('active'); }
+    else            { activeVariant.addons.splice(idx,1); btn.classList.remove('active'); }
+    vmUpdatePrice();
+  }
+
+  function vmCalcPrice() {
+    const sOpt = VARIANTS.sizes.find(s => s.id === activeVariant.size);
+    const pOpt = VARIANTS.packaging.find(p => p.id === activeVariant.packaging);
+    const addonsTotal = activeVariant.addons.reduce((sum, id) => {
+      const a = VARIANTS.addons.find(x => x.id === id);
+      return sum + (a ? a.price : 0);
+    }, 0);
+    const adj = (sOpt ? sOpt.priceAdj : 0) + (pOpt ? pOpt.priceAdj : 0);
+    return Math.max(0, activeVariant.basePrice + adj) + addonsTotal;
+  }
+
+  function vmUpdatePrice() {
+    document.getElementById('vmTotal').textContent = vmCalcPrice().toFixed(0);
+  }
+
+  function variantAddToCart() {
+    const price   = vmCalcPrice();
+    const sOpt    = VARIANTS.sizes.find(s => s.id === activeVariant.size);
+    const pOpt    = VARIANTS.packaging.find(p => p.id === activeVariant.packaging);
+    const addonLabels = activeVariant.addons.map(id => VARIANTS.addons.find(a => a.id === id)?.label).filter(Boolean);
+
+    const variants = {
+      size:      sOpt  ? sOpt.label  : '',
+      packaging: pOpt  ? pOpt.label  : '',
+      addons:    addonLabels
+    };
+
+    // Unique key: same product + same exact variant combo → increment qty
+    const vKey = `${activeVariant.name}|${activeVariant.size}|${activeVariant.packaging}|${[...activeVariant.addons].sort().join(',')}`;
+    const existing = cart.find(i => i.variantKey === vKey);
+
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ id: Date.now(), name: activeVariant.name, cat: activeVariant.cat, price, basePrice: activeVariant.basePrice, qty: 1, variantKey: vKey, variants });
+    }
+
+    saveCart();
+    updateCartUI();
+    closeVariantModal();
+    openCart();
+
+    // Button feedback
+    const addBtn = activeVariant.cardEl ? activeVariant.cardEl.querySelector('.prod-add') : null;
+    if (addBtn) {
+      const orig = addBtn.innerHTML;
+      addBtn.innerHTML = '✓ Added'; addBtn.style.background = '#4a8c4a';
+      setTimeout(() => { addBtn.innerHTML = orig; addBtn.style.background = ''; }, 1400);
+    }
+  }
+  </script>
+
+</body>
+</html>
+  <!-- ═══════════ ADMIN SYSTEM ═══════════ -->
+  <style>
+    /* ── Login trigger (top-right, subtle) ── */
+    
+    
+
+    /* ── Login Modal ── */
+    #loginModalBg {
+      display: none; position: fixed; inset: 0; z-index: 99998;
+      background: rgba(10,8,5,0.85); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #loginModalBg.show { display: flex; }
+    #loginModal {
+      background: #18160f; border: 1px solid rgba(198,146,42,0.25);
+      border-radius: 14px; padding: 44px 40px; width: 380px; max-width: 95vw;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: modalIn 0.3s cubic-bezier(0.34,1.4,0.64,1) both;
+    }
+    @keyframes modalIn { from { opacity:0; transform:scale(0.92) translateY(20px); } to { opacity:1; transform:none; } }
+    .lm-logo {
+      text-align: center; margin-bottom: 28px;
+    }
+    .lm-logo h3 {
+      font-family: var(--serif); font-size: 26px; color: var(--white);
+      letter-spacing: 0.12em; font-weight: 400;
+    }
+    .lm-logo span { color: var(--gold); }
+    .lm-logo p {
+      font-family: var(--sans); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3); margin-top: 4px;
+    }
+    .lm-field { margin-bottom: 16px; }
+    .lm-field label {
+      display: block; font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); margin-bottom: 7px;
+    }
+    .lm-field input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12); color: var(--white);
+      font-family: var(--sans); font-size: 13px;
+      padding: 12px 14px; border-radius: 8px; outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .lm-field input:focus { border-color: var(--gold); background: rgba(198,146,42,0.07); }
+    .lm-error {
+      font-family: var(--sans); font-size: 11px; color: #e05060;
+      text-align: center; margin-bottom: 12px; min-height: 16px;
+    }
+    .lm-btn {
+      width: 100%; background: var(--gold); color: var(--white); border: none;
+      font-family: var(--sans); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 14px; border-radius: 8px; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .lm-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .lm-cancel {
+      display: block; text-align: center; margin-top: 14px;
+      font-family: var(--sans); font-size: 10px; color: rgba(255,255,255,0.25);
+      cursor: pointer; letter-spacing: 0.1em; transition: color 0.2s;
+    }
+    .lm-cancel:hover { color: rgba(255,255,255,0.5); }
+
+    /* ── Admin Top Bar (shown after login) ── */
+    #adminBar {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9990;
+      background: #0f0e09; border-bottom: 1px solid rgba(198,146,42,0.2);
+      padding: 10px 24px; align-items: center; justify-content: space-between;
+      gap: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    #adminBar.show { display: flex; }
+    body.admin-active { padding-top: 48px; }
+    .ab-left { display: flex; align-items: center; gap: 12px; }
+    .ab-logo {
+      font-family: var(--serif); font-size: 15px; color: var(--white);
+      letter-spacing: 0.1em;
+    }
+    .ab-logo span { color: var(--gold); }
+    .ab-badge {
+      font-family: var(--sans); font-size: 8px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      background: var(--gold); color: #000; padding: 3px 8px; border-radius: 3px;
+    }
+    .ab-right { display: flex; align-items: center; gap: 10px; }
+    .ab-btn {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 7px 16px; border-radius: 6px; cursor: pointer; border: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .ab-btn:hover { transform: translateY(-1px); }
+    .ab-btn-gold   { background: var(--gold); color: #fff; }
+    .ab-btn-gold:hover { background: var(--gold-light); }
+    .ab-btn-dark   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+    .ab-btn-dark:hover { background: rgba(255,255,255,0.14); }
+    .ab-btn-red    { background: rgba(192,57,43,0.15); color: #e05060; border: 1px solid rgba(192,57,43,0.3); }
+    .ab-btn-red:hover { background: rgba(192,57,43,0.3); }
+
+    /* ── Admin Side Panel ── */
+    #apOverlay {
+      display: none; position: fixed; inset: 0; z-index: 9991;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+    }
+    #apOverlay.show { display: block; }
+    #apPanel {
+      position: fixed; top: 48px; right: -860px; width: 860px; max-width: 100vw;
+      height: calc(100vh - 48px); z-index: 9992;
+      background: #18160f; display: flex; flex-direction: column;
+      border-left: 1px solid rgba(198,146,42,0.15);
+      box-shadow: -10px 0 60px rgba(0,0,0,0.5);
+      transition: right 0.36s cubic-bezier(0.4,0,0.2,1);
+    }
+    #apPanel.show { right: 0; }
+
+    /* Panel header */
+    .ap-ph {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid rgba(198,146,42,0.15);
+      background: #0f0e09; flex-shrink: 0;
+    }
+    .ap-ph h2 { font-family: var(--serif); font-size: 18px; color: var(--white); font-weight: 400; }
+    .ap-ph h2 em { font-style: italic; color: var(--gold); }
+    .ap-ph-btns { display: flex; gap: 8px; }
+    .ap-close-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15); background: none;
+      color: rgba(255,255,255,0.5); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; 
+    }
+    .ap-close-btn:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+
+    /* Panel body */
+    .ap-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* Sidebar */
+    .ap-sb {
+      width: 220px; flex-shrink: 0; overflow-y: auto;
+      border-right: 1px solid rgba(198,146,42,0.1); padding: 12px 0;
+      background: #121007;
+    }
+    .ap-sb::-webkit-scrollbar { width: 3px; }
+    .ap-sb::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); border-radius: 2px; }
+    .ap-sb-title {
+      font-family: var(--sans); font-size: 8px; font-weight: 700;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25); padding: 0 16px 10px;
+    }
+    .ap-ci {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 16px; cursor: pointer;
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      color: rgba(255,255,255,0.45); border-left: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .ap-ci:hover { background: rgba(198,146,42,0.07); color: rgba(255,255,255,0.8); }
+    .ap-ci.active { border-left-color: var(--gold); background: rgba(198,146,42,0.1); color: var(--gold); font-weight: 600; }
+    .ap-ci-count {
+      font-size: 9px; background: rgba(198,146,42,0.15); color: var(--gold);
+      padding: 2px 6px; border-radius: 8px;
+    }
+    .ap-ci.active .ap-ci-count { background: var(--gold); color: #000; }
+
+    /* Main content */
+    .ap-mc {
+      flex: 1; overflow-y: auto; padding: 20px 20px 80px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .ap-mc::-webkit-scrollbar { width: 3px; }
+    .ap-mc::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); border-radius: 2px; }
+
+    /* Collection rename bar */
+    .ap-rename-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: #0f0e09; padding: 14px 16px; border-radius: 8px;
+      border: 1px solid rgba(198,146,42,0.15);
+    }
+    .ap-rename-bar label {
+      font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); white-space: nowrap;
+    }
+    .ap-rename-inp {
+      flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white); font-family: var(--serif); font-size: 16px;
+      padding: 8px 12px; border-radius: 6px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .ap-rename-inp:focus { border-color: var(--gold); }
+    .ap-rename-btn {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--gold); color: #fff; border: none; cursor: pointer;
+      padding: 9px 16px; border-radius: 6px; white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .ap-rename-btn:hover { background: var(--gold-light); }
+
+    /* Products grid */
+    .ap-pg { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+
+    /* Admin product card */
+    .ap-pc {
+      background: #1e1a10; border-radius: 10px; overflow: hidden;
+      border: 1px solid rgba(198,146,42,0.1);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .ap-pc:hover { border-color: rgba(198,146,42,0.35); transform: translateY(-2px); }
+
+    /* Image area */
+    .ap-pi {
+      width: 100%; height: 130px; position: relative; overflow: hidden;
+      background: #121007; cursor: pointer;
+    }
+    
+    
+    .ap-pi-pos { 
+      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 4px; z-index: 3; opacity: 0; transition: opacity 0.2s;
+    }
+    .ap-pc:hover .ap-pi-pos { opacity: 1; }
+    .ap-pos-btn {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+      background: rgba(0,0,0,0.75); color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+      padding: 3px 7px; cursor: pointer; white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+    }
+    .ap-pos-btn:hover, .ap-pos-btn.sel { background: var(--gold); color: #fff; border-color: var(--gold); }
+    .ap-pi-placeholder {
+      width:100%;height:100%;display:flex;align-items:center;
+      justify-content:center;flex-direction:column;gap:6px;
+      color:rgba(255,255,255,0.2);
+    }
+    .ap-pi-placeholder span:first-child { font-size: 26px; opacity: 0.3; }
+    .ap-pi-placeholder span:last-child { font-size: 10px; letter-spacing: 0.1em; }
+    .ap-pi-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s; z-index: 2;
+    }
+    .ap-pi:hover .ap-pi-overlay { opacity: 1; }
+    .ap-pi-overlay span {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--gold); color: #fff; padding: 7px 14px; border-radius: 4px;
+    }
+
+    /* Card fields */
+    .ap-pb { padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; }
+    .ap-fl {
+      font-family: var(--sans); font-size: 8px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); display: block; margin-bottom: 2px;
+    }
+    .ap-fi {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); color: var(--white);
+      font-family: var(--sans); font-size: 11px;
+      padding: 7px 9px; border-radius: 5px; outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .ap-fi:focus { border-color: var(--gold); background: rgba(198,146,42,0.07); }
+    .ap-fi-price { color: var(--gold); font-weight: 700; }
+    .ap-fi-desc { resize: none; height: 44px; font-size: 10px; line-height: 1.5; }
+    .ap-badge-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .ap-bo {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 4px; cursor: pointer;
+      border: 1.5px solid transparent; opacity: 0.4; transition: opacity 0.2s, border-color 0.2s;
+    }
+    .ap-bo.sel { opacity: 1; border-color: rgba(255,255,255,0.4); }
+    .ap-bo[data-b="badge-popular"] { background: #2D2D2D; color: #fff; }
+    .ap-bo[data-b="badge-new"]     { background: var(--gold); color: #fff; }
+    .ap-bo[data-b="badge-sale"]    { background: #e05060; color: #fff; }
+    .ap-bo[data-b=""]              { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+    .ap-ca { display: flex; gap: 6px; padding: 0 12px 12px; }
+    .ap-save-btn {
+      flex: 1; background: var(--gold); color: #fff; border: none; cursor: pointer;
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px; border-radius: 6px; transition: background 0.2s;
+    }
+    .ap-save-btn:hover { background: var(--gold-light); }
+    .ap-save-btn.saved { background: #2a7a2a; }
+    .ap-del-btn {
+      width: 32px; background: rgba(192,57,43,0.12); color: #e05060;
+      border: 1px solid rgba(192,57,43,0.25); cursor: pointer;
+      border-radius: 6px; font-size: 14px; display: flex;
+      align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .ap-del-btn:hover { background: rgba(192,57,43,0.3); }
+
+    /* Add product tile */
+    .ap-add-tile {
+      background: rgba(198,146,42,0.04); border: 2px dashed rgba(198,146,42,0.22);
+      border-radius: 10px; min-height: 180px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 8px; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .ap-add-tile:hover { background: rgba(198,146,42,0.1); border-color: var(--gold); }
+    .ap-add-tile .ap-plus { font-size: 30px; color: rgba(198,146,42,0.45); }
+    .ap-add-tile span:last-child {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase; color: rgba(198,146,42,0.55);
+    }
+
+    /* Empty state */
+    .ap-empty {
+      text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.2);
+      font-family: var(--serif); font-size: 16px; font-style: italic;
+    }
+    .ap-empty .ap-flower { font-size: 40px; margin-bottom: 12px; display: block; }
+
+    /* Toast */
+    #apToast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2a7a2a; color: #fff;
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; padding: 11px 26px; border-radius: 30px;
+      z-index: 99999; opacity: 0; pointer-events: none;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    #apToast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Hidden file input */
+    #apFileIn { display: none; }
+
+    @keyframes cardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    @media (max-width:1100px) { .products-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width:760px) { .products-grid { grid-template-columns: repeat(2,1fr); } .collections { padding:80px 20px; } #apPanel { width:100vw; } .ap-pg { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:480px) { .products-grid { grid-template-columns:1fr; } .ap-pg { grid-template-columns:1fr; } }
+
+    /* ══ POS MODE ══════════════════════════════════ */
+    #posOverlay {
+      display: none; position: fixed; inset: 0; z-index: 99990;
+      background: #0d0b07; flex-direction: column;
+    }
+    #posOverlay.show { display: flex; }
+
+    /* Header */
+    #posHeader {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 20px; background: #0f0e09;
+      border-bottom: 1px solid rgba(198,146,42,0.2); flex-shrink: 0;
+    }
+    .pos-logo { font-family: var(--serif); font-size: 17px; color: var(--white); letter-spacing: 0.1em; white-space: nowrap; }
+    .pos-logo em { color: var(--gold); font-style: normal; }
+    .pos-mode-badge {
+      font-family: var(--sans); font-size: 8px; font-weight: 700; letter-spacing: 0.18em;
+      background: #c0392b; color: #fff; padding: 2px 7px; border-radius: 3px;
+    }
+    #posSearch {
+      flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(198,146,42,0.2);
+      color: var(--white); font-family: var(--sans); font-size: 13px;
+      padding: 9px 16px; border-radius: 8px; outline: none; transition: border-color 0.2s;
+    }
+    #posSearch::placeholder { color: rgba(255,255,255,0.2); }
+    #posSearch:focus { border-color: var(--gold); }
+    .pos-hdr-btns { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* Body layout */
+    #posBody { display: flex; flex: 1; overflow: hidden; }
+
+    /* Products panel */
+    #posProducts { flex: 1; overflow-y: auto; padding: 14px; border-right: 1px solid rgba(198,146,42,0.1); }
+    #posProducts::-webkit-scrollbar { width: 3px; }
+    #posProducts::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); }
+    #posProductGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: 10px; }
+
+    .pos-tile {
+      background: #1e1a10; border: 1px solid rgba(198,146,42,0.1);
+      border-radius: 10px; overflow: hidden; cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .pos-tile:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .pos-tile-img {
+      height: 78px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background-size: cover; background-position: center;
+    }
+    .pos-tile-img-icon { font-size: 26px; opacity: 0.3; }
+    .pos-tile-body { padding: 8px 10px 10px; }
+    .pos-tile-cat {
+      font-family: var(--sans); font-size: 8px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); display: block; margin-bottom: 3px;
+    }
+    .pos-tile-name { font-family: var(--serif); font-size: 13px; color: var(--white); line-height: 1.3; margin-bottom: 7px; }
+    .pos-tile-footer { display: flex; align-items: center; justify-content: space-between; }
+    .pos-tile-price { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--gold); }
+    .pos-tile-add {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--gold); border: none; color: #fff;
+      font-size: 17px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .pos-tile-add:hover { background: var(--gold-light); transform: scale(1.12); }
+    .pos-no-results { font-family: var(--serif); font-size: 15px; font-style: italic; color: rgba(255,255,255,0.2); text-align: center; padding: 40px 20px; grid-column: 1/-1; }
+
+    /* Order ticket */
+    #posTicket { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; background: #18160f; overflow: hidden; }
+    .pos-ticket-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 18px; border-bottom: 1px solid rgba(198,146,42,0.15); background: #0f0e09; flex-shrink: 0;
+    }
+    .pos-ticket-title { font-family: var(--serif); font-size: 16px; color: var(--white); }
+    .pos-ticket-title em { color: var(--gold); font-style: italic; }
+    .pos-item-badge {
+      font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      background: rgba(198,146,42,0.15); color: var(--gold); padding: 3px 9px; border-radius: 10px;
+    }
+    #posOrderItems { flex: 1; overflow-y: auto; padding: 10px 14px; }
+    #posOrderItems::-webkit-scrollbar { width: 3px; }
+    #posOrderItems::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); }
+    .pos-order-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; color:rgba(255,255,255,0.18); }
+    .pos-order-empty span { font-size:36px; opacity:0.25; }
+    .pos-order-empty p { font-family:var(--serif); font-size:14px; font-style:italic; }
+
+    .pos-order-item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .pos-oi-info { flex: 1; min-width: 0; }
+    .pos-oi-cat { font-family:var(--sans); font-size:8px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:2px; }
+    .pos-oi-name { font-family:var(--serif); font-size:13px; color:var(--white); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pos-qty-grp { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .pos-qb { width:22px; height:22px; border-radius:50%; border:1px solid rgba(198,146,42,0.35); background:none; color:var(--gold); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    .pos-qb:hover { background:var(--gold); color:#fff; }
+    .pos-qn { font-family:var(--sans); font-size:12px; font-weight:700; color:var(--white); min-width:18px; text-align:center; }
+    .pos-oi-price { font-family:var(--sans); font-size:12px; font-weight:700; color:var(--white); flex-shrink:0; }
+    .pos-oi-del { background:none; border:none; color:rgba(255,255,255,0.2); cursor:pointer; font-size:13px; padding:2px; transition:color 0.2s; }
+    .pos-oi-del:hover { color:#e05060; }
+
+    /* Order footer */
+    #posOrderFooter {
+      border-top: 1px solid rgba(198,146,42,0.15); padding: 12px 16px;
+      background: #0f0e09; flex-shrink: 0; display: flex; flex-direction: column; gap: 9px;
+    }
+    .pos-totals { display:flex; flex-direction:column; gap:3px; }
+    .pos-tot-row { display:flex; justify-content:space-between; align-items:center; }
+    .pos-tot-lbl { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.28); }
+    .pos-tot-val { font-family:var(--sans); font-size:12px; font-weight:600; color:rgba(255,255,255,0.5); }
+    .pos-disc-val { color:#4caf7d !important; }
+    .pos-grand-row { display:flex; justify-content:space-between; align-items:baseline; padding-top:7px; border-top:1px solid rgba(255,255,255,0.08); margin-top:2px; }
+    .pos-grand-lbl { font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--white); }
+    .pos-grand-val { font-family:var(--serif); font-size:26px; font-weight:300; color:var(--white); }
+    .pos-grand-val sup { font-family:var(--sans); font-size:11px; font-weight:700; color:var(--gold); vertical-align:super; margin-right:2px; }
+
+    /* Discount */
+    .pos-disc-row { display:flex; align-items:center; gap:7px; }
+    .pos-disc-lbl { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.28); white-space:nowrap; }
+    .pos-disc-sel {
+      background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--white);
+      font-family:var(--sans); font-size:11px; padding:7px 8px; border-radius:6px; outline:none; cursor:pointer; color-scheme:dark;
+    }
+    .pos-disc-sel option { background:#18160f; }
+    .pos-disc-inp {
+      flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--gold);
+      font-family:var(--sans); font-size:13px; font-weight:700;
+      padding:7px 10px; border-radius:6px; outline:none; transition:border-color 0.2s;
+    }
+    .pos-disc-inp:focus { border-color:var(--gold); }
+    .pos-disc-inp:disabled { opacity:0.3; cursor:not-allowed; }
+
+    /* Toggle rows */
+    .pos-toggle-row { display:flex; gap:6px; }
+    .pos-tgl {
+      flex:1; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+      background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.1);
+      color:rgba(255,255,255,0.38); border-radius:8px; padding:8px 4px; cursor:pointer;
+      transition:all 0.2s; text-align:center;
+    }
+    .pos-tgl.pay-active { background:var(--gold); border-color:var(--gold); color:#fff; }
+    .pos-tgl.paid-active { background:#2a7a2a; border-color:#2a7a2a; color:#fff; }
+    .pos-tgl.unpaid-active { background:rgba(224,80,96,0.15); border-color:#e05060; color:#e05060; }
+
+    /* Action buttons */
+    .pos-actions { display:flex; gap:6px; }
+    .pos-act {
+      flex:1; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:u

@@ -1,0 +1,836 @@
+  <div id="cartOverlay" onclick="closeCart()"></div>
+  <div id="cartPanel">
+    <div class="cart-ph">
+      <h2>Your <em>Gift Bag</em></h2>
+      <button class="cart-ph-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItemsList">
+      <div class="cart-empty" id="cartEmptyState">
+        <span class="cart-empty-icon">🛍</span>
+        <p>Your gift bag is empty</p>
+        <span>Add something beautiful</span>
+      </div>
+      <div id="cartItemsContainer"></div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+
+      <!-- Recipient details -->
+      <div class="recipient-section">
+        <div class="recipient-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Recipient Details
+        </div>
+
+        <div class="rf-grid-2">
+          <div class="rf-group">
+            <label class="rf-label" for="rfName">Name <span class="rf-required">*</span></label>
+            <input id="rfName" class="rf-input" type="text" placeholder="Recipient's name"
+              autocomplete="name" oninput="onRecipientInput('name',this.value)" />
+          </div>
+          <div class="rf-group">
+            <label class="rf-label" for="rfPhone">Phone <span class="rf-required">*</span></label>
+            <input id="rfPhone" class="rf-input" type="tel" placeholder="+974 XXXX XXXX"
+              autocomplete="tel" oninput="onRecipientInput('phone',this.value)" />
+          </div>
+        </div>
+
+        <div class="rf-group">
+          <label class="rf-label" for="rfAddress">Delivery Address <span class="rf-required">*</span></label>
+          <textarea id="rfAddress" class="rf-textarea" rows="2"
+            placeholder="Street, building, apartment…"
+            oninput="onRecipientInput('address',this.value)"></textarea>
+        </div>
+
+        <div class="rf-group">
+          <label class="rf-label" for="rfLandmark">Landmark</label>
+          <input id="rfLandmark" class="rf-input" type="text"
+            placeholder="Nearby mosque, hotel, or landmark"
+            oninput="onRecipientInput('landmark',this.value)" />
+        </div>
+
+        <div class="rf-group">
+          <label class="rf-label" for="rfOccasion">Occasion</label>
+          <select id="rfOccasion" class="rf-select" onchange="onRecipientInput('occasion',this.value)">
+            <option value="">Select occasion</option>
+            <option value="Birthday">Birthday</option>
+            <option value="Anniversary">Anniversary</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Congratulations">Congratulations</option>
+            <option value="Graduation">Graduation</option>
+            <option value="Valentine's Day">Valentine's Day</option>
+            <option value="Mother's Day">Mother's Day</option>
+            <option value="Eid">Eid</option>
+            <option value="Get Well Soon">Get Well Soon</option>
+            <option value="New Baby">New Baby</option>
+            <option value="Thank You">Thank You</option>
+            <option value="Just Because">Just Because</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="rf-group">
+          <label class="rf-label" for="rfNotes">Delivery Notes</label>
+          <textarea id="rfNotes" class="rf-textarea" rows="2"
+            placeholder="Gate code, access instructions, preferences…"
+            oninput="onRecipientInput('notes',this.value)"></textarea>
+        </div>
+      </div>
+      <hr class="gift-msg-divider" />
+
+      <!-- Gift message -->
+      <div class="gift-msg-section">
+        <div class="gift-msg-label">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+          Gift Message <span style="font-weight:400;opacity:0.45;margin-left:3px;letter-spacing:0;">— optional</span>
+        </div>
+        <textarea id="giftMsgInput" class="gift-msg-textarea" maxlength="250"
+          placeholder="Write a personal message for the recipient…"
+          oninput="onGiftMsgInput(this)"></textarea>
+        <div class="gift-msg-footer">
+          <span class="gift-msg-counter" id="giftMsgCounter">0 / 250</span>
+        </div>
+      </div>
+      <hr class="gift-msg-divider" />
+
+      <!-- Delivery scheduling -->
+      <div class="delivery-section">
+        <div class="delivery-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+          Delivery Schedule
+        </div>
+        <input type="date" id="deliveryDateInput" class="delivery-date-input"
+          onchange="onDeliveryDateChange(this.value)" />
+        <div class="delivery-slots" id="deliverySlots"></div>
+        <div class="delivery-note"  id="deliveryNote"></div>
+        <div class="delivery-confirmed" id="deliveryConfirmed">
+          <span class="delivery-confirmed-text" id="deliveryConfirmedText"></span>
+          <button class="delivery-change-btn" onclick="resetDeliverySlot()">Change</button>
+        </div>
+      </div>
+      <hr class="gift-msg-divider" />
+
+      <!-- Promo code input -->
+      <div class="promo-section" id="promoSection">
+        <div class="promo-input-row">
+          <input type="text" id="promoInput" class="promo-input" placeholder="Promo code"
+            autocomplete="off" onkeydown="if(event.key==='Enter') applyPromo()" />
+          <button class="promo-apply-btn" onclick="applyPromo()">Apply</button>
+        </div>
+        <div class="promo-msg" id="promoMsg"></div>
+      </div>
+
+      <!-- Applied promo tag -->
+      <div class="promo-applied" id="promoApplied" style="display:none;">
+        <span class="promo-tag">✦ <span id="promoAppliedLabel"></span></span>
+        <button class="promo-remove-btn" onclick="removePromo()" title="Remove promo">✕</button>
+      </div>
+
+      <!-- Subtotal, discount, total -->
+      <div class="cart-subtotal-row" id="cartSubtotalRow" style="display:none;">
+        <span class="cart-subtotal-label">Subtotal</span>
+        <span class="cart-subtotal-val"><span style="font-size:9px;color:var(--gold);font-weight:700;margin-right:2px;">QR</span><span id="cartSubtotalVal">0</span></span>
+      </div>
+      <div class="cart-discount-row" id="cartDiscountRow" style="display:none;">
+        <span class="cart-discount-label">Discount</span>
+        <span class="cart-discount-val">−QR <span id="cartDiscountVal">0</span></span>
+      </div>
+      <hr class="cart-totals-divider" id="cartTotalsDivider" style="display:none;" />
+
+      <div class="cart-total-row">
+        <span class="cart-total-label">Order Total</span>
+        <div class="cart-total-val"><span>QR</span><span id="cartTotalVal">0</span></div>
+      </div>
+
+      <div class="rf-checkout-error" id="rfCheckoutError">Please fill in the required recipient details before ordering.</div>
+      <a id="cartWaBtn" href="#" target="_blank" class="cart-wa-btn" onclick="return validateAndOrder()">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.533 5.849L.057 23.617a.75.75 0 00.906.94l5.946-1.557A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.698-.5-5.254-1.376l-.372-.215-3.899 1.021 1.04-3.794-.235-.38A9.932 9.932 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Order via WhatsApp
+      </a>
+      <button class="cart-clear-btn" onclick="clearCart()">Clear Gift Bag</button>
+    </div>
+  </div>
+
+
+  <script>
+  // ══════════════════════════════════════════════
+  //  CART SYSTEM
+  // ══════════════════════════════════════════════
+  const CART_KEY      = 'rosebella_cart';
+  const PROMO_KEY     = 'rosebella_promo';
+  const GIFT_MSG_KEY  = 'rosebella_gift_msg';
+  const DELIVERY_KEY  = 'rosebella_delivery';
+  const RECIPIENT_KEY = 'rosebella_recipient';
+
+  // Same-day: no new orders after this hour; slots must start ≥ SLOT_LEAD_HRS from now
+  const SAME_DAY_CUTOFF = 15;
+  const SLOT_LEAD_HRS   = 2;
+
+  const TIME_SLOTS = [
+    { id: 'slot1', label: '9 AM – 12 PM',  start: 9  },
+    { id: 'slot2', label: '12 PM – 3 PM',  start: 12 },
+    { id: 'slot3', label: '3 PM – 6 PM',   start: 15 },
+    { id: 'slot4', label: '6 PM – 9 PM',   start: 18 },
+  ];
+
+  const PROMO_CODES = [
+    { code: 'ROSEBELLA10', type: 'percent', value: 10,  label: '10% off — ROSEBELLA10' },
+    { code: 'WELCOME20',   type: 'percent', value: 20,  label: '20% off — WELCOME20'   },
+    { code: 'LOVE15',      type: 'percent', value: 15,  label: '15% off — LOVE15'       },
+    { code: 'FLAT50',      type: 'fixed',   value: 50,  label: 'QR 50 off — FLAT50'     },
+    { code: 'VIP100',      type: 'fixed',   value: 100, label: 'QR 100 off — VIP100'    },
+  ];
+
+  function loadCart() {
+    try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function loadPromo() {
+    try { return JSON.parse(localStorage.getItem(PROMO_KEY)) || null; }
+    catch (e) { return null; }
+  }
+
+  function loadGiftMsg() {
+    return localStorage.getItem(GIFT_MSG_KEY) || '';
+  }
+
+  function loadDelivery() {
+    try { return JSON.parse(localStorage.getItem(DELIVERY_KEY)) || { date: '', slot: '' }; }
+    catch(e) { return { date: '', slot: '' }; }
+  }
+
+  function loadRecipient() {
+    try {
+      return JSON.parse(localStorage.getItem(RECIPIENT_KEY)) ||
+        { name:'', phone:'', address:'', landmark:'', occasion:'', notes:'' };
+    } catch(e) {
+      return { name:'', phone:'', address:'', landmark:'', occasion:'', notes:'' };
+    }
+  }
+
+  function saveCart()      { localStorage.setItem(CART_KEY,      JSON.stringify(cart));          }
+  function savePromo()     { localStorage.setItem(PROMO_KEY,     JSON.stringify(appliedPromo));  }
+  function saveGiftMsg()   { localStorage.setItem(GIFT_MSG_KEY,  giftMessage);                   }
+  function saveDelivery()  { localStorage.setItem(DELIVERY_KEY,  JSON.stringify(deliverySlot));  }
+  function saveRecipient() { localStorage.setItem(RECIPIENT_KEY, JSON.stringify(recipient));     }
+
+  let cart         = loadCart();
+  let appliedPromo = loadPromo();
+  let giftMessage  = loadGiftMsg();
+  let deliverySlot = loadDelivery();
+  let recipient    = loadRecipient();
+
+  // ── Recipient helpers ─────────────────────────
+  function onRecipientInput(field, value) {
+    recipient[field] = value;
+    saveRecipient();
+    const id = 'rf' + field.charAt(0).toUpperCase() + field.slice(1);
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('error');
+    document.getElementById('rfCheckoutError').classList.remove('show');
+  }
+
+  function validateRecipient() {
+    let valid = true;
+    ['rfName', 'rfPhone', 'rfAddress'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || !el.value.trim()) {
+        if (el) el.classList.add('error');
+        valid = false;
+      }
+    });
+    return valid;
+  }
+
+  function validateAndOrder() {
+    if (!validateRecipient()) {
+      const err = document.getElementById('rfCheckoutError');
+      err.classList.add('show');
+      setTimeout(() => err.classList.remove('show'), 4000);
+      const firstErr = document.querySelector('#cartPanel .rf-input.error, #cartPanel .rf-textarea.error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+    return true;
+  }
+
+  // ── Delivery helpers ──────────────────────────
+  function toDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function getMinDate() {
+    const now = new Date();
+    const anySlotToday = TIME_SLOTS.some(s => s.start > now.getHours() + SLOT_LEAD_HRS);
+    if (!anySlotToday) {
+      const tom = new Date(now); tom.setDate(tom.getDate() + 1);
+      return toDateStr(tom);
+    }
+    return toDateStr(now);
+  }
+
+  function getAvailableSlots(dateStr) {
+    const now = new Date();
+    if (dateStr === toDateStr(now)) {
+      return TIME_SLOTS.filter(s => s.start > now.getHours() + SLOT_LEAD_HRS);
+    }
+    return TIME_SLOTS;
+  }
+
+  function formatDeliveryDate(dateStr) {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+  }
+
+  function onDeliveryDateChange(val) {
+    deliverySlot.date = val;
+    deliverySlot.slot = '';
+    saveDelivery();
+    renderDeliverySlots(val);
+    updateCartUI();
+  }
+
+  function selectDeliverySlot(slotId) {
+    deliverySlot.slot = slotId;
+    saveDelivery();
+    document.querySelectorAll('.delivery-slot-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.slot === slotId);
+    });
+    updateCartUI();
+  }
+
+  function resetDeliverySlot() {
+    deliverySlot.slot = '';
+    saveDelivery();
+    const slotsEl = document.getElementById('deliverySlots');
+    if (slotsEl) {
+      slotsEl.querySelectorAll('.delivery-slot-btn').forEach(b => b.classList.remove('active'));
+    }
+    updateCartUI();
+  }
+
+  function renderDeliverySlots(dateStr) {
+    const container = document.getElementById('deliverySlots');
+    const noteEl    = document.getElementById('deliveryNote');
+    if (!container) return;
+
+    if (!dateStr) { container.innerHTML = ''; noteEl.textContent = ''; return; }
+
+    const now      = new Date();
+    const slots    = getAvailableSlots(dateStr);
+    const isToday  = dateStr === toDateStr(now);
+
+    noteEl.textContent = isToday
+      ? `✦ Same-day delivery · cutoff ${SAME_DAY_CUTOFF}:00`
+      : '';
+    noteEl.className = 'delivery-note' + (isToday ? ' same-day' : '');
+
+    if (slots.length === 0) {
+      container.innerHTML = '<p class="delivery-no-slots">No slots available today — please pick another date.</p>';
+      return;
+    }
+
+    container.innerHTML = slots.map(s => `
+      <button class="delivery-slot-btn${deliverySlot.slot === s.id ? ' active' : ''}"
+        data-slot="${s.id}" onclick="selectDeliverySlot('${s.id}')">${s.label}</button>
+    `).join('');
+  }
+
+  // ── Open / Close ──────────────────────────────
+  function openCart() {
+    document.getElementById('cartPanel').classList.add('show');
+    document.getElementById('cartOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('cart-open');
+  }
+
+  function closeCart() {
+    document.getElementById('cartPanel').classList.remove('show');
+    document.getElementById('cartOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    document.body.classList.remove('cart-open');
+  }
+
+  // ── Add to cart ───────────────────────────────
+  function addToCart(btn, name) {
+    const card    = btn.closest('.prod-card');
+    const catEl   = card ? card.querySelector('.prod-cat')   : null;
+    const priceEl = card ? card.querySelector('.prod-price') : null;
+
+    let price = 0;
+    if (priceEl) {
+      const clone = priceEl.cloneNode(true);
+      const cur = clone.querySelector('.currency');
+      if (cur) cur.remove();
+      price = parseFloat(clone.textContent.trim()) || 0;
+    }
+
+    const cat = catEl ? catEl.textContent.trim() : '';
+    const existing = cart.find(i => i.name === name);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ id: Date.now(), name, cat, price, qty: 1 });
+    }
+
+    saveCart();
+    updateCartUI();
+    openCart();
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Added';
+    btn.style.background = '#4a8c4a';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 1400);
+  }
+
+  // ── Promo code ────────────────────────────────
+  function applyPromo() {
+    const input = document.getElementById('promoInput');
+    const msgEl = document.getElementById('promoMsg');
+    const code  = input.value.trim().toUpperCase();
+
+    msgEl.className = 'promo-msg';
+    msgEl.textContent = '';
+
+    if (!code) {
+      msgEl.className = 'promo-msg error';
+      msgEl.textContent = 'Please enter a promo code.';
+      return;
+    }
+
+    if (appliedPromo) {
+      msgEl.className = 'promo-msg error';
+      msgEl.textContent = 'Remove the current promo before applying a new one.';
+      return;
+    }
+
+    const match = PROMO_CODES.find(p => p.code === code);
+    if (!match) {
+      msgEl.className = 'promo-msg error';
+      msgEl.textContent = 'Invalid promo code. Please try again.';
+      input.value = '';
+      return;
+    }
+
+    appliedPromo = match;
+    savePromo();
+    input.value = '';
+    msgEl.className = 'promo-msg success';
+    msgEl.textContent = '✓ Promo code applied!';
+    updateCartUI();
+
+    setTimeout(() => { msgEl.textContent = ''; msgEl.className = 'promo-msg'; }, 3000);
+  }
+
+  function removePromo() {
+    appliedPromo = null;
+    savePromo();
+    document.getElementById('promoMsg').textContent = '';
+    document.getElementById('promoMsg').className = 'promo-msg';
+    updateCartUI();
+  }
+
+  // ── Update UI ─────────────────────────────────
+  function updateCartUI() {
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const count    = cart.reduce((s, i) => s + i.qty, 0);
+
+    let discount = 0;
+    if (appliedPromo && subtotal > 0) {
+      if (appliedPromo.type === 'percent') {
+        discount = subtotal * appliedPromo.value / 100;
+      } else {
+        discount = Math.min(appliedPromo.value, subtotal);
+      }
+    }
+    const total = Math.max(0, subtotal - discount);
+
+    // Badge
+    const badge = document.getElementById('cartCount');
+    badge.textContent = count;
+    badge.classList.toggle('visible', count > 0);
+
+    // Footer visibility
+    document.getElementById('cartFooter').style.display = cart.length ? 'block' : 'none';
+
+    // Subtotal row — only show when a promo is applied
+    const hasDiscount = appliedPromo && discount > 0;
+    document.getElementById('cartSubtotalRow').style.display    = hasDiscount ? 'flex'  : 'none';
+    document.getElementById('cartDiscountRow').style.display    = hasDiscount ? 'flex'  : 'none';
+    document.getElementById('cartTotalsDivider').style.display  = hasDiscount ? 'block' : 'none';
+    document.getElementById('cartSubtotalVal').textContent      = subtotal.toFixed(0);
+    document.getElementById('cartDiscountVal').textContent      = discount.toFixed(0);
+    document.getElementById('cartTotalVal').textContent         = total.toFixed(0);
+
+    // Applied promo tag
+    const appliedEl = document.getElementById('promoApplied');
+    if (appliedPromo) {
+      document.getElementById('promoAppliedLabel').textContent = appliedPromo.label;
+      appliedEl.style.display = 'flex';
+      document.getElementById('promoSection').style.display = 'none';
+    } else {
+      appliedEl.style.display = 'none';
+      document.getElementById('promoSection').style.display = 'block';
+    }
+
+    // WhatsApp message
+    let msg = 'Hello Rosebella! 🌸 I would like to order:\n\n';
+    cart.forEach(i => {
+      msg += `• ${i.name} x${i.qty} — QR ${(i.price * i.qty).toFixed(0)}\n`;
+      if (i.variants) {
+        const v = i.variants;
+        const parts = [];
+        if (v.size)                         parts.push(v.size);
+        if (v.packaging)                    parts.push(v.packaging);
+        if (v.addons && v.addons.length)    parts.push(v.addons.join(', '));
+        if (parts.length) msg += `  ↳ ${parts.join(' · ')}\n`;
+      }
+    });
+    if (appliedPromo && discount > 0) {
+      msg += `\nPromo: ${appliedPromo.code} (−QR ${discount.toFixed(0)})`;
+    }
+    msg += `\nTotal: QR ${total.toFixed(0)}`;
+    if (deliverySlot.date && deliverySlot.slot) {
+      const slotObj = TIME_SLOTS.find(s => s.id === deliverySlot.slot);
+      msg += `\n\n📦 Delivery: ${formatDeliveryDate(deliverySlot.date)}`;
+      msg += `\n⏰ Time Slot: ${slotObj ? slotObj.label : deliverySlot.slot}`;
+    }
+    if (recipient.name || recipient.phone || recipient.address) {
+      msg += '\n\n👤 Recipient Details:';
+      if (recipient.name)     msg += `\nName: ${recipient.name}`;
+      if (recipient.phone)    msg += `\nPhone: ${recipient.phone}`;
+      if (recipient.address)  msg += `\nAddress: ${recipient.address}`;
+      if (recipient.landmark) msg += `\nLandmark: ${recipient.landmark}`;
+      if (recipient.occasion) msg += `\nOccasion: ${recipient.occasion}`;
+      if (recipient.notes)    msg += `\nNotes: ${recipient.notes}`;
+    }
+    if (deliverySlot.date && deliverySlot.slot) {
+      const slotObj = TIME_SLOTS.find(s => s.id === deliverySlot.slot);
+      msg += `\n\n📦 Delivery: ${formatDeliveryDate(deliverySlot.date)}`;
+      msg += `\n⏰ Time Slot: ${slotObj ? slotObj.label : deliverySlot.slot}`;
+    }
+    if (giftMessage.trim()) {
+      msg += `\n\n💌 Gift Message:\n"${giftMessage.trim()}"`;
+    }
+    document.getElementById('cartWaBtn').href = 'https://wa.me/97433446618?text=' + encodeURIComponent(msg);
+
+    // Empty state
+    document.getElementById('cartEmptyState').style.display = cart.length ? 'none' : 'flex';
+
+    // Items
+    const container = document.getElementById('cartItemsContainer');
+    container.innerHTML = cart.map(item => {
+      const variantLine = (() => {
+        if (!item.variants) return '';
+        const v = item.variants;
+        const parts = [];
+        if (v.size)                      parts.push(v.size);
+        if (v.packaging)                 parts.push(v.packaging);
+        if (v.addons && v.addons.length) parts.push(...v.addons.map(a => `+${a}`));
+        return parts.length ? `<div class="cart-item-variants">${parts.join(' · ')}</div>` : '';
+      })();
+      return `
+      <div class="cart-item" id="ci-${item.id}">
+        <div class="cart-item-img" style="background:var(--charcoal2);border-radius:8px;flex-shrink:0;width:72px;height:72px;"></div>
+        <div class="cart-item-info">
+          <span class="cart-item-cat">${item.cat}</span>
+          <div class="cart-item-name">${item.name}</div>
+          ${variantLine}
+          <div class="cart-item-controls">
+            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="cart-item-price"><span class="ci-cur">QR</span>${(item.price * item.qty).toFixed(0)}</div>
+          <button class="cart-item-del" onclick="removeItem(${item.id})" title="Remove">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Recipient fields — sync on load/restore
+    const rfMap = { rfName:'name', rfPhone:'phone', rfAddress:'address', rfLandmark:'landmark', rfOccasion:'occasion', rfNotes:'notes' };
+    Object.entries(rfMap).forEach(([id, field]) => {
+      const el = document.getElementById(id);
+      if (el && el.value !== recipient[field]) el.value = recipient[field];
+    });
+
+    // Gift message — sync textarea value and counter on load/restore
+    const ta = document.getElementById('giftMsgInput');
+    if (ta && ta.value !== giftMessage) ta.value = giftMessage;
+    syncGiftCounter(giftMessage.length);
+
+    // Delivery scheduling — sync date input, validate stored date, render slots
+    const dateInput = document.getElementById('deliveryDateInput');
+    if (dateInput) {
+      const minDate = getMinDate();
+      dateInput.min = minDate;
+
+      // If a saved date is now in the past (e.g. yesterday), clear it
+      if (deliverySlot.date && deliverySlot.date < minDate) {
+        deliverySlot.date = '';
+        deliverySlot.slot = '';
+        saveDelivery();
+      }
+
+      if (dateInput.value !== deliverySlot.date) dateInput.value = deliverySlot.date;
+      if (deliverySlot.date) renderDeliverySlots(deliverySlot.date);
+    }
+
+    // Delivery confirmed badge
+    const confirmedEl   = document.getElementById('deliveryConfirmed');
+    const confirmedText = document.getElementById('deliveryConfirmedText');
+    const slotsEl       = document.getElementById('deliverySlots');
+    const noteEl        = document.getElementById('deliveryNote');
+    if (confirmedEl) {
+      if (deliverySlot.date && deliverySlot.slot) {
+        const slotObj = TIME_SLOTS.find(s => s.id === deliverySlot.slot);
+        confirmedText.textContent = `📦 ${formatDeliveryDate(deliverySlot.date)} · ${slotObj ? slotObj.label : ''}`;
+        confirmedEl.style.display = 'flex';
+        if (slotsEl) slotsEl.style.display = 'none';
+        if (noteEl)  noteEl.style.display  = 'none';
+      } else {
+        confirmedEl.style.display = 'none';
+        if (slotsEl) slotsEl.style.display = '';
+        if (noteEl)  noteEl.style.display  = '';
+      }
+    }
+  }
+
+  // ── Gift message ──────────────────────────────
+  function onGiftMsgInput(el) {
+    giftMessage = el.value;
+    saveGiftMsg();
+    syncGiftCounter(el.value.length);
+  }
+
+  function syncGiftCounter(len) {
+    const counter = document.getElementById('giftMsgCounter');
+    if (!counter) return;
+    counter.textContent = `${len} / 250`;
+    counter.className = 'gift-msg-counter' + (len >= 250 ? ' limit' : len >= 200 ? ' warn' : '');
+  }
+
+  // ── Qty / Remove ──────────────────────────────
+  function changeQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+    saveCart();
+    updateCartUI();
+  }
+
+  function removeItem(id) {
+    cart = cart.filter(i => i.id !== id);
+    saveCart();
+    updateCartUI();
+  }
+
+  function toggleWish(btn) {
+    btn.classList.toggle('liked');
+    btn.textContent = btn.classList.contains('liked') ? '♥' : '♡';
+  }
+
+  function clearCart() {
+    if (!confirm('Clear your gift bag?')) return;
+    cart         = [];
+    appliedPromo = null;
+    giftMessage  = '';
+    deliverySlot = { date: '', slot: '' };
+    recipient    = { name:'', phone:'', address:'', landmark:'', occasion:'', notes:'' };
+    saveCart(); savePromo(); saveGiftMsg(); saveDelivery(); saveRecipient();
+
+    const ta = document.getElementById('giftMsgInput');
+    if (ta) ta.value = '';
+    const di = document.getElementById('deliveryDateInput');
+    if (di) di.value = '';
+    const slotsEl = document.getElementById('deliverySlots');
+    if (slotsEl) slotsEl.innerHTML = '';
+    ['rfName','rfPhone','rfAddress','rfLandmark','rfOccasion','rfNotes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    updateCartUI();
+  }
+
+  // Restore state on page load
+  updateCartUI();
+
+  // ══════════════════════════════════════════════
+  //  VARIANT SYSTEM
+  // ══════════════════════════════════════════════
+  const VARIANTS = {
+    sizes: [
+      { id: 'small',   label: 'Small',    priceAdj: -50  },
+      { id: 'medium',  label: 'Medium',   priceAdj: 0    },
+      { id: 'large',   label: 'Large',    priceAdj: 80   },
+      { id: 'xlarge',  label: 'X-Large',  priceAdj: 160  },
+    ],
+    packaging: [
+      { id: 'standard',   label: 'Standard',    priceAdj: 0  },
+      { id: 'luxury-box', label: 'Luxury Box',  priceAdj: 40 },
+      { id: 'kraft-wrap', label: 'Kraft Wrap',  priceAdj: 15 },
+      { id: 'satin-bag',  label: 'Satin Bag',   priceAdj: 25 },
+    ],
+    addons: [
+      { id: 'balloon',   label: 'Balloon',    icon: '🎈', price: 35 },
+      { id: 'chocolate', label: 'Chocolates', icon: '🍫', price: 55 },
+      { id: 'vase',      label: 'Vase',       icon: '🏺', price: 45 },
+      { id: 'teddy',     label: 'Teddy Bear', icon: '🧸', price: 60 },
+      { id: 'candle',    label: 'Candle',     icon: '🕯', price: 30 },
+    ]
+  };
+
+  let activeVariant = { cardEl:null, name:'', cat:'', basePrice:0, size:'medium', packaging:'standard', addons:[] };
+
+  function openVariantModal(btn, name) {
+    const card    = btn.closest('.prod-card');
+    const catEl   = card ? card.querySelector('.prod-cat')   : null;
+    const priceEl = card ? card.querySelector('.prod-price') : null;
+    const bgEl    = card ? card.querySelector('.prod-img-bg'): null;
+    const imgEl   = card ? card.querySelector('.prod-img img'):null;
+
+    let basePrice = 0;
+    if (priceEl) {
+      const cl = priceEl.cloneNode(true);
+      const cu = cl.querySelector('.currency'); if (cu) cu.remove();
+      basePrice = parseFloat(cl.textContent.trim()) || 0;
+    }
+
+    activeVariant = { cardEl:card, name, cat: catEl ? catEl.textContent.trim() : '', basePrice, size:'medium', packaging:'standard', addons:[] };
+
+    // Populate header
+    document.getElementById('vmCat').textContent       = activeVariant.cat;
+    document.getElementById('vmName').textContent      = name;
+    document.getElementById('vmBasePrice').textContent = `QR ${basePrice}`;
+
+    // Thumbnail
+    const thumb = document.getElementById('vmThumb');
+    thumb.style.backgroundImage = '';
+    thumb.className = 'vm-thumb';
+    if (imgEl && imgEl.src) {
+      thumb.style.backgroundImage = `url(${imgEl.src})`;
+      thumb.style.backgroundSize  = 'cover';
+    } else if (bgEl) {
+      const cls = (bgEl.className.match(/pi-\d+/) || [''])[0];
+      if (cls) thumb.classList.add(cls);
+    }
+
+    // Render selectors
+    vmRenderPills('vmSizes',    VARIANTS.sizes,     'size',      'medium');
+    vmRenderPills('vmPackaging',VARIANTS.packaging, 'packaging', 'standard');
+    vmRenderAddons();
+    vmUpdatePrice();
+
+    document.getElementById('variantBg').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeVariantModal() {
+    document.getElementById('variantBg').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function vmRenderPills(containerId, options, type, selected) {
+    document.getElementById(containerId).innerHTML = options.map(opt => {
+      const adj = opt.priceAdj !== 0
+        ? `<span class="vm-pill-adj">${opt.priceAdj > 0 ? '+' : ''}QR ${opt.priceAdj}</span>`
+        : '';
+      return `<button class="vm-pill${opt.id === selected ? ' active' : ''}"
+        onclick="vmSelectOption('${type}','${opt.id}',this)">${opt.label} ${adj}</button>`;
+    }).join('');
+  }
+
+  function vmSelectOption(type, id, btn) {
+    activeVariant[type] = id;
+    btn.closest('.vm-pills').querySelectorAll('.vm-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    vmUpdatePrice();
+  }
+
+  function vmRenderAddons() {
+    document.getElementById('vmAddons').innerHTML = VARIANTS.addons.map(a => {
+      const on = activeVariant.addons.includes(a.id);
+      return `
+        <button class="vm-addon${on ? ' active' : ''}" onclick="vmToggleAddon('${a.id}',this)">
+          <span class="vm-addon-icon">${a.icon}</span>
+          <div class="vm-addon-body">
+            <span class="vm-addon-label">${a.label}</span>
+            <span class="vm-addon-price">+QR ${a.price}</span>
+          </div>
+          <span class="vm-addon-check">✓</span>
+        </button>`;
+    }).join('');
+  }
+
+  function vmToggleAddon(id, btn) {
+    const idx = activeVariant.addons.indexOf(id);
+    if (idx === -1) { activeVariant.addons.push(id); btn.classList.add('active'); }
+    else            { activeVariant.addons.splice(idx,1); btn.classList.remove('active'); }
+    vmUpdatePrice();
+  }
+
+  function vmCalcPrice() {
+    const sOpt = VARIANTS.sizes.find(s => s.id === activeVariant.size);
+    const pOpt = VARIANTS.packaging.find(p => p.id === activeVariant.packaging);
+    const addonsTotal = activeVariant.addons.reduce((sum, id) => {
+      const a = VARIANTS.addons.find(x => x.id === id);
+      return sum + (a ? a.price : 0);
+    }, 0);
+    const adj = (sOpt ? sOpt.priceAdj : 0) + (pOpt ? pOpt.priceAdj : 0);
+    return Math.max(0, activeVariant.basePrice + adj) + addonsTotal;
+  }
+
+  function vmUpdatePrice() {
+    document.getElementById('vmTotal').textContent = vmCalcPrice().toFixed(0);
+  }
+
+  function variantAddToCart() {
+    const price   = vmCalcPrice();
+    const sOpt    = VARIANTS.sizes.find(s => s.id === activeVariant.size);
+    const pOpt    = VARIANTS.packaging.find(p => p.id === activeVariant.packaging);
+    const addonLabels = activeVariant.addons.map(id => VARIANTS.addons.find(a => a.id === id)?.label).filter(Boolean);
+
+    const variants = {
+      size:      sOpt  ? sOpt.label  : '',
+      packaging: pOpt  ? pOpt.label  : '',
+      addons:    addonLabels
+    };
+
+    // Unique key: same product + same exact variant combo → increment qty
+    const vKey = `${activeVariant.name}|${activeVariant.size}|${activeVariant.packaging}|${[...activeVariant.addons].sort().join(',')}`;
+    const existing = cart.find(i => i.variantKey === vKey);
+
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ id: Date.now(), name: activeVariant.name, cat: activeVariant.cat, price, basePrice: activeVariant.basePrice, qty: 1, variantKey: vKey, variants });
+    }
+
+    saveCart();
+    updateCartUI();
+    closeVariantModal();
+    openCart();
+
+    // Button feedback
+    const addBtn = activeVariant.cardEl ? activeVariant.cardEl.querySelector('.prod-add') : null;
+    if (addBtn) {
+      const orig = addBtn.innerHTML;
+      addBtn.innerHTML = '✓ Added'; addBtn.style.background = '#4a8c4a';
+      setTimeout(() => { addBtn.innerHTML = orig; addBtn.style.background = ''; }, 1400);
+    }
+  }
+  </script>
+
+</body>

@@ -1,0 +1,1603 @@
+</body>
+</html>
+  <!-- ═══════════ ADMIN SYSTEM ═══════════ -->
+  <style>
+    /* ── Login trigger (top-right, subtle) ── */
+    
+    
+
+    /* ── Login Modal ── */
+    #loginModalBg {
+      display: none; position: fixed; inset: 0; z-index: 99998;
+      background: rgba(10,8,5,0.85); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #loginModalBg.show { display: flex; }
+    #loginModal {
+      background: #18160f; border: 1px solid rgba(198,146,42,0.25);
+      border-radius: 14px; padding: 44px 40px; width: 380px; max-width: 95vw;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: modalIn 0.3s cubic-bezier(0.34,1.4,0.64,1) both;
+    }
+    @keyframes modalIn { from { opacity:0; transform:scale(0.92) translateY(20px); } to { opacity:1; transform:none; } }
+    .lm-logo {
+      text-align: center; margin-bottom: 28px;
+    }
+    .lm-logo h3 {
+      font-family: var(--serif); font-size: 26px; color: var(--white);
+      letter-spacing: 0.12em; font-weight: 400;
+    }
+    .lm-logo span { color: var(--gold); }
+    .lm-logo p {
+      font-family: var(--sans); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3); margin-top: 4px;
+    }
+    .lm-field { margin-bottom: 16px; }
+    .lm-field label {
+      display: block; font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); margin-bottom: 7px;
+    }
+    .lm-field input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12); color: var(--white);
+      font-family: var(--sans); font-size: 13px;
+      padding: 12px 14px; border-radius: 8px; outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .lm-field input:focus { border-color: var(--gold); background: rgba(198,146,42,0.07); }
+    .lm-error {
+      font-family: var(--sans); font-size: 11px; color: #e05060;
+      text-align: center; margin-bottom: 12px; min-height: 16px;
+    }
+    .lm-btn {
+      width: 100%; background: var(--gold); color: var(--white); border: none;
+      font-family: var(--sans); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 14px; border-radius: 8px; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .lm-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .lm-cancel {
+      display: block; text-align: center; margin-top: 14px;
+      font-family: var(--sans); font-size: 10px; color: rgba(255,255,255,0.25);
+      cursor: pointer; letter-spacing: 0.1em; transition: color 0.2s;
+    }
+    .lm-cancel:hover { color: rgba(255,255,255,0.5); }
+
+    /* ── Admin Top Bar (shown after login) ── */
+    #adminBar {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9990;
+      background: #0f0e09; border-bottom: 1px solid rgba(198,146,42,0.2);
+      padding: 10px 24px; align-items: center; justify-content: space-between;
+      gap: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    #adminBar.show { display: flex; }
+    body.admin-active { padding-top: 48px; }
+    .ab-left { display: flex; align-items: center; gap: 12px; }
+    .ab-logo {
+      font-family: var(--serif); font-size: 15px; color: var(--white);
+      letter-spacing: 0.1em;
+    }
+    .ab-logo span { color: var(--gold); }
+    .ab-badge {
+      font-family: var(--sans); font-size: 8px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      background: var(--gold); color: #000; padding: 3px 8px; border-radius: 3px;
+    }
+    .ab-right { display: flex; align-items: center; gap: 10px; }
+    .ab-btn {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 7px 16px; border-radius: 6px; cursor: pointer; border: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .ab-btn:hover { transform: translateY(-1px); }
+    .ab-btn-gold   { background: var(--gold); color: #fff; }
+    .ab-btn-gold:hover { background: var(--gold-light); }
+    .ab-btn-dark   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+    .ab-btn-dark:hover { background: rgba(255,255,255,0.14); }
+    .ab-btn-red    { background: rgba(192,57,43,0.15); color: #e05060; border: 1px solid rgba(192,57,43,0.3); }
+    .ab-btn-red:hover { background: rgba(192,57,43,0.3); }
+
+    /* ── Admin Side Panel ── */
+    #apOverlay {
+      display: none; position: fixed; inset: 0; z-index: 9991;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+    }
+    #apOverlay.show { display: block; }
+    #apPanel {
+      position: fixed; top: 48px; right: -860px; width: 860px; max-width: 100vw;
+      height: calc(100vh - 48px); z-index: 9992;
+      background: #18160f; display: flex; flex-direction: column;
+      border-left: 1px solid rgba(198,146,42,0.15);
+      box-shadow: -10px 0 60px rgba(0,0,0,0.5);
+      transition: right 0.36s cubic-bezier(0.4,0,0.2,1);
+    }
+    #apPanel.show { right: 0; }
+
+    /* Panel header */
+    .ap-ph {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid rgba(198,146,42,0.15);
+      background: #0f0e09; flex-shrink: 0;
+    }
+    .ap-ph h2 { font-family: var(--serif); font-size: 18px; color: var(--white); font-weight: 400; }
+    .ap-ph h2 em { font-style: italic; color: var(--gold); }
+    .ap-ph-btns { display: flex; gap: 8px; }
+    .ap-close-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15); background: none;
+      color: rgba(255,255,255,0.5); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; 
+    }
+    .ap-close-btn:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+
+    /* Panel body */
+    .ap-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* Sidebar */
+    .ap-sb {
+      width: 220px; flex-shrink: 0; overflow-y: auto;
+      border-right: 1px solid rgba(198,146,42,0.1); padding: 12px 0;
+      background: #121007;
+    }
+    .ap-sb::-webkit-scrollbar { width: 3px; }
+    .ap-sb::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); border-radius: 2px; }
+    .ap-sb-title {
+      font-family: var(--sans); font-size: 8px; font-weight: 700;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25); padding: 0 16px 10px;
+    }
+    .ap-ci {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 16px; cursor: pointer;
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      color: rgba(255,255,255,0.45); border-left: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .ap-ci:hover { background: rgba(198,146,42,0.07); color: rgba(255,255,255,0.8); }
+    .ap-ci.active { border-left-color: var(--gold); background: rgba(198,146,42,0.1); color: var(--gold); font-weight: 600; }
+    .ap-ci-count {
+      font-size: 9px; background: rgba(198,146,42,0.15); color: var(--gold);
+      padding: 2px 6px; border-radius: 8px;
+    }
+    .ap-ci.active .ap-ci-count { background: var(--gold); color: #000; }
+
+    /* Main content */
+    .ap-mc {
+      flex: 1; overflow-y: auto; padding: 20px 20px 80px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .ap-mc::-webkit-scrollbar { width: 3px; }
+    .ap-mc::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); border-radius: 2px; }
+
+    /* Collection rename bar */
+    .ap-rename-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: #0f0e09; padding: 14px 16px; border-radius: 8px;
+      border: 1px solid rgba(198,146,42,0.15);
+    }
+    .ap-rename-bar label {
+      font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); white-space: nowrap;
+    }
+    .ap-rename-inp {
+      flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white); font-family: var(--serif); font-size: 16px;
+      padding: 8px 12px; border-radius: 6px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .ap-rename-inp:focus { border-color: var(--gold); }
+    .ap-rename-btn {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--gold); color: #fff; border: none; cursor: pointer;
+      padding: 9px 16px; border-radius: 6px; white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .ap-rename-btn:hover { background: var(--gold-light); }
+
+    /* Products grid */
+    .ap-pg { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+
+    /* Admin product card */
+    .ap-pc {
+      background: #1e1a10; border-radius: 10px; overflow: hidden;
+      border: 1px solid rgba(198,146,42,0.1);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .ap-pc:hover { border-color: rgba(198,146,42,0.35); transform: translateY(-2px); }
+
+    /* Image area */
+    .ap-pi {
+      width: 100%; height: 130px; position: relative; overflow: hidden;
+      background: #121007; cursor: pointer;
+    }
+    
+    
+    .ap-pi-pos { 
+      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 4px; z-index: 3; opacity: 0; transition: opacity 0.2s;
+    }
+    .ap-pc:hover .ap-pi-pos { opacity: 1; }
+    .ap-pos-btn {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+      background: rgba(0,0,0,0.75); color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+      padding: 3px 7px; cursor: pointer; white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+    }
+    .ap-pos-btn:hover, .ap-pos-btn.sel { background: var(--gold); color: #fff; border-color: var(--gold); }
+    .ap-pi-placeholder {
+      width:100%;height:100%;display:flex;align-items:center;
+      justify-content:center;flex-direction:column;gap:6px;
+      color:rgba(255,255,255,0.2);
+    }
+    .ap-pi-placeholder span:first-child { font-size: 26px; opacity: 0.3; }
+    .ap-pi-placeholder span:last-child { font-size: 10px; letter-spacing: 0.1em; }
+    .ap-pi-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s; z-index: 2;
+    }
+    .ap-pi:hover .ap-pi-overlay { opacity: 1; }
+    .ap-pi-overlay span {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--gold); color: #fff; padding: 7px 14px; border-radius: 4px;
+    }
+
+    /* Card fields */
+    .ap-pb { padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; }
+    .ap-fl {
+      font-family: var(--sans); font-size: 8px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); display: block; margin-bottom: 2px;
+    }
+    .ap-fi {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); color: var(--white);
+      font-family: var(--sans); font-size: 11px;
+      padding: 7px 9px; border-radius: 5px; outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .ap-fi:focus { border-color: var(--gold); background: rgba(198,146,42,0.07); }
+    .ap-fi-price { color: var(--gold); font-weight: 700; }
+    .ap-fi-desc { resize: none; height: 44px; font-size: 10px; line-height: 1.5; }
+    .ap-badge-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .ap-bo {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 4px; cursor: pointer;
+      border: 1.5px solid transparent; opacity: 0.4; transition: opacity 0.2s, border-color 0.2s;
+    }
+    .ap-bo.sel { opacity: 1; border-color: rgba(255,255,255,0.4); }
+    .ap-bo[data-b="badge-popular"] { background: #2D2D2D; color: #fff; }
+    .ap-bo[data-b="badge-new"]     { background: var(--gold); color: #fff; }
+    .ap-bo[data-b="badge-sale"]    { background: #e05060; color: #fff; }
+    .ap-bo[data-b=""]              { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+    .ap-ca { display: flex; gap: 6px; padding: 0 12px 12px; }
+    .ap-save-btn {
+      flex: 1; background: var(--gold); color: #fff; border: none; cursor: pointer;
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px; border-radius: 6px; transition: background 0.2s;
+    }
+    .ap-save-btn:hover { background: var(--gold-light); }
+    .ap-save-btn.saved { background: #2a7a2a; }
+    .ap-del-btn {
+      width: 32px; background: rgba(192,57,43,0.12); color: #e05060;
+      border: 1px solid rgba(192,57,43,0.25); cursor: pointer;
+      border-radius: 6px; font-size: 14px; display: flex;
+      align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .ap-del-btn:hover { background: rgba(192,57,43,0.3); }
+
+    /* Add product tile */
+    .ap-add-tile {
+      background: rgba(198,146,42,0.04); border: 2px dashed rgba(198,146,42,0.22);
+      border-radius: 10px; min-height: 180px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 8px; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .ap-add-tile:hover { background: rgba(198,146,42,0.1); border-color: var(--gold); }
+    .ap-add-tile .ap-plus { font-size: 30px; color: rgba(198,146,42,0.45); }
+    .ap-add-tile span:last-child {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase; color: rgba(198,146,42,0.55);
+    }
+
+    /* Empty state */
+    .ap-empty {
+      text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.2);
+      font-family: var(--serif); font-size: 16px; font-style: italic;
+    }
+    .ap-empty .ap-flower { font-size: 40px; margin-bottom: 12px; display: block; }
+
+    /* Toast */
+    #apToast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2a7a2a; color: #fff;
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; padding: 11px 26px; border-radius: 30px;
+      z-index: 99999; opacity: 0; pointer-events: none;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    #apToast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Hidden file input */
+    #apFileIn { display: none; }
+
+    @keyframes cardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    @media (max-width:1100px) { .products-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width:760px) { .products-grid { grid-template-columns: repeat(2,1fr); } .collections { padding:80px 20px; } #apPanel { width:100vw; } .ap-pg { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:480px) { .products-grid { grid-template-columns:1fr; } .ap-pg { grid-template-columns:1fr; } }
+
+    /* ══ POS MODE ══════════════════════════════════ */
+    #posOverlay {
+      display: none; position: fixed; inset: 0; z-index: 99990;
+      background: #0d0b07; flex-direction: column;
+    }
+    #posOverlay.show { display: flex; }
+
+    /* Header */
+    #posHeader {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 20px; background: #0f0e09;
+      border-bottom: 1px solid rgba(198,146,42,0.2); flex-shrink: 0;
+    }
+    .pos-logo { font-family: var(--serif); font-size: 17px; color: var(--white); letter-spacing: 0.1em; white-space: nowrap; }
+    .pos-logo em { color: var(--gold); font-style: normal; }
+    .pos-mode-badge {
+      font-family: var(--sans); font-size: 8px; font-weight: 700; letter-spacing: 0.18em;
+      background: #c0392b; color: #fff; padding: 2px 7px; border-radius: 3px;
+    }
+    #posSearch {
+      flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(198,146,42,0.2);
+      color: var(--white); font-family: var(--sans); font-size: 13px;
+      padding: 9px 16px; border-radius: 8px; outline: none; transition: border-color 0.2s;
+    }
+    #posSearch::placeholder { color: rgba(255,255,255,0.2); }
+    #posSearch:focus { border-color: var(--gold); }
+    .pos-hdr-btns { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* Body layout */
+    #posBody { display: flex; flex: 1; overflow: hidden; }
+
+    /* Products panel */
+    #posProducts { flex: 1; overflow-y: auto; padding: 14px; border-right: 1px solid rgba(198,146,42,0.1); }
+    #posProducts::-webkit-scrollbar { width: 3px; }
+    #posProducts::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); }
+    #posProductGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: 10px; }
+
+    .pos-tile {
+      background: #1e1a10; border: 1px solid rgba(198,146,42,0.1);
+      border-radius: 10px; overflow: hidden; cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .pos-tile:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .pos-tile-img {
+      height: 78px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background-size: cover; background-position: center;
+    }
+    .pos-tile-img-icon { font-size: 26px; opacity: 0.3; }
+    .pos-tile-body { padding: 8px 10px 10px; }
+    .pos-tile-cat {
+      font-family: var(--sans); font-size: 8px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); display: block; margin-bottom: 3px;
+    }
+    .pos-tile-name { font-family: var(--serif); font-size: 13px; color: var(--white); line-height: 1.3; margin-bottom: 7px; }
+    .pos-tile-footer { display: flex; align-items: center; justify-content: space-between; }
+    .pos-tile-price { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--gold); }
+    .pos-tile-add {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--gold); border: none; color: #fff;
+      font-size: 17px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .pos-tile-add:hover { background: var(--gold-light); transform: scale(1.12); }
+    .pos-no-results { font-family: var(--serif); font-size: 15px; font-style: italic; color: rgba(255,255,255,0.2); text-align: center; padding: 40px 20px; grid-column: 1/-1; }
+
+    /* Order ticket */
+    #posTicket { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; background: #18160f; overflow: hidden; }
+    .pos-ticket-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 18px; border-bottom: 1px solid rgba(198,146,42,0.15); background: #0f0e09; flex-shrink: 0;
+    }
+    .pos-ticket-title { font-family: var(--serif); font-size: 16px; color: var(--white); }
+    .pos-ticket-title em { color: var(--gold); font-style: italic; }
+    .pos-item-badge {
+      font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      background: rgba(198,146,42,0.15); color: var(--gold); padding: 3px 9px; border-radius: 10px;
+    }
+    #posOrderItems { flex: 1; overflow-y: auto; padding: 10px 14px; }
+    #posOrderItems::-webkit-scrollbar { width: 3px; }
+    #posOrderItems::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); }
+    .pos-order-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; color:rgba(255,255,255,0.18); }
+    .pos-order-empty span { font-size:36px; opacity:0.25; }
+    .pos-order-empty p { font-family:var(--serif); font-size:14px; font-style:italic; }
+
+    .pos-order-item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .pos-oi-info { flex: 1; min-width: 0; }
+    .pos-oi-cat { font-family:var(--sans); font-size:8px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:2px; }
+    .pos-oi-name { font-family:var(--serif); font-size:13px; color:var(--white); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pos-qty-grp { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .pos-qb { width:22px; height:22px; border-radius:50%; border:1px solid rgba(198,146,42,0.35); background:none; color:var(--gold); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    .pos-qb:hover { background:var(--gold); color:#fff; }
+    .pos-qn { font-family:var(--sans); font-size:12px; font-weight:700; color:var(--white); min-width:18px; text-align:center; }
+    .pos-oi-price { font-family:var(--sans); font-size:12px; font-weight:700; color:var(--white); flex-shrink:0; }
+    .pos-oi-del { background:none; border:none; color:rgba(255,255,255,0.2); cursor:pointer; font-size:13px; padding:2px; transition:color 0.2s; }
+    .pos-oi-del:hover { color:#e05060; }
+
+    /* Order footer */
+    #posOrderFooter {
+      border-top: 1px solid rgba(198,146,42,0.15); padding: 12px 16px;
+      background: #0f0e09; flex-shrink: 0; display: flex; flex-direction: column; gap: 9px;
+    }
+    .pos-totals { display:flex; flex-direction:column; gap:3px; }
+    .pos-tot-row { display:flex; justify-content:space-between; align-items:center; }
+    .pos-tot-lbl { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.28); }
+    .pos-tot-val { font-family:var(--sans); font-size:12px; font-weight:600; color:rgba(255,255,255,0.5); }
+    .pos-disc-val { color:#4caf7d !important; }
+    .pos-grand-row { display:flex; justify-content:space-between; align-items:baseline; padding-top:7px; border-top:1px solid rgba(255,255,255,0.08); margin-top:2px; }
+    .pos-grand-lbl { font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--white); }
+    .pos-grand-val { font-family:var(--serif); font-size:26px; font-weight:300; color:var(--white); }
+    .pos-grand-val sup { font-family:var(--sans); font-size:11px; font-weight:700; color:var(--gold); vertical-align:super; margin-right:2px; }
+
+    /* Discount */
+    .pos-disc-row { display:flex; align-items:center; gap:7px; }
+    .pos-disc-lbl { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.28); white-space:nowrap; }
+    .pos-disc-sel {
+      background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--white);
+      font-family:var(--sans); font-size:11px; padding:7px 8px; border-radius:6px; outline:none; cursor:pointer; color-scheme:dark;
+    }
+    .pos-disc-sel option { background:#18160f; }
+    .pos-disc-inp {
+      flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--gold);
+      font-family:var(--sans); font-size:13px; font-weight:700;
+      padding:7px 10px; border-radius:6px; outline:none; transition:border-color 0.2s;
+    }
+    .pos-disc-inp:focus { border-color:var(--gold); }
+    .pos-disc-inp:disabled { opacity:0.3; cursor:not-allowed; }
+
+    /* Toggle rows */
+    .pos-toggle-row { display:flex; gap:6px; }
+    .pos-tgl {
+      flex:1; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+      background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.1);
+      color:rgba(255,255,255,0.38); border-radius:8px; padding:8px 4px; cursor:pointer;
+      transition:all 0.2s; text-align:center;
+    }
+    .pos-tgl.pay-active { background:var(--gold); border-color:var(--gold); color:#fff; }
+    .pos-tgl.paid-active { background:#2a7a2a; border-color:#2a7a2a; color:#fff; }
+    .pos-tgl.unpaid-active { background:rgba(224,80,96,0.15); border-color:#e05060; color:#e05060; }
+
+    /* Action buttons */
+    .pos-actions { display:flex; gap:6px; }
+    .pos-act {
+      flex:1; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+      border:none; border-radius:8px; padding:10px 4px; cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
+    }
+    .pos-act:hover { transform:translateY(-1px); }
+    .pos-act-complete { background:var(--gold); color:#fff; flex:2; }
+    .pos-act-complete:hover { background:var(--gold-light); }
+    .pos-act-print { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.65); }
+    .pos-act-print:hover { background:rgba(255,255,255,0.14); }
+    .pos-act-clear { background:rgba(192,57,43,0.12); color:#e05060; border:1px solid rgba(192,57,43,0.25) !important; }
+    .pos-act-clear:hover { background:rgba(192,57,43,0.25); }
+
+    /* History modal */
+    #posHistoryBg { display:none; position:fixed; inset:0; z-index:99995; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+    #posHistoryBg.show { display:flex; }
+    #posHistoryPanel {
+      background:#18160f; border:1px solid rgba(198,146,42,0.2); border-radius:14px;
+      width:720px; max-width:96vw; max-height:88vh;
+      display:flex; flex-direction:column; overflow:hidden;
+      box-shadow:0 24px 80px rgba(0,0,0,0.6); animation:modalIn 0.3s cubic-bezier(0.34,1.4,0.64,1) both;
+    }
+    .pos-hst-hd { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid rgba(198,146,42,0.15); background:#0f0e09; flex-shrink:0; }
+    .pos-hst-title { font-family:var(--serif); font-size:20px; font-weight:400; color:var(--white); }
+    .pos-hst-title em { color:var(--gold); font-style:italic; }
+    .pos-hst-close { width:32px; height:32px; border-radius:50%; border:1px solid rgba(255,255,255,0.15); background:none; color:rgba(255,255,255,0.5); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .pos-hst-close:hover { background:#c0392b; color:#fff; border-color:#c0392b; }
+    #posHistoryBody { flex:1; overflow-y:auto; padding:20px 24px; }
+    #posHistoryBody::-webkit-scrollbar { width:3px; }
+    #posHistoryBody::-webkit-scrollbar-thumb { background:rgba(198,146,42,0.3); }
+
+    .pos-summary-card { background:#121007; border:1px solid rgba(198,146,42,0.15); border-radius:10px; padding:18px 20px; margin-bottom:20px; }
+    .pos-sum-title { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+    .pos-sum-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .pos-sum-stat { text-align:center; }
+    .pos-sum-num { font-family:var(--serif); font-size:32px; font-weight:300; color:var(--white); display:block; line-height:1; }
+    .pos-sum-num sub { font-family:var(--sans); font-size:11px; font-weight:700; color:var(--gold); vertical-align:super; margin-right:2px; }
+    .pos-sum-lbl { font-family:var(--sans); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.28); margin-top:4px; display:block; }
+
+    .pos-ord-row { background:#1e1a10; border:1px solid rgba(198,146,42,0.1); border-radius:8px; padding:13px 16px; margin-bottom:9px; animation:cardIn 0.3s ease both; }
+    .pos-ord-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .pos-ord-id { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); }
+    .pos-ord-time { font-family:var(--sans); font-size:9px; color:rgba(255,255,255,0.3); }
+    .pos-ord-items { font-family:var(--serif); font-size:12px; color:rgba(255,255,255,0.4); font-style:italic; margin-bottom:7px; line-height:1.5; }
+    .pos-ord-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .pos-ord-total { font-family:var(--sans); font-size:14px; font-weight:700; color:var(--white); }
+    .pos-tag { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:3px 8px; border-radius:4px; }
+    .pos-tag-method { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.45); }
+    .pos-tag-paid { background:rgba(42,122,42,0.2); color:#4caf7d; border:1px solid rgba(76,175,125,0.3); }
+    .pos-tag-unpaid { background:rgba(224,80,96,0.1); color:#e05060; border:1px solid rgba(224,80,96,0.3); }
+    .pos-tag-disc { background:rgba(232,200,112,0.12); color:#e8c870; }
+    .pos-no-orders { font-family:var(--serif); font-size:16px; font-style:italic; color:rgba(255,255,255,0.2); text-align:center; padding:40px 20px; }
+
+    @media (max-width:768px) {
+      #posBody { flex-direction:column; }
+      #posProducts { max-height:45vh; border-right:none; border-bottom:1px solid rgba(198,146,42,0.1); }
+      #posTicket { width:100%; }
+      #posProductGrid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+    }
+  </style>
+
+  <!-- HTML -->
+  <input type="file" id="apFileIn" accept="image/*" />
+  <div id="apToast"></div>
+
+  <!-- Login trigger: tiny gold dot top-right -->
+  
+
+  <!-- Login Modal -->
+  <div id="loginModalBg">
+    <div id="loginModal">
+      <div class="lm-logo">
+        <h3>ROSE<span>BELLA</span></h3>
+        <p>Admin Access</p>
+      </div>
+      <div class="lm-field">
+        <label>Email Address</label>
+        <input type="email" id="lmEmail" placeholder="your@email.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="lm-field">
+        <label>Password</label>
+        <input type="password" id="lmPass" placeholder="••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="lm-error" id="lmError"></div>
+      <button class="lm-btn" onclick="doLogin()">Sign In →</button>
+      <span class="lm-cancel" onclick="hideLogin()">Cancel</span>
+    </div>
+  </div>
+
+  <!-- Admin Top Bar (visible after login) -->
+  <div id="adminBar">
+    <div class="ab-left">
+      <span class="ab-logo">ROSE<span>BELLA</span></span>
+      <span class="ab-badge">Admin Mode</span>
+    </div>
+    <div class="ab-right">
+      <button class="ab-btn" style="background:#c0392b;color:#fff;" onclick="openPOS()">🏪 POS Mode</button>
+      <button class="ab-btn ab-btn-gold" onclick="openPanel()">⚙ Manage Collections</button>
+      <button class="ab-btn ab-btn-dark" onclick="downloadSite()">⬇ Save & Download</button>
+      <button class="ab-btn ab-btn-red" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Side Panel -->
+  <div id="apOverlay" onclick="closePanel()"></div>
+  <div id="apPanel">
+    <div class="ap-ph">
+      <h2>Manage <em>Collections & Products</em></h2>
+      <div class="ap-ph-btns">
+        <button class="ab-btn ab-btn-dark" style="font-size:10px;" onclick="downloadSite()">⬇ Save</button>
+        <button class="ap-close-btn" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+    <div class="ap-body">
+      <div class="ap-sb" id="apSb">
+        <div class="ap-sb-title">Collections</div>
+      </div>
+      <div class="ap-mc" id="apMc">
+        <div class="ap-empty">
+          <span class="ap-flower">🌸</span>
+          Select a collection from the left to manage its products
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POS Overlay -->
+  <div id="posOverlay">
+    <div id="posHeader">
+      <div class="pos-logo">ROSE<em>BELLA</em> &nbsp;<span class="pos-mode-badge">POS</span></div>
+      <input type="text" id="posSearch" placeholder="🔍  Search products by name or category…" oninput="posFilterProducts(this.value)" />
+      <div class="pos-hdr-btns">
+        <button class="ab-btn ab-btn-dark" onclick="openPosHistory()">📋 History</button>
+        <button class="ab-btn ab-btn-red"  onclick="closePOS()">✕ Exit POS</button>
+      </div>
+    </div>
+    <div id="posBody">
+      <!-- Product browser -->
+      <div id="posProducts">
+        <div id="posProductGrid"></div>
+      </div>
+      <!-- Order ticket -->
+      <div id="posTicket">
+        <div class="pos-ticket-hd">
+          <span class="pos-ticket-title">Current <em>Order</em></span>
+          <span class="pos-item-badge" id="posItemBadge">0 items</span>
+        </div>
+        <div id="posOrderItems">
+          <div class="pos-order-empty">
+            <span>🛒</span><p>Tap a product to add it</p>
+          </div>
+        </div>
+        <div id="posOrderFooter">
+          <!-- Totals -->
+          <div class="pos-totals">
+            <div class="pos-tot-row" id="posSubRow">
+              <span class="pos-tot-lbl">Subtotal</span>
+              <span class="pos-tot-val" id="posSubVal">QR 0</span>
+            </div>
+            <div class="pos-tot-row" id="posDiscRow" style="display:none;">
+              <span class="pos-tot-lbl">Discount</span>
+              <span class="pos-tot-val pos-disc-val" id="posDiscAmt">−QR 0</span>
+            </div>
+            <div class="pos-grand-row">
+              <span class="pos-grand-lbl">Total</span>
+              <span class="pos-grand-val"><sup>QR</sup><span id="posTotalVal">0</span></span>
+            </div>
+          </div>
+          <!-- Discount -->
+          <div class="pos-disc-row">
+            <span class="pos-disc-lbl">Discount</span>
+            <select id="posDiscType" class="pos-disc-sel" onchange="posDiscTypeChange(this.value)">
+              <option value="none">None</option>
+              <option value="percent">%</option>
+              <option value="fixed">QR</option>
+            </select>
+            <input type="number" id="posDiscVal" class="pos-disc-inp" min="0" value="0"
+              placeholder="0" disabled oninput="posUpdateDiscount()" />
+          </div>
+          <!-- Payment method -->
+          <div class="pos-toggle-row">
+            <button class="pos-tgl pay-active" data-method="cash" onclick="posSetPayment('cash')">💵 Cash</button>
+            <button class="pos-tgl" data-method="card" onclick="posSetPayment('card')">💳 Card</button>
+          </div>
+          <!-- Paid / Unpaid -->
+          <div class="pos-toggle-row">
+            <button class="pos-tgl paid-active" data-status="paid" onclick="posSetStatus('paid')">✓ Paid</button>
+            <button class="pos-tgl" data-status="unpaid" onclick="posSetStatus('unpaid')">○ Unpaid</button>
+          </div>
+          <!-- Actions -->
+          <div class="pos-actions">
+            <button class="pos-act pos-act-print"    onclick="posPrintReceipt()">🖨 Print</button>
+            <button class="pos-act pos-act-complete" onclick="posCompleteOrder()">✓ Complete Order</button>
+            <button class="pos-act pos-act-clear"    onclick="posClearOrder(false)">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POS History Modal -->
+  <div id="posHistoryBg">
+    <div id="posHistoryPanel">
+      <div class="pos-hst-hd">
+        <span class="pos-hst-title">Order <em>History</em></span>
+        <button class="pos-hst-close" onclick="closePosHistory()">✕</button>
+      </div>
+      <div id="posHistoryBody"></div>
+    </div>
+  </div>
+
+  <script>
+  // ═══════════════════════════════════════════════
+  //  ROSEBELLA ADMIN SYSTEM
+  // ═══════════════════════════════════════════════
+  const ADMIN_EMAIL = 'yousefaljailey@gmail.com';
+  const ADMIN_PASS  = 'Yy12345678!';
+  let isAdmin = false;
+  let curSlug = null;
+  let pendingImgUid = null;
+
+  // ── Auth ──────────────────────────────────────
+  function showLogin() {
+    document.getElementById('loginModalBg').classList.add('show');
+    setTimeout(() => document.getElementById('lmEmail').focus(), 100);
+  }
+  function hideLogin() {
+    document.getElementById('loginModalBg').classList.remove('show');
+    document.getElementById('lmError').textContent = '';
+    document.getElementById('lmEmail').value = '';
+    document.getElementById('lmPass').value = '';
+  }
+  function doLogin() {
+    const email = document.getElementById('lmEmail').value.trim();
+    const pass  = document.getElementById('lmPass').value;
+    const err   = document.getElementById('lmError');
+    if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+      isAdmin = true;
+      hideLogin();
+      document.getElementById('adminBar').classList.add('show');
+      document.getElementById('adminTrigger').style.display = 'none';
+      document.body.classList.add('admin-active');
+      apToast('Welcome back, Yousef! 👋');
+    } else {
+      err.textContent = 'Incorrect email or password. Please try again.';
+      document.getElementById('lmPass').value = '';
+    }
+  }
+  function doLogout() {
+    isAdmin = false;
+    document.getElementById('adminBar').classList.remove('show');
+    document.getElementById('adminTrigger').style.display = 'flex';
+    document.body.classList.remove('admin-active');
+    closePanel();
+    apToast('Signed out successfully.');
+  }
+
+  // ── Panel ─────────────────────────────────────
+  function openPanel() {
+    closeCart();
+    buildSidebar();
+    document.getElementById('apPanel').classList.add('show');
+    document.getElementById('apOverlay').classList.add('show');
+  }
+  function closePanel() {
+    document.getElementById('apPanel').classList.remove('show');
+    document.getElementById('apOverlay').classList.remove('show');
+  }
+
+  // ── Build sidebar ─────────────────────────────
+  function buildSidebar() {
+    const sb = document.getElementById('apSb');
+    const tabs = document.querySelectorAll('.cat-tab:not([data-cat="all"])');
+    let h = '<div class="ap-sb-title">Collections</div>';
+    tabs.forEach(t => {
+      const slug  = t.dataset.cat;
+      const name  = t.textContent.trim();
+      const count = document.querySelectorAll(`.prod-card[data-cat="${slug}"]`).length;
+      const act   = slug === curSlug ? 'active' : '';
+      h += `<div class="ap-ci ${act}" onclick="selectCol('${slug}','${name.replace(/'/g,"\'")}')">
+        <span>${name}</span><span class="ap-ci-count">${count}</span></div>`;
+    });
+    sb.innerHTML = h;
+  }
+
+  // ── Select collection ─────────────────────────
+  function selectCol(slug, name) {
+    curSlug = slug;
+    document.querySelectorAll('.ap-ci').forEach(i => i.classList.remove('active'));
+    const item = document.querySelector(`.ap-ci[onclick*="${slug}"]`);
+    if (item) item.classList.add('active');
+
+    const tabEl = document.querySelector(`.cat-tab[data-cat="${slug}"]`);
+    const curName = tabEl ? tabEl.textContent.trim() : name;
+    const cards   = document.querySelectorAll(`.prod-card[data-cat="${slug}"]`);
+
+    let h = `
+      <div class="ap-rename-bar">
+        <label>Collection Name</label>
+        <input class="ap-rename-inp" id="renInp" value="${curName}" />
+        <button class="ap-rename-btn" onclick="renameCol('${slug}')">Rename</button>
+      </div>
+      <div class="ap-pg" id="apPg">`;
+
+    cards.forEach((card, i) => {
+      const imgEl   = card.querySelector('img');
+      const bgEl    = card.querySelector('.prod-img-bg');
+      const nameEl  = card.querySelector('.prod-body h3');
+      const descEl  = card.querySelector('.prod-desc');
+      const priceEl = card.querySelector('.prod-price');
+      const badgeEl = card.querySelector('.prod-badge');
+
+      const imgSrc    = imgEl ? imgEl.src : '';
+      const imgPos    = imgEl ? (imgEl.style.objectPosition || 'center top') : 'center top';
+      const cardName  = nameEl  ? nameEl.textContent.trim() : '';
+      const cardDesc  = descEl  ? descEl.textContent.trim() : '';
+      let   cardPrice = '';
+      if (priceEl) {
+        const cl = priceEl.cloneNode(true);
+        const cu = cl.querySelector('.currency'); if (cu) cu.remove();
+        cardPrice = cl.textContent.trim();
+      }
+      const cardBadge = badgeEl ? badgeEl.className.replace('prod-badge','').trim() : '';
+      const uid = `u-${slug}-${i}`;
+      card.dataset.apid = uid;
+
+      const bOpts = ['','badge-popular','badge-new','badge-sale'].map(b => {
+        const lbl = {'':'None','badge-popular':'Bestseller','badge-new':'New','badge-sale':'Sale'}[b];
+        const sel = b === cardBadge ? 'sel' : '';
+        return `<span class="ap-bo ${sel}" data-b="${b}" onclick="selBadge(this,'${uid}')">${lbl}</span>`;
+      }).join('');
+
+      // Image position selector
+      // Parse stored transform (scale + translate)
+      const imgData = (card && card.dataset.imgTransform) ? JSON.parse(card.dataset.imgTransform) : {scale:1,x:0,y:0};
+      const posHtml = ''; // replaced by zoom toolbar below
+
+      h += `
+        <div class="ap-pc" id="apc-${uid}">
+          <div class="ap-pi" onclick="trigImg('${uid}')">
+            ${imgSrc
+              ? `<div id="apim-${uid}" class="ap-editor-wrap"
+                   style="background-image:url(${imgSrc});background-size:100% auto;background-position:50% 0%;background-repeat:no-repeat;"></div>`
+              : `<div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>`}
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('${uid}')"><span>📷 Change Photo</span></div>
+            <div class="ap-img-bar" id="apbar-${uid}">
+              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',-0.15)">−</button>
+              <span class="ap-ipct" id="appct-${uid}">100%</span>
+              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',0.15)">+</button>
+              <button class="ap-ireset" onclick="event.stopPropagation();edReset('${uid}')">↺ Fit</button>
+            </div>
+            <div class="ap-img-bar" id="apbar-${uid}">
+              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',-0.15)">−</button>
+              <span class="ap-ipct" id="appct-${uid}">Fit</span>
+              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',0.15)">+</button>
+              <button class="ap-ireset" onclick="event.stopPropagation();edReset('${uid}')">↺ Fit</button>
+            </div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-${uid}" value="${cardName.replace(/"/g,'&quot;')}" /></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-${uid}">${cardDesc}</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-${uid}" value="${cardPrice}" /></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row">${bOpts}</div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-${uid}" onclick="saveCard('${uid}')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('${uid}','${slug}')">🗑</button>
+          </div>
+        </div>`;
+    });
+
+    h += `
+        <div class="ap-add-tile" onclick="addProduct('${slug}','${curName.replace(/'/g,"\'")}')">
+          <span class="ap-plus">＋</span><span>Add New Product</span>
+        </div>
+      </div>`;
+
+    document.getElementById('apMc').innerHTML = h;
+  }
+
+  // ── Rename collection ─────────────────────────
+  function renameCol(slug) {
+    const v = document.getElementById('renInp').value.trim();
+    if (!v) return;
+    const tab = document.querySelector(`.cat-tab[data-cat="${slug}"]`);
+    if (tab) tab.textContent = v;
+    document.querySelectorAll(`.prod-card[data-cat="${slug}"] .prod-cat`).forEach(e => e.textContent = v);
+    buildSidebar();
+    selectCol(slug, v);
+    apToast('Collection renamed!');
+  }
+
+  // ── Badge selector ────────────────────────────
+  function selBadge(el, uid) {
+    el.closest('.ap-badge-row').querySelectorAll('.ap-bo').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+
+  // ── Image position ────────────────────────────
+  function setImgPos(btn, uid) {
+    const pos = btn.dataset.pos;
+    btn.closest('.ap-pi-pos').querySelectorAll('.ap-pos-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    // Update admin preview
+    const apImg = document.getElementById(`apim-${uid}`);
+    if (apImg) apImg.style.objectPosition = pos;
+    // Update main card image
+    const card = document.querySelector(`.prod-card[data-apid="${uid}"]`);
+    if (card) {
+      const mainImg = card.querySelector('.prod-img img');
+      if (mainImg) mainImg.style.objectPosition = pos;
+    }
+    apToast('Image position updated!');
+  }
+
+  // ── Save card ─────────────────────────────────
+  function saveCard(uid) {
+    const card = document.querySelector(`.prod-card[data-apid="${uid}"]`);
+    if (!card) return;
+    const nm  = document.getElementById(`apn-${uid}`).value.trim();
+    const dc  = document.getElementById(`apd-${uid}`).value.trim();
+    const pr  = document.getElementById(`app-${uid}`).value.trim();
+    const bEl = document.querySelector(`#apc-${uid} .ap-bo.sel`);
+    const bv  = bEl ? bEl.dataset.b : '';
+    const bt  = bEl ? bEl.textContent.trim() : '';
+
+    const nEl = card.querySelector('.prod-body h3');
+    const dEl = card.querySelector('.prod-desc');
+    const pEl = card.querySelector('.prod-price');
+    let   bdEl= card.querySelector('.prod-badge');
+
+    if (nEl) nEl.textContent = nm;
+    if (dEl) dEl.textContent = dc;
+    if (pEl) { const cu = pEl.querySelector('.currency'); pEl.innerHTML = (cu ? cu.outerHTML : '') + pr; }
+
+    if (bv && bt !== 'None') {
+      if (!bdEl) { bdEl = document.createElement('span'); const pi = card.querySelector('.prod-img'); if (pi) pi.insertBefore(bdEl, pi.firstChild); }
+      bdEl.className = `prod-badge ${bv}`; bdEl.textContent = bt;
+    } else if (bdEl && bt === 'None') { bdEl.remove(); }
+
+    const addB = card.querySelector('.prod-add');
+    if (addB) addB.setAttribute('onclick', `openVariantModal(this,'${nm.replace(/'/g,"\'")}')`);
+
+    const sb = document.getElementById(`apsb-${uid}`);
+    if (sb) { sb.textContent='✓ Saved!'; sb.classList.add('saved'); setTimeout(()=>{ sb.textContent='Save'; sb.classList.remove('saved'); },2000); }
+    buildSidebar();
+    apToast(`"${nm}" saved!`);
+  }
+
+  // ── Delete card ───────────────────────────────
+  function delCard(uid, slug) {
+    if (!confirm('Delete this product from the website?')) return;
+    const c = document.querySelector(`.prod-card[data-apid="${uid}"]`);
+    if (c) c.remove();
+    const ap = document.getElementById(`apc-${uid}`);
+    if (ap) ap.remove();
+    buildSidebar();
+    apToast('Product deleted.');
+  }
+
+  // ── Image upload ──────────────────────────────
+  function trigImg(uid) { pendingImgUid = uid; document.getElementById('apFileIn').click(); }
+
+  document.getElementById('apFileIn').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file || !pendingImgUid) return;
+    const uid = pendingImgUid;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const src = ev.target.result;
+      // Update main page card
+      const card = document.querySelector(`.prod-card[data-apid="${uid}"]`);
+      if (card) {
+        const mImg = card.querySelector('.prod-img img');
+        const mBg  = card.querySelector('.prod-img-bg');
+        if (mImg) { mImg.src = src; }
+        else if (mBg) { mBg.style.cssText=`background-image:url(${src});background-size:cover;background-position:center;`; mBg.className='prod-img-bg'; }
+        else { const pi=card.querySelector('.prod-img'); if(pi){ const img=document.createElement('img'); img.src=src; img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;'; pi.insertBefore(img,pi.firstChild); } }
+      }
+      // Update admin preview - re-render the whole card
+      selectCol(curSlug, document.querySelector(`.cat-tab[data-cat="${curSlug}"]`)?.textContent.trim() || curSlug);
+      apToast('Photo uploaded!');
+    };
+    reader.readAsDataURL(file);
+    this.value = '';
+  });
+
+  // ── Add new product ───────────────────────────
+  function addProduct(slug, colName) {
+    const grid = document.getElementById('productsGrid');
+    const nc = document.createElement('div');
+    nc.className = 'prod-card show'; nc.dataset.cat = slug;
+    const uid = `new-${slug}-${Date.now()}`;
+    nc.dataset.apid = uid;
+    nc.innerHTML = `
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="position:absolute;inset:0;background:#2a2520;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">${colName}</span>
+        <h3>New Product</h3>
+        <p class="prod-desc">Add a description</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>0</div>
+          <button class="prod-add" onclick="openVariantModal(this,\'New Product\')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Add
+          </button>
+        </div>
+      </div>`;
+    grid.appendChild(nc);
+    selectCol(slug, colName);
+    apToast('New product added — fill in the details!');
+  }
+
+  // ── Download ──────────────────────────────────
+  function downloadSite() {
+    const h = '<!DOCTYPE html>' + document.documentElement.outerHTML;
+    const b = new Blob([h],{type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download='rosebella-website.html'; a.click();
+    URL.revokeObjectURL(a.href);
+    apToast('Downloading updated website!');
+  }
+
+  // ── Toast ─────────────────────────────────────
+  function apToast(msg) {
+    const t = document.getElementById('apToast');
+    t.textContent = '✓ ' + msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2400);
+  }
+
+  // ══════════════════════════════════════════════
+  //  POS SYSTEM
+  // ══════════════════════════════════════════════
+  const POS_ORDERS_KEY = 'rosebella_pos_orders';
+
+  let posOrder = { items:[], discountType:'none', discountValue:0, paymentMethod:'cash', status:'paid' };
+  let posOrders = (function(){ try{ return JSON.parse(localStorage.getItem(POS_ORDERS_KEY))||[]; }catch(e){ return []; } })();
+
+  function savePosOrders() { localStorage.setItem(POS_ORDERS_KEY, JSON.stringify(posOrders)); }
+
+  // ── Open / Close ──────────────────────────────
+  function openPOS() {
+    closeCart(); closePanel();
+    document.getElementById('posOverlay').classList.add('show');
+    renderPosProducts('');
+    updatePosUI();
+  }
+  function closePOS() { document.getElementById('posOverlay').classList.remove('show'); }
+
+  // ── Product browser ───────────────────────────
+  function posFilterProducts(q) { renderPosProducts(q.trim().toLowerCase()); }
+
+  function renderPosProducts(query) {
+    const grid = document.getElementById('posProductGrid');
+    let html = '', count = 0;
+    document.querySelectorAll('.prod-card').forEach(card => {
+      const nameEl  = card.querySelector('.prod-body h3');
+      const catEl   = card.querySelector('.prod-cat');
+      const priceEl = card.querySelector('.prod-price');
+      const imgEl   = card.querySelector('.prod-img img');
+      const bgEl    = card.querySelector('.prod-img-bg');
+      const name    = nameEl  ? nameEl.textContent.trim()  : '';
+      const cat     = catEl   ? catEl.textContent.trim()   : '';
+      if (query && !name.toLowerCase().includes(query) && !cat.toLowerCase().includes(query)) return;
+      let price = 0;
+      if (priceEl) { const cl=priceEl.cloneNode(true); const cu=cl.querySelector('.currency'); if(cu) cu.remove(); price=parseFloat(cl.textContent.trim())||0; }
+      const imgSrc   = imgEl ? imgEl.src : '';
+      const bgMatch  = bgEl  ? (bgEl.className.match(/pi-\d+/)||[''])[0] : '';
+      const safeN = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const safeC = cat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      count++;
+      html += `
+        <div class="pos-tile" onclick="posAddItem('${safeN}','${safeC}',${price})">
+          <div class="pos-tile-img ${bgMatch}" style="${imgSrc?`background-image:url(${imgSrc});background-size:cover;background-position:center`:''}">
+            ${!imgSrc ? '<span class="pos-tile-img-icon">🌸</span>' : ''}
+          </div>
+          <div class="pos-tile-body">
+            <span class="pos-tile-cat">${cat}</span>
+            <div class="pos-tile-name">${name}</div>
+            <div class="pos-tile-footer">
+              <span class="pos-tile-price">QR ${price}</span>
+              <button class="pos-tile-add" onclick="event.stopPropagation();posAddItem('${safeN}','${safeC}',${price})">+</button>
+            </div>
+          </div>
+        </div>`;
+    });
+    if (!count) html = '<div class="pos-no-results">No products match your search</div>';
+    grid.innerHTML = html;
+  }
+
+  // ── Order mutations ───────────────────────────
+  function posAddItem(name, cat, price) {
+    const ex = posOrder.items.find(i => i.name === name);
+    if (ex) { ex.qty++; } else { posOrder.items.push({ id: Date.now(), name, cat, price, qty:1 }); }
+    updatePosUI();
+  }
+  function posChangeQty(id, delta) {
+    const item = posOrder.items.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) posOrder.items = posOrder.items.filter(i => i.id !== id);
+    updatePosUI();
+  }
+  function posRemoveItem(id) { posOrder.items = posOrder.items.filter(i => i.id !== id); updatePosUI(); }
+
+  // ── Discount ──────────────────────────────────
+  function posDiscTypeChange(type) {
+    posOrder.discountType = type;
+    const inp = document.getElementById('posDiscVal');
+    inp.disabled = (type === 'none');
+    if (type === 'none') { inp.value = '0'; posOrder.discountValue = 0; }
+    updatePosUI();
+  }
+  function posUpdateDiscount() {
+    posOrder.discountValue = parseFloat(document.getElementById('posDiscVal').value) || 0;
+    updatePosUI();
+  }
+
+  // ── Payment / Status ──────────────────────────
+  function posSetPayment(method) {
+    posOrder.paymentMethod = method;
+    document.querySelectorAll('[data-method]').forEach(b => b.classList.toggle('pay-active', b.dataset.method === method));
+  }
+  function posSetStatus(status) {
+    posOrder.status = status;
+    document.querySelectorAll('[data-status]').forEach(b => {
+      b.classList.remove('paid-active','unpaid-active');
+      if (b.dataset.status === status) b.classList.add(status === 'paid' ? 'paid-active' : 'unpaid-active');
+    });
+  }
+
+  // ── Totals ────────────────────────────────────
+  function posCalcTotals() {
+    const subtotal = posOrder.items.reduce((s,i) => s + i.price * i.qty, 0);
+    let discount = 0;
+    if (posOrder.discountType === 'percent') discount = subtotal * posOrder.discountValue / 100;
+    else if (posOrder.discountType === 'fixed') discount = Math.min(posOrder.discountValue, subtotal);
+    return { subtotal, discount, total: Math.max(0, subtotal - discount) };
+  }
+
+  // ── Render UI ─────────────────────────────────
+  function updatePosUI() {
+    const { subtotal, discount, total } = posCalcTotals();
+    const count = posOrder.items.reduce((s,i) => s + i.qty, 0);
+
+    const badge = document.getElementById('posItemBadge');
+    if (badge) badge.textContent = count > 0 ? `${count} item${count!==1?'s':''}` : '0 items';
+
+    document.getElementById('posSubVal').textContent   = `QR ${subtotal.toFixed(0)}`;
+    document.getElementById('posDiscAmt').textContent  = `−QR ${discount.toFixed(0)}`;
+    document.getElementById('posTotalVal').textContent = total.toFixed(0);
+    document.getElementById('posDiscRow').style.display = discount > 0 ? 'flex' : 'none';
+
+    const container = document.getElementById('posOrderItems');
+    if (posOrder.items.length === 0) {
+      container.innerHTML = '<div class="pos-order-empty"><span>🛒</span><p>Tap a product to add it</p></div>';
+      return;
+    }
+    container.innerHTML = posOrder.items.map(item => `
+      <div class="pos-order-item">
+        <div class="pos-oi-info">
+          <span class="pos-oi-cat">${item.cat}</span>
+          <span class="pos-oi-name">${item.name}</span>
+        </div>
+        <div class="pos-qty-grp">
+          <button class="pos-qb" onclick="posChangeQty(${item.id},-1)">−</button>
+          <span class="pos-qn">${item.qty}</span>
+          <button class="pos-qb" onclick="posChangeQty(${item.id},1)">+</button>
+        </div>
+        <span class="pos-oi-price">QR ${(item.price*item.qty).toFixed(0)}</span>
+        <button class="pos-oi-del" onclick="posRemoveItem(${item.id})">🗑</button>
+      </div>`).join('');
+  }
+
+  // ── Complete order ────────────────────────────
+  function posCompleteOrder() {
+    if (posOrder.items.length === 0) { apToast('Add items before completing.'); return; }
+    const { subtotal, discount, total } = posCalcTotals();
+    const order = {
+      id: `ORD-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toISOString(),
+      items: posOrder.items.map(i => ({...i})),
+      subtotal, discount, discountType: posOrder.discountType,
+      discountValue: posOrder.discountValue, total,
+      paymentMethod: posOrder.paymentMethod, status: posOrder.status
+    };
+    posOrders.unshift(order);
+    savePosOrders();
+    apToast(`✓ Order ${order.id} — QR ${total.toFixed(0)} saved`);
+    posClearOrder(true);
+  }
+
+  function posClearOrder(skipConfirm) {
+    if (!skipConfirm && posOrder.items.length > 0 && !confirm('Clear current order?')) return;
+    posOrder = { items:[], discountType:'none', discountValue:0, paymentMethod: posOrder.paymentMethod, status:'paid' };
+    const ds = document.getElementById('posDiscType');  if (ds) ds.value = 'none';
+    const dv = document.getElementById('posDiscVal');   if (dv) { dv.value = '0'; dv.disabled = true; }
+    posSetStatus('paid');
+    updatePosUI();
+  }
+
+  // ── Print receipt ─────────────────────────────
+  function posPrintReceipt() {
+    if (posOrder.items.length === 0) { apToast('Add items before printing.'); return; }
+    const { subtotal, discount, total } = posCalcTotals();
+    const now      = new Date();
+    const dateStr  = now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+    const timeStr  = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    const orderId  = `#${now.getTime().toString().slice(-6)}`;
+
+    const itemRows = posOrder.items.map(i => `
+      <tr><td style="padding:4px 0;font-family:Georgia,serif;font-size:13px;">${i.name}</td>
+          <td style="text-align:center;padding:4px 8px;font-size:11px;color:#666;">×${i.qty}</td>
+          <td style="text-align:right;font-weight:700;font-size:13px;">QR&nbsp;${(i.price*i.qty).toFixed(0)}</td></tr>`).join('');
+
+    const discRow = discount > 0 ? `
+      <tr><td colspan="2" style="font-size:11px;color:#999;padding:3px 0;">${posOrder.discountType==='percent'?posOrder.discountValue+'% discount':'Discount'}</td>
+          <td style="text-align:right;font-size:11px;color:#999;">−QR&nbsp;${discount.toFixed(0)}</td></tr>` : '';
+
+    const methodLabel = posOrder.paymentMethod === 'cash' ? '💵 Cash' : '💳 Card';
+    const statusLabel = posOrder.status === 'paid' ? '✓ Paid' : '○ Unpaid';
+
+    const receiptWin = window.open('', '_blank', 'width=400,height=650');
+    receiptWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt ${orderId}</title>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:Arial,sans-serif;background:#fff;color:#222;max-width:320px;margin:0 auto;padding:24px 20px}
+      h1{font-family:Georgia,serif;font-size:22px;font-weight:400;letter-spacing:0.12em;text-align:center}
+      .sub{font-size:10px;letter-spacing:0.1em;color:#888;text-align:center;text-transform:uppercase;margin-top:3px}
+      hr{border:none;border-top:1px solid #ddd;margin:12px 0}
+      hr.dashed{border-top:1px dashed #ccc}
+      .meta{font-size:11px;color:#666;margin-bottom:10px}
+      .meta strong{font-size:13px;color:#222;display:block;letter-spacing:0.08em;margin-bottom:2px}
+      table{width:100%;border-collapse:collapse}
+      th{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;padding-bottom:6px}
+      .grand td{font-size:16px;font-weight:700;padding-top:8px;border-top:2px solid #222}
+      .tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+      .tag{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:3px}
+      .cash{background:#f0f0f0;color:#444}.card{background:#e8f0ff;color:#2244aa}
+      .paid{background:#e8f8ec;color:#2a7a2a}.unpaid{background:#feeaec;color:#c0392b}
+      .footer{text-align:center;margin-top:20px;font-family:Georgia,serif;font-size:12px;color:#888;font-style:italic}
+      @media print{body{max-width:none}}
+    </style></head><body>
+    <h1>ROSEBELLA</h1>
+    <div class="sub">Luxury Flowers &amp; Chocolates · Doha, Qatar</div>
+    <hr/><div class="meta"><strong>${orderId}</strong>${dateStr} &nbsp; ${timeStr}</div>
+    <hr class="dashed"/>
+    <table><thead><tr><th style="text-align:left">Item</th><th></th><th style="text-align:right">Amount</th></tr></thead>
+    <tbody>${itemRows}</tbody></table>
+    <hr class="dashed"/>
+    <table><tbody>
+      <tr><td style="font-size:11px;color:#888;padding:3px 0">Subtotal</td><td></td><td style="text-align:right;font-size:11px;color:#888">QR&nbsp;${subtotal.toFixed(0)}</td></tr>
+      ${discRow}
+      <tr class="grand"><td>TOTAL</td><td></td><td style="text-align:right">QR&nbsp;${total.toFixed(0)}</td></tr>
+    </tbody></table>
+    <div class="tags">
+      <span class="tag ${posOrder.paymentMethod}">${methodLabel}</span>
+      <span class="tag ${posOrder.status}">${statusLabel}</span>
+    </div>
+    <div class="footer">Thank you for choosing Rosebella 🌸</div>
+    </body></html>`);
+    receiptWin.document.close();
+    setTimeout(() => receiptWin.print(), 400);
+  }
+
+  // ── History & Summary ─────────────────────────
+  function openPosHistory()  { renderPosHistory(); document.getElementById('posHistoryBg').classList.add('show'); }
+  function closePosHistory() { document.getElementById('posHistoryBg').classList.remove('show'); }
+
+  function renderPosHistory() {
+    const today    = new Date();
+    const todayPfx = today.toISOString().slice(0,10);
+    const todayOrd = posOrders.filter(o => o.timestamp.startsWith(todayPfx));
+    const paidOrd  = todayOrd.filter(o => o.status === 'paid');
+    const revenue  = paidOrd.reduce((s,o) => s + o.total, 0);
+    const avgOrd   = paidOrd.length > 0 ? revenue / paidOrd.length : 0;
+    const dayLabel = today.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+
+    const summaryHtml = `
+      <div class="pos-summary-card">
+        <div class="pos-sum-title">Today's Summary — ${dayLabel}</div>
+        <div class="pos-sum-stats">
+          <div class="pos-sum-stat"><span class="pos-sum-num"><sub>QR</sub>${revenue.toFixed(0)}</span><span class="pos-sum-lbl">Revenue</span></div>
+          <div class="pos-sum-stat"><span class="pos-sum-num">${todayOrd.length}</span><span class="pos-sum-lbl">Orders</span></div>
+          <div class="pos-sum-stat"><span class="pos-sum-num"><sub>QR</sub>${avgOrd.toFixed(0)}</span><span class="pos-sum-lbl">Avg. Order</span></div>
+        </div>
+      </div>`;
+
+    const ordersHtml = posOrders.length === 0
+      ? '<div class="pos-no-orders">No orders recorded yet</div>'
+      : posOrders.map(o => {
+          const d = new Date(o.timestamp);
+          const t = d.toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+          const items = o.items.map(i => `${i.name} ×${i.qty}`).join(', ');
+          const sc = o.status === 'paid' ? 'pos-tag-paid' : 'pos-tag-unpaid';
+          const sl = o.status === 'paid' ? '✓ Paid' : '○ Unpaid';
+          const dc = o.discount > 0 ? `<span class="pos-tag pos-tag-disc">−QR ${o.discount.toFixed(0)}</span>` : '';
+          return `
+            <div class="pos-ord-row">
+              <div class="pos-ord-hd"><span class="pos-ord-id">${o.id}</span><span class="pos-ord-time">${t}</span></div>
+              <div class="pos-ord-items">${items}</div>
+              <div class="pos-ord-meta">
+                <span class="pos-ord-total">QR ${o.total.toFixed(0)}</span>
+                ${dc}
+                <span class="pos-tag pos-tag-method">${o.paymentMethod === 'cash' ? '💵 Cash' : '💳 Card'}</span>
+                <span class="pos-tag ${sc}">${sl}</span>
+              </div>
+            </div>`;
+        }).join('');
+
+    document.getElementById('posHistoryBody').innerHTML = summaryHtml + ordersHtml;
+  }
+
+  // ── Filter helpers ────────────────────────────
+  function getCardPrice(card) {
+    const el = card.querySelector('.prod-price');
+    if (!el) return 0;
+    const cl = el.cloneNode(true);
+    const cu = cl.querySelector('.currency'); if (cu) cu.remove();
+    return parseFloat(cl.textContent.trim()) || 0;
+  }
+
+  function updatePriceFill() {
+    const minEl = document.getElementById('fbPriceMin');
+    const maxEl = document.getElementById('fbPriceMax');
+    const fill  = document.getElementById('fbPriceFill');
+    if (!minEl || !maxEl || !fill) return;
+    const min = parseFloat(minEl.value), max = parseFloat(maxEl.value);
+    const total = parseFloat(maxEl.max) || 600;
+    fill.style.left  = (min / total * 100) + '%';
+    fill.style.right = (100 - max / total * 100) + '%';
+    const minLbl = document.getElementById('fbPriceMinLabel');
+    const maxLbl = document.getElementById('fbPriceMaxLabel');
+    if (minLbl) minLbl.textContent = `QR ${min}`;
+    if (maxLbl) maxLbl.textContent = max >= total ? `QR ${max}+` : `QR ${max}`;
+  }
+
+  function onPriceSlide() {
+    const minEl = document.getElementById('fbPriceMin');
+    const maxEl = document.getElementById('fbPriceMax');
+    const gap = 25;
+    if (parseFloat(minEl.value) > parseFloat(maxEl.value) - gap) minEl.value = parseFloat(maxEl.value) - gap;
+    if (parseFloat(maxEl.value) < parseFloat(minEl.value) + gap) maxEl.value = parseFloat(minEl.value) + gap;
+    updatePriceFill();
+    applyFilters();
+  }
+
+  function resetPriceFilter() {
+    const maxEl = document.getElementById('fbPriceMax');
+    document.getElementById('fbPriceMin').value = 0;
+    if (maxEl) maxEl.value = maxEl.max;
+    updatePriceFill();
+  }
+
+  function updateFilterChips(sort, priceMin, priceMax, sliderMax) {
+    const chips = [];
+    if (sort !== 'newest') {
+      const lbl = sort === 'price-asc' ? 'Price: Low → High' : 'Price: High → Low';
+      chips.push(`<span class="fb-chip">${lbl}<button class="fb-chip-x" onclick="document.getElementById('sortSelect').value='newest';applyFilters()">✕</button></span>`);
+    }
+    if (priceMin > 0 || priceMax < sliderMax) {
+      const maxLbl = priceMax >= sliderMax ? `${priceMax}+` : priceMax;
+      chips.push(`<span class="fb-chip">QR ${priceMin} – ${maxLbl}<button class="fb-chip-x" onclick="resetPriceFilter();applyFilters()">✕</button></span>`);
+    }
+    const el = document.getElementById('fbChips');
+    if (el) el.innerHTML = chips.join('');
+    const btn = document.getElementById('fbResetBtn');
+    if (btn) btn.style.display = chips.length ? 'inline-block' : 'none';
+  }
+
+  function resetFilters() {
+    document.getElementById('sortSelect').value = 'newest';
+    resetPriceFilter();
+    applyFilters();
+  }
+
+  // ── Product search + filter + sort ────────────
+  function applyFilters() {
+    const raw       = document.getElementById('prodSearch')?.value || '';
+    const query     = raw.trim().toLowerCase();
+    const activeCat = document.querySelector('.cat-tab.active')?.dataset.cat || 'all';
+    const sort      = document.getElementById('sortSelect')?.value || 'newest';
+    const priceMinEl = document.getElementById('fbPriceMin');
+    const priceMaxEl = document.getElementById('fbPriceMax');
+    const sliderMax  = parseFloat(priceMaxEl?.max || 600);
+    const priceMin   = parseFloat(priceMinEl?.value || 0);
+    const priceMax   = parseFloat(priceMaxEl?.value || sliderMax);
+
+    const cards = [...document.querySelectorAll('.prod-card')];
+    const matching = [], nonMatching = [];
+
+    cards.forEach(card => {
+      const name     = (card.querySelector('.prod-body h3')?.textContent || '').trim().toLowerCase();
+      const slug     = (card.dataset.cat || '').toLowerCase();
+      const catLabel = (card.querySelector('.prod-cat')?.textContent || '').trim().toLowerCase();
+      const price    = getCardPrice(card);
+
+      const matchCat   = activeCat === 'all' || slug === activeCat;
+      const matchQuery = !query || name.includes(query) || slug.replace(/-/g,' ').includes(query) || catLabel.includes(query);
+      const matchPrice = price === 0 || (price >= priceMin && price <= priceMax);
+
+      (matchCat && matchQuery && matchPrice ? matching : nonMatching).push(card);
+    });
+
+    // Sort matching cards
+    matching.sort((a, b) => {
+      if (sort === 'price-asc')  return getCardPrice(a) - getCardPrice(b);
+      if (sort === 'price-desc') return getCardPrice(b) - getCardPrice(a);
+      return parseInt(a.dataset.originalIndex || 0) - parseInt(b.dataset.originalIndex || 0);
+    });
+
+    // Reorder DOM: matching → non-matching → empty state
+    const grid  = document.getElementById('productsGrid');
+    const empty = document.getElementById('searchEmptyState');
+    [...matching, ...nonMatching].forEach(c => grid.insertBefore(c, empty));
+
+    // Visibility + animation
+    matching.forEach(c => {
+      c.classList.add('show');
+      c.style.animation = 'none'; c.offsetHeight;
+      c.style.animation = 'cardIn 0.35s ease both';
+    });
+    nonMatching.forEach(c => c.classList.remove('show'));
+
+    const visible = matching.length;
+    if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+
+    // Search UI
+    const clearBtn = document.getElementById('searchClear');
+    if (clearBtn) clearBtn.style.display = query ? 'flex' : 'none';
+    const tabsEl = document.querySelector('.cat-tabs');
+    if (tabsEl) tabsEl.style.opacity = query ? '0.45' : '';
+    const hint = document.getElementById('searchHint');
+    if (hint) hint.textContent = query
+      ? (visible === 0 ? `No results for "${raw.trim()}"` : `${visible} product${visible !== 1 ? 's' : ''} found`)
+      : '';
+
+    // Result count + chips
+    const countEl = document.getElementById('filterResultCount');
+    if (countEl) countEl.textContent = visible > 0 ? `${visible} product${visible !== 1 ? 's' : ''} shown` : '';
+    updateFilterChips(sort, priceMin, priceMax, sliderMax);
+  }
+
+  function clearSearch() {
+    const inp = document.getElementById('prodSearch');
+    if (inp) { inp.value = ''; inp.focus(); }
+    applyFilters();
+  }
+
+  // ── Category tabs ─────────────────────────────
+  document.querySelectorAll('.cat-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      applyFilters();
+    });
+  });
+
+  // ── Init filtering ────────────────────────────
+  (function initProductFiltering() {
+    document.querySelectorAll('.prod-card').forEach((card, i) => {
+      card.dataset.originalIndex = i;
+    });
+    const prices = [...document.querySelectorAll('.prod-card')]
+      .map(getCardPrice).filter(p => p > 0);
+    if (prices.length) {
+      const roundedMax = Math.ceil(Math.max(...prices) / 50) * 50 + 50;
+      const maxEl = document.getElementById('fbPriceMax');
+      const minEl = document.getElementById('fbPriceMin');
+      if (maxEl) { maxEl.max = roundedMax; maxEl.value = roundedMax; }
+      if (minEl) { minEl.max = roundedMax; }
+      updatePriceFill();
+    }
+  })();
+
+  // ── Nav scroll ────────────────────────────────
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',window.scrollY>60));
+
+
+  // ══════════════════════════════════
+  //  IMAGE EDITOR — SIMPLE & WORKING
+  // ══════════════════════════════════
+  (function(){
+    var S = {};
+    function gs(uid){ if(!S[uid]) S[uid]={z:1,x:0,y:0}; return S[uid]; }
+
+    // Apply background-size + background-position on a wrapper div
+    // Much simpler than transform — no pixel sizing issues
+    function apply(uid){
+      var wrap = document.getElementById('apim-'+uid);
+      var lbl  = document.getElementById('appct-'+uid);
+      if(!wrap) return;
+      var s = gs(uid);
+      wrap.style.backgroundSize     = (s.z * 100) + '% auto';
+      wrap.style.backgroundPosition = s.x + '% ' + s.y + '%';
+      if(lbl) lbl.textContent = Math.round(s.z*100) + '%';
+      // Sync main card
+      var card = document.querySelector('.prod-card[data-apid="'+uid+'"]');
+      if(!card) return;
+      var mi = card.querySelector('.prod-img img');
+      var mb = card.querySelector('.prod-img-bg');
+      if(mi){
+        mi.style.objectFit      = 'cover';
+        mi.style.objectPosition = s.x + '% ' + s.y + '%';
+        mi.style.transform      = s.z !== 1 ? 'scale('+s.z+')' : '';
+        mi.style.transformOrigin= s.x+'% '+s.y+'%';
+      }
+      if(mb){
+        mb.style.backgroundSize    = (s.z*100)+'% auto';
+        mb.style.backgroundPosition= s.x+'% '+s.y+'%';
+      }
+    }
+
+    window.edZoom = function(uid, d){
+      var s = gs(uid);
+      s.z = Math.round(Math.min(4, Math.max(0.1, s.z + d)) * 100) / 100;
+      apply(uid);
+    };
+
+    window.edReset = function(uid){
+      S[uid] = {z:1, x:50, y:0};
+      apply(uid);
+    };
+
+    function attach(uid){
+      var wrap = document.getElementById('apim-'+uid);
+      if(!wrap || wrap.dataset.ed) return;
+      wrap.dataset.ed = '1';
+
+      // Start: show full image
+      var s = gs(uid);
+      s.z = 1; s.x = 50; s.y = 0;
+      apply(uid);
+
+      var down=false, ox,oy,sx,sy;
+
+      wrap.addEventListener('mousedown', function(e){
+        if(e.button!==0) return;
+        e.preventDefault(); e.stopPropagation();
+        down=true; ox=e.clientX; oy=e.clientY;
+        var s=gs(uid); sx=s.x; sy=s.y;
+        wrap.style.cursor='grabbing';
+      });
+
+      document.addEventListener('mousemove', function(e){
+        if(!down) return;
+        var s=gs(uid);
+        var cw=wrap.offsetWidth||140, ch=wrap.offsetHeight||140;
+        // Moving mouse left → x increases (reveals right of image)
+        s.x = Math.max(0, Math.min(100, sx - (e.clientX-ox)/cw * 100 / s.z));
+        s.y = Math.max(0, Math.min(100, sy - (e.clientY-oy)/ch * 100 / s.z));
+        apply(uid);
+      });
+
+      document.addEventListener('mouseup', function(){
+        if(down){ down=false; wrap.style.cursor='grab'; }
+      });
+
+      // Touch
+      wrap.addEventListener('touchstart',function(e){
+        var t=e.touches[0]; down=true; ox=t.clientX; oy=t.clientY;
+        var s=gs(uid); sx=s.x; sy=s.y;
+      },{passive:true});
+      wrap.addEventListener('touchmove',function(e){
+        if(!down) return;
+        var t=e.touches[0]; var s=gs(uid);
+        var cw=wrap.offsetWidth||140, ch=wrap.offsetHeight||140;
+        s.x=Math.max(0,Math.min(100, sx-(t.clientX-ox)/cw*100/s.z));
+        s.y=Math.max(0,Math.min(100, sy-(t.clientY-oy)/ch*100/s.z));
+        apply(uid);
+      },{passive:true});
+      wrap.addEventListener('touchend',function(){ down=false; });
+
+      // Scroll wheel = scroll image UP/DOWN
+      wrap.addEventListener('wheel', function(e){
+        e.preventDefault();
+        var s=gs(uid);
+        var step = (e.deltaY > 0 ? 3 : -3); // 3% per scroll tick
+        s.y = Math.max(0, Math.min(100, s.y + step));
+        apply(uid);
+      },{passive:false});
+
+      wrap.style.cursor = 'grab';
+    }
+
+    // Hook into selectCol — runs AFTER it's defined since we're in same script
+    var _orig = selectCol;
+    selectCol = function(slug, name){
+      _orig(slug, name);
+      setTimeout(function(){
+        document.querySelectorAll('.ap-editor-wrap').forEach(function(w){
+          attach(w.id.replace('apim-',''));
+        });
+      }, 200);
+    };
+
+  })();
+
+  // ── Scroll reveal ─────────────────────────────
+  // Reveal observer + immediate fallback
+  document.querySelectorAll('.reveal').forEach(el => {
+    new IntersectionObserver(entries=>{
+      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+    },{threshold:0.05}).observe(el);
+  });
+  // Fallback: force-show all reveals after 800ms
+  setTimeout(() => {
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
+  }, 800);
+
+</script>
+</body>
+</html>
