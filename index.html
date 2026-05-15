@@ -2354,7 +2354,7 @@
     #dtCustomDateInput { width:100%; font-family:var(--sans); font-size:13px; color:var(--charcoal); background:#f9f7f3; border:1.5px solid #e0dbd0; padding:10px 14px; outline:none; margin-bottom:16px; transition:border-color 0.2s; }
     #dtCustomDateInput:focus { border-color:var(--gold); }
     .dt-slots { border:1px solid #e0dbd0; display:grid; grid-template-columns:1fr 1fr; }
-    .dt-slot { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #e0dbd0; border-right:1px solid #e0dbd0; cursor:pointer; transition:background 0.2s; background:#fff; }
+    .dt-slot { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #e0dbd0; border-right:1px solid #e0dbd0; cursor:pointer; transition:background 0.2s; background:#fff; width:100%; text-align:left; font-size:inherit; font-family:inherit; outline:none; }
     .dt-slot:nth-child(even) { border-right:none; }
     .dt-slot.full-width { grid-column:1/-1; border-right:none; }
     .dt-slot:hover:not(.unavail) { background:rgba(198,146,42,0.04); }
@@ -7061,26 +7061,51 @@
   }
 
   function renderDtSlots(dateStr) {
-    const slots = getSlotsForDate(dateStr);
-    document.getElementById('dtSlots').innerHTML = slots.map(s => {
+    const slots       = getSlotsForDate(dateStr);
+    const availSlots  = slots.filter(s => s.availableNow);
+    const container   = document.getElementById('dtSlots');
+
+    // Auto-select first available slot if nothing selected yet
+    if (availSlots.length && !dtSelectedSlotId) {
+      dtSelectedSlotId = availSlots[0].id;
+      dtSlotFee        = availSlots[0].fee;
+    }
+
+    if (!slots.length) {
+      container.innerHTML = `<div style="grid-column:1/-1;padding:20px;text-align:center;font-family:var(--serif);font-size:14px;font-style:italic;color:var(--taupe);">No slots available for this date.</div>`;
+      return;
+    }
+
+    container.innerHTML = slots.map(s => {
       const avail  = s.availableNow;
       const active = dtSelectedSlotId === s.id;
-      const feeStr = !avail ? `<span class="dt-slot-status na">Not Available</span>`
-        : s.fee === 0 ? `<span class="dt-slot-status free">Free</span>`
-        : `<span class="dt-slot-status fee">QAR ${s.fee}</span>`;
-      const cls = `dt-slot${s.fullWidth ? ' full-width' : ''}${!avail ? ' unavail' : ''}${active ? ' active' : ''}`;
-      const click = avail ? `onclick="dtSelectSlot('${s.id}',${s.fee})"` : '';
-      return `<div class="${cls}" ${click}>
-        <span class="dt-slot-label">${s.label}</span>
-        ${feeStr}
-      </div>`;
+      const feeStr = !avail
+        ? `<span class="dt-slot-status na">Not Available</span>`
+        : s.fee === 0
+          ? `<span class="dt-slot-status free">Free</span>`
+          : `<span class="dt-slot-status fee">QAR ${s.fee}</span>`;
+      const cls = [
+        'dt-slot',
+        s.fullWidth ? 'full-width' : '',
+        !avail      ? 'unavail'    : '',
+        active      ? 'active'     : ''
+      ].filter(Boolean).join(' ');
+
+      // Use <button> for reliable click on all browsers/devices
+      if (!avail) {
+        return `<div class="${cls}">
+          <span class="dt-slot-label">${s.label}</span>${feeStr}
+        </div>`;
+      }
+      return `<button type="button" class="${cls}" onclick="dtSelectSlot('${s.id}',${s.fee})">
+        <span class="dt-slot-label">${s.label}</span>${feeStr}
+      </button>`;
     }).join('');
   }
 
   function dtSelectSlot(id, fee) {
     dtSelectedSlotId = id;
     dtSlotFee        = fee;
-    // Re-render to update active state
     const dateStr = dtSelectedDate === 'today' ? toDateStr(new Date())
       : dtSelectedDate === 'tomorrow' ? (() => { const d=new Date(); d.setDate(d.getDate()+1); return toDateStr(d); })()
       : dtSelectedDate;
@@ -7088,28 +7113,53 @@
   }
 
   function confirmDtModal() {
-    if (!dtSelectedDate || !dtSelectedSlotId) return;
+    // Validate date selected
+    if (!dtSelectedDate) {
+      dtShowModalError('Please select a delivery date first.');
+      return;
+    }
+    // Validate slot selected
+    if (!dtSelectedSlotId) {
+      dtShowModalError('Please select a time slot.');
+      return;
+    }
+
     // Resolve actual date string
     const actualDate = dtSelectedDate === 'today' ? toDateStr(new Date())
       : dtSelectedDate === 'tomorrow' ? (() => { const d=new Date(); d.setDate(d.getDate()+1); return toDateStr(d); })()
       : dtSelectedDate;
-    const config  = loadSlotConfig();
-    const slot    = config.find(s => s.id === dtSelectedSlotId);
-    const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const [y,m,d] = actualDate.split('-').map(Number);
-    const dateLabel = `${d} ${months[m-1]} ${y}`;
-    const feeLabel  = dtSlotFee > 0 ? ` · +QAR ${dtSlotFee}` : '';
+
+    const config     = loadSlotConfig();
+    const slot       = config.find(s => s.id === dtSelectedSlotId);
+    const months     = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const [y,m,d]    = actualDate.split('-').map(Number);
+    const dateLabel  = `${d} ${months[m-1]} ${y}`;
+    const feeLabel   = dtSlotFee > 0 ? ` · +QAR ${dtSlotFee}` : '';
+
     // Update trigger display
     document.getElementById('coDtTriggerText').textContent = `${dateLabel} · ${slot ? slot.label : ''}${feeLabel}`;
     document.getElementById('coDtTriggerSub').textContent  = 'Tap to change';
     document.getElementById('coDtTrigger').classList.add('selected');
+
     // Save to delivery state
-    coDeliveryType    = dtSelectedSlotId === 's_express' ? 'express' : 'scheduled';
-    coDeliverySlotId  = dtSelectedSlotId;
-    coDeliveryDate    = actualDate;
-    coExpressFee      = dtSlotFee;
+    coDeliveryType   = dtSelectedSlotId === 's_express' ? 'express' : 'scheduled';
+    coDeliverySlotId = dtSelectedSlotId;
+    coDeliveryDate   = actualDate;
+    coExpressFee     = dtSlotFee;
     coRenderSummary();
     closeDtModal();
+  }
+
+  function dtShowModalError(msg) {
+    let el = document.getElementById('dtModalError');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'dtModalError';
+      el.style.cssText = 'font-family:var(--sans);font-size:11px;color:#e05060;font-weight:600;letter-spacing:0.05em;padding:8px 0 0;';
+      document.querySelector('.dt-footer').prepend(el);
+    }
+    el.textContent = '⚠ ' + msg;
+    setTimeout(() => { if (el) el.textContent = ''; }, 3000);
   }
 
   // ══════════════════════════════════════════════
