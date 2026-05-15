@@ -5378,6 +5378,174 @@
       #posTicket { width:100%; }
       #posProductGrid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
     }
+
+    /* ── POS Nav Tabs ── */
+    .pos-nav { display:flex; gap:2px; padding:0 20px; background:#0f0e09; border-bottom:1px solid rgba(198,146,42,0.15); flex-shrink:0; overflow-x:auto; }
+    .pos-nav::-webkit-scrollbar { height:2px; }
+    .pos-nav-tab { font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:none; border:none; border-bottom:2px solid transparent; color:rgba(255,255,255,0.35); padding:11px 16px; cursor:pointer; white-space:nowrap; transition:color 0.2s, border-color 0.2s; }
+    .pos-nav-tab:hover { color:rgba(255,255,255,0.7); }
+    .pos-nav-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+    .pos-panel { display:none; flex:1; overflow:hidden; }
+    .pos-panel.active { display:flex; }
+    #posPanel-register { flex-direction:row; }
+
+    /* ── Module shared ── */
+    .pos-mod-wrap { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:16px; }
+    .pos-mod-wrap::-webkit-scrollbar { width:3px; }
+    .pos-mod-wrap::-webkit-scrollbar-thumb { background:rgba(198,146,42,0.3); }
+    .pos-mod-hd { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .pos-mod-title { font-family:var(--serif); font-size:20px; color:var(--white); }
+    .pos-mod-title em { color:var(--gold); font-style:italic; }
+    .pos-mod-btn { font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:var(--gold); color:#fff; border:none; padding:9px 16px; cursor:pointer; transition:background 0.2s; }
+    .pos-mod-btn:hover { background:var(--gold-light); }
+    .pos-mod-btn-ghost { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.12); }
+    .pos-mod-btn-ghost:hover { background:rgba(255,255,255,0.12); color:#fff; }
+    .pos-mod-search { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--white); font-family:var(--sans); font-size:12px; padding:9px 14px; outline:none; flex:1; transition:border-color 0.2s; }
+    .pos-mod-search::placeholder { color:rgba(255,255,255,0.2); }
+    .pos-mod-search:focus { border-color:var(--gold); }
+    .pos-mod-select { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--white); font-family:var(--sans); font-size:11px; padding:9px 10px; outline:none; cursor:pointer; color-scheme:dark; }
+    .pos-mod-select option { background:#18160f; }
+    .pos-filter-row { display:flex; gap:8px; align-items:center; }
+
+    /* ── Inventory ── */
+    .pos-inv-table { width:100%; border-collapse:collapse; font-family:var(--sans); font-size:12px; }
+    .pos-inv-table th { text-align:left; font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:8px 12px; border-bottom:1px solid rgba(198,146,42,0.15); }
+    .pos-inv-table td { padding:11px 12px; border-bottom:1px solid rgba(255,255,255,0.05); color:rgba(255,255,255,0.75); vertical-align:middle; }
+    .pos-inv-table tr:hover td { background:rgba(198,146,42,0.04); }
+    .pos-stock-ok   { color:#4caf7d; font-weight:700; }
+    .pos-stock-low  { color:#e8c870; font-weight:700; }
+    .pos-stock-crit { color:#e05060; font-weight:700; }
+    .pos-inv-badge { font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:2px 7px; border-radius:3px; }
+    .pos-inv-badge-ok   { background:rgba(76,175,125,0.15); color:#4caf7d; }
+    .pos-inv-badge-low  { background:rgba(232,200,112,0.15); color:#e8c870; }
+    .pos-inv-badge-crit { background:rgba(224,80,96,0.15); color:#e05060; }
+    .pos-inv-actions { display:flex; gap:6px; }
+    .pos-inv-btn { font-size:10px; background:none; border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.4); padding:4px 9px; cursor:pointer; transition:all 0.2s; }
+    .pos-inv-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .pos-inv-btn-del:hover { border-color:#e05060; color:#e05060; }
+    .pos-inv-inp { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--gold); font-family:var(--sans); font-size:12px; font-weight:700; padding:4px 8px; width:70px; outline:none; text-align:center; }
+    .pos-inv-inp:focus { border-color:var(--gold); }
+
+    /* ── Orders / Delivery ── */
+    .pos-ord-filters { display:flex; gap:6px; flex-wrap:wrap; }
+    .pos-filter-btn { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.35); padding:6px 12px; cursor:pointer; transition:all 0.2s; }
+    .pos-filter-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .pos-filter-btn.active { background:var(--gold); border-color:var(--gold); color:#fff; }
+    .pos-del-card { background:#1e1a10; border:1px solid rgba(198,146,42,0.1); border-radius:10px; padding:16px 18px; margin-bottom:10px; }
+    .pos-del-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; gap:12px; }
+    .pos-del-id { font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.14em; color:var(--gold); }
+    .pos-del-time { font-family:var(--sans); font-size:10px; color:rgba(255,255,255,0.3); }
+    .pos-del-items { font-family:var(--serif); font-size:12px; color:rgba(255,255,255,0.4); font-style:italic; margin-bottom:8px; line-height:1.5; }
+    .pos-del-recipient { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:8px; }
+    .pos-del-footer { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .pos-status-pipeline { display:flex; gap:4px; }
+    .pos-status-btn { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:5px 10px; border:1px solid rgba(255,255,255,0.12); background:none; color:rgba(255,255,255,0.3); cursor:pointer; transition:all 0.2s; }
+    .pos-status-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .pos-status-btn.status-pending   { background:rgba(255,193,7,0.12); border-color:#ffc107; color:#ffc107; }
+    .pos-status-btn.status-preparing { background:rgba(33,150,243,0.12); border-color:#2196f3; color:#2196f3; }
+    .pos-status-btn.status-out       { background:rgba(156,39,176,0.12); border-color:#9c27b0; color:#9c27b0; }
+    .pos-status-btn.status-delivered { background:rgba(76,175,125,0.12); border-color:#4caf7d; color:#4caf7d; }
+    .pos-gps-btn { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:5px 10px; background:none; border:1px solid rgba(198,146,42,0.3); color:rgba(198,146,42,0.7); cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
+    .pos-gps-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .pos-source-tag { font-family:var(--sans); font-size:8px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:3px 7px; border-radius:3px; }
+    .pos-source-online { background:rgba(33,150,243,0.15); color:#64b5f6; }
+    .pos-source-pos    { background:rgba(198,146,42,0.15); color:var(--gold); }
+
+    /* ── CRM ── */
+    .pos-crm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+    .pos-crm-card { background:#1e1a10; border:1px solid rgba(198,146,42,0.1); border-radius:10px; padding:16px 18px; cursor:pointer; transition:border-color 0.2s; }
+    .pos-crm-card:hover { border-color:var(--gold); }
+    .pos-crm-name { font-family:var(--serif); font-size:16px; color:var(--white); margin-bottom:4px; }
+    .pos-crm-phone { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px; }
+    .pos-crm-stats { display:flex; gap:16px; }
+    .pos-crm-stat { text-align:center; }
+    .pos-crm-stat-num { font-family:var(--sans); font-size:16px; font-weight:700; color:var(--gold); display:block; }
+    .pos-crm-stat-lbl { font-family:var(--sans); font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.25); }
+    .pos-crm-dates { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
+    .pos-crm-date-tag { font-family:var(--sans); font-size:9px; font-weight:600; padding:3px 8px; background:rgba(198,146,42,0.1); color:rgba(198,146,42,0.7); border-radius:3px; }
+    #posCrmModalBg { display:none; position:fixed; inset:0; z-index:99997; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+    #posCrmModalBg.show { display:flex; }
+    #posCrmModal { background:#18160f; border:1px solid rgba(198,146,42,0.2); border-radius:14px; width:580px; max-width:96vw; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; }
+    .pos-crm-modal-hd { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid rgba(198,146,42,0.15); background:#0f0e09; flex-shrink:0; }
+    .pos-crm-modal-hd-title { font-family:var(--serif); font-size:18px; color:var(--white); }
+    .pos-crm-modal-body { flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:16px; }
+    .pos-crm-modal-body::-webkit-scrollbar { width:3px; }
+    .pos-crm-sec-title { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+    .pos-crm-field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .pos-crm-field { display:flex; flex-direction:column; gap:5px; }
+    .pos-crm-field label { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); }
+    .pos-crm-field input, .pos-crm-field textarea, .pos-crm-field select { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--white); font-family:var(--sans); font-size:12px; padding:9px 12px; outline:none; transition:border-color 0.2s; resize:none; color-scheme:dark; }
+    .pos-crm-field input:focus, .pos-crm-field textarea:focus { border-color:var(--gold); }
+    .pos-crm-dates-list { display:flex; flex-direction:column; gap:8px; }
+    .pos-crm-date-row { display:flex; align-items:center; gap:8px; }
+    .pos-crm-del-date { background:none; border:none; color:rgba(255,255,255,0.25); cursor:pointer; font-size:14px; transition:color 0.2s; }
+    .pos-crm-del-date:hover { color:#e05060; }
+    .pos-crm-history-item { background:#121007; border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:10px 12px; }
+    .pos-crm-hist-hd { display:flex; justify-content:space-between; margin-bottom:4px; }
+    .pos-crm-hist-id { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; color:var(--gold); }
+    .pos-crm-hist-date { font-family:var(--sans); font-size:9px; color:rgba(255,255,255,0.3); }
+    .pos-crm-hist-items { font-family:var(--serif); font-size:12px; color:rgba(255,255,255,0.5); font-style:italic; }
+
+    /* ── Analytics ── */
+    .pos-analytics-layout { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .pos-kpi { background:#1e1a10; border:1px solid rgba(198,146,42,0.12); border-radius:10px; padding:16px 18px; }
+    .pos-kpi-lbl { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:6px; }
+    .pos-kpi-val { font-family:var(--serif); font-size:30px; font-weight:300; color:var(--white); line-height:1; }
+    .pos-kpi-val sup { font-family:var(--sans); font-size:11px; font-weight:700; color:var(--gold); }
+    .pos-kpi-sub { font-family:var(--sans); font-size:10px; color:rgba(255,255,255,0.25); margin-top:4px; }
+    .pos-chart-card { background:#1e1a10; border:1px solid rgba(198,146,42,0.12); border-radius:10px; padding:16px 18px; }
+    .pos-chart-title { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+    .pos-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .pos-bar-name { font-family:var(--serif); font-size:12px; color:rgba(255,255,255,0.65); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pos-bar-track { flex:1; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+    .pos-bar-fill { height:100%; background:var(--gold); border-radius:3px; transition:width 0.6s ease; }
+    .pos-bar-val { font-family:var(--sans); font-size:11px; font-weight:700; color:var(--gold); width:60px; text-align:right; flex-shrink:0; }
+    .pos-trend-chart { display:flex; align-items:flex-end; gap:6px; height:80px; padding-top:8px; }
+    .pos-trend-col { display:flex; flex-direction:column; align-items:center; flex:1; height:100%; justify-content:flex-end; gap:4px; }
+    .pos-trend-bar { width:100%; background:rgba(198,146,42,0.3); border-radius:2px 2px 0 0; transition:height 0.6s ease; min-height:2px; }
+    .pos-trend-bar.today { background:var(--gold); }
+    .pos-trend-lbl { font-family:var(--sans); font-size:8px; color:rgba(255,255,255,0.25); text-align:center; }
+    .pos-pie-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .pos-pie-legend { display:flex; flex-direction:column; gap:8px; flex:1; }
+    .pos-pie-leg-item { display:flex; align-items:center; gap:8px; }
+    .pos-pie-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .pos-pie-leg-name { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.55); }
+    .pos-pie-leg-val { font-family:var(--sans); font-size:11px; font-weight:700; color:var(--white); margin-left:auto; }
+    .pos-peak-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .pos-peak-lbl { font-family:var(--sans); font-size:10px; color:rgba(255,255,255,0.4); width:60px; flex-shrink:0; }
+    .pos-peak-bar-track { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; }
+    .pos-peak-bar-fill { height:100%; background:rgba(198,146,42,0.5); border-radius:4px; transition:width 0.6s; }
+    .pos-analytics-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .pos-analytics-row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    @media (max-width:1100px) { .pos-analytics-layout { grid-template-columns:repeat(2,1fr); } .pos-analytics-row2 { grid-template-columns:1fr; } }
+    @media (max-width:768px)  { .pos-analytics-layout { grid-template-columns:1fr 1fr; } .pos-analytics-row3 { grid-template-columns:1fr 1fr; } }
+
+    /* ── Wire Services ── */
+    .pos-wire-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .pos-wire-integ { background:#1e1a10; border:1px solid rgba(198,146,42,0.12); border-radius:10px; padding:20px; text-align:center; }
+    .pos-wire-logo { font-family:var(--serif); font-size:22px; color:var(--white); margin-bottom:6px; }
+    .pos-wire-status { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:3px 10px; border-radius:10px; display:inline-block; margin-bottom:12px; }
+    .pos-wire-status-active { background:rgba(76,175,125,0.15); color:#4caf7d; }
+    .pos-wire-status-inactive { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.3); }
+    .pos-wire-connect { font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:8px 16px; background:none; border:1px solid rgba(198,146,42,0.3); color:rgba(198,146,42,0.7); cursor:pointer; transition:all 0.2s; }
+    .pos-wire-connect:hover { border-color:var(--gold); color:var(--gold); }
+    .pos-wire-disconnect { color:rgba(224,80,96,0.6); border-color:rgba(224,80,96,0.3); }
+    .pos-wire-disconnect:hover { border-color:#e05060; color:#e05060; }
+    .pos-wire-orders-wrap { display:flex; flex-direction:column; gap:10px; }
+    .pos-wire-order { background:#1e1a10; border:1px solid rgba(198,146,42,0.1); border-radius:8px; padding:14px 16px; }
+    .pos-wire-ord-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .pos-wire-ord-id { font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.12em; color:var(--gold); }
+    .pos-wire-ord-src { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:2px 7px; background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.4); border-radius:3px; }
+    .pos-wire-ord-details { font-family:var(--serif); font-size:12px; color:rgba(255,255,255,0.5); font-style:italic; margin-bottom:6px; line-height:1.5; }
+    .pos-wire-ord-footer { display:flex; align-items:center; gap:8px; }
+    .pos-wire-add-form { background:#1e1a10; border:1px solid rgba(198,146,42,0.15); border-radius:10px; padding:20px; }
+    .pos-wire-form-title { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+    .pos-wire-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+    .pos-wire-field { display:flex; flex-direction:column; gap:5px; }
+    .pos-wire-field label { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); }
+    .pos-wire-field input, .pos-wire-field select, .pos-wire-field textarea { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:var(--white); font-family:var(--sans); font-size:12px; padding:9px 12px; outline:none; transition:border-color 0.2s; resize:none; color-scheme:dark; }
+    .pos-wire-field input:focus, .pos-wire-field textarea:focus { border-color:var(--gold); }
+    @media (max-width:768px) { .pos-wire-grid { grid-template-columns:1fr; } .pos-wire-form-grid { grid-template-columns:1fr; } }
   </style>
 
   <!-- HTML -->
@@ -5450,72 +5618,158 @@
   <!-- POS Overlay -->
   <div id="posOverlay">
     <div id="posHeader">
-      <div class="pos-logo">ROSE<em>BELLA</em> &nbsp;<span class="pos-mode-badge">POS</span></div>
-      <input type="text" id="posSearch" placeholder="🔍  Search products by name or category…" oninput="posFilterProducts(this.value)" />
-      <div class="pos-hdr-btns">
-        <button class="ab-btn ab-btn-dark" onclick="openPosHistory()">📋 History</button>
-        <button class="ab-btn ab-btn-red"  onclick="closePOS()">✕ Exit POS</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid rgba(198,146,42,0.12);flex-shrink:0;">
+        <div class="pos-logo">ROSE<em>BELLA</em> &nbsp;<span class="pos-mode-badge">POS</span></div>
+        <button class="ab-btn ab-btn-red" onclick="closePOS()">✕ Exit POS</button>
       </div>
+      <nav class="pos-nav">
+        <button class="pos-nav-tab active" data-panel="register" onclick="posNavTo('register',this)">🏪 Register</button>
+        <button class="pos-nav-tab" data-panel="inventory"  onclick="posNavTo('inventory',this)">📦 Inventory</button>
+        <button class="pos-nav-tab" data-panel="orders"     onclick="posNavTo('orders',this)">📋 Orders & Delivery</button>
+        <button class="pos-nav-tab" data-panel="crm"        onclick="posNavTo('crm',this)">👥 CRM</button>
+        <button class="pos-nav-tab" data-panel="analytics"  onclick="posNavTo('analytics',this)">📊 Analytics</button>
+        <button class="pos-nav-tab" data-panel="wire"       onclick="posNavTo('wire',this)">🌐 Wire Services</button>
+      </nav>
     </div>
     <div id="posBody">
-      <!-- Product browser -->
-      <div id="posProducts">
-        <div id="posProductGrid"></div>
+      <div id="posPanel-register" class="pos-panel active">
+        <div id="posProducts">
+          <div style="padding:10px 14px 0;"><input type="text" id="posSearch" class="pos-mod-search" style="width:100%;box-sizing:border-box;" placeholder="🔍  Search products by name or category…" oninput="posFilterProducts(this.value)" /></div>
+          <div id="posProductGrid" style="padding:10px 14px;"></div>
+        </div>
+        <div id="posTicket">
+          <div class="pos-ticket-hd">
+            <span class="pos-ticket-title">Current <em>Order</em></span>
+            <span class="pos-item-badge" id="posItemBadge">0 items</span>
+          </div>
+          <div id="posOrderItems">
+            <div class="pos-order-empty"><span>🛒</span><p>Tap a product to add it</p></div>
+          </div>
+          <div id="posOrderFooter">
+            <div class="pos-totals">
+              <div class="pos-tot-row" id="posSubRow"><span class="pos-tot-lbl">Subtotal</span><span class="pos-tot-val" id="posSubVal">QR 0</span></div>
+              <div class="pos-tot-row" id="posDiscRow" style="display:none;"><span class="pos-tot-lbl">Discount</span><span class="pos-tot-val pos-disc-val" id="posDiscAmt">−QR 0</span></div>
+              <div class="pos-grand-row"><span class="pos-grand-lbl">Total</span><span class="pos-grand-val"><sup>QR</sup><span id="posTotalVal">0</span></span></div>
+            </div>
+            <div class="pos-disc-row">
+              <span class="pos-disc-lbl">Discount</span>
+              <select id="posDiscType" class="pos-disc-sel" onchange="posDiscTypeChange(this.value)">
+                <option value="none">None</option><option value="percent">%</option><option value="fixed">QR</option>
+              </select>
+              <input type="number" id="posDiscVal" class="pos-disc-inp" min="0" value="0" placeholder="0" disabled oninput="posUpdateDiscount()" />
+            </div>
+            <div class="pos-toggle-row">
+              <button class="pos-tgl pay-active" data-method="cash" onclick="posSetPayment('cash')">💵 Cash</button>
+              <button class="pos-tgl" data-method="card" onclick="posSetPayment('card')">💳 Card</button>
+            </div>
+            <div class="pos-toggle-row">
+              <button class="pos-tgl paid-active" data-status="paid" onclick="posSetStatus('paid')">✓ Paid</button>
+              <button class="pos-tgl" data-status="unpaid" onclick="posSetStatus('unpaid')">○ Unpaid</button>
+            </div>
+            <div class="pos-actions">
+              <button class="pos-act pos-act-print"    onclick="posPrintReceipt()">🖨 Print</button>
+              <button class="pos-act pos-act-complete" onclick="posCompleteOrder()">✓ Complete Order</button>
+              <button class="pos-act pos-act-clear"    onclick="posClearOrder(false)">🗑</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- Order ticket -->
-      <div id="posTicket">
-        <div class="pos-ticket-hd">
-          <span class="pos-ticket-title">Current <em>Order</em></span>
-          <span class="pos-item-badge" id="posItemBadge">0 items</span>
+      <div id="posPanel-inventory" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd"><div class="pos-mod-title">📦 <em>Inventory</em> Management</div><button class="pos-mod-btn" onclick="posInvAdd()">+ Add Item</button></div>
+          <div class="pos-filter-row">
+            <input id="posInvSearch" class="pos-mod-search" placeholder="🔍 Search inventory…" oninput="posInvRender()" />
+            <select id="posInvTypeFilter" class="pos-mod-select" onchange="posInvRender()"><option value="">All Types</option><option>Roses</option><option>Peonies</option><option>Tulips</option><option>Orchids</option><option>Lilies</option><option>Chocolates</option><option>Accessories</option><option>Packaging</option></select>
+            <select id="posInvStockFilter" class="pos-mod-select" onchange="posInvRender()"><option value="">All Stock</option><option value="crit">Critical</option><option value="low">Low</option><option value="ok">OK</option></select>
+          </div>
+          <div style="overflow-x:auto;"><table class="pos-inv-table"><thead><tr><th>Item</th><th>Type</th><th>In Stock</th><th>Unit</th><th>Reorder At</th><th>Season</th><th>Status</th><th>Actions</th></tr></thead><tbody id="posInvBody"></tbody></table></div>
         </div>
-        <div id="posOrderItems">
-          <div class="pos-order-empty">
-            <span>🛒</span><p>Tap a product to add it</p>
+      </div>
+      <div id="posPanel-orders" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd"><div class="pos-mod-title">📋 Orders &amp; <em>Delivery</em></div><div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.3);" id="posOrdCount"></div></div>
+          <div class="pos-filter-row" style="flex-wrap:wrap;">
+            <div class="pos-ord-filters" id="posOrdFilters">
+              <button class="pos-filter-btn active" onclick="posOrdSetFilter('all',this)">All</button>
+              <button class="pos-filter-btn" onclick="posOrdSetFilter('pending',this)">Pending</button>
+              <button class="pos-filter-btn" onclick="posOrdSetFilter('preparing',this)">Preparing</button>
+              <button class="pos-filter-btn" onclick="posOrdSetFilter('out',this)">Out for Delivery</button>
+              <button class="pos-filter-btn" onclick="posOrdSetFilter('delivered',this)">Delivered</button>
+            </div>
+            <input id="posOrdSearch" class="pos-mod-search" style="max-width:220px;" placeholder="🔍 Search orders…" oninput="posOrdRender()" />
+          </div>
+          <div id="posOrdList"></div>
+        </div>
+      </div>
+      <div id="posPanel-crm" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd"><div class="pos-mod-title">👥 Customer <em>Relationships</em></div><button class="pos-mod-btn" onclick="posCrmAddNew()">+ Add Customer</button></div>
+          <div class="pos-filter-row"><input id="posCrmSearch" class="pos-mod-search" placeholder="🔍 Search by name, phone, or email…" oninput="posCrmRender()" /></div>
+          <div id="posCrmGrid" class="pos-crm-grid"></div>
+        </div>
+      </div>
+      <div id="posPanel-analytics" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd"><div class="pos-mod-title">📊 <em>Analytics</em> &amp; Reports</div><select id="posAnalyticsPeriod" class="pos-mod-select" onchange="posAnalyticsRender()"><option value="today">Today</option><option value="7">Last 7 Days</option><option value="30">Last 30 Days</option><option value="all">All Time</option></select></div>
+          <div id="posAnalyticsContent"></div>
+        </div>
+      </div>
+      <div id="posPanel-wire" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd"><div class="pos-mod-title">🌐 Wire <em>Services</em></div></div>
+          <div class="pos-wire-grid" id="posWireIntegrations"></div>
+          <div class="pos-wire-add-form">
+            <div class="pos-wire-form-title">Log Wire Order</div>
+            <div class="pos-wire-form-grid">
+              <div class="pos-wire-field"><label>Wire Service</label><select id="wireService"><option>FTD</option><option>Teleflora</option><option>1-800-Flowers</option><option>BloomNation</option></select></div>
+              <div class="pos-wire-field"><label>Order ID</label><input id="wireOrderId" placeholder="e.g. FTD-20241215-001" /></div>
+              <div class="pos-wire-field"><label>Arrangement</label><input id="wireArrangement" placeholder="e.g. Premier Rose Bouquet" /></div>
+              <div class="pos-wire-field"><label>Total (QR)</label><input id="wireTotal" type="number" min="0" placeholder="0" /></div>
+              <div class="pos-wire-field"><label>Recipient Name</label><input id="wireRecipient" placeholder="Full name" /></div>
+              <div class="pos-wire-field"><label>Delivery Date</label><input id="wireDelivDate" type="date" /></div>
+            </div>
+            <div class="pos-wire-field" style="margin-bottom:12px;"><label>Delivery Notes</label><textarea id="wireNotes" rows="2" placeholder="Special instructions…"></textarea></div>
+            <button class="pos-mod-btn" onclick="posWireSubmit()">+ Log Order</button>
+          </div>
+          <div><div class="pos-chart-title" style="margin-bottom:10px;">Wire Orders</div><div id="posWireList" class="pos-wire-orders-wrap"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRM Detail Modal -->
+  <div id="posCrmModalBg">
+    <div id="posCrmModal">
+      <div class="pos-crm-modal-hd">
+        <span class="pos-crm-modal-hd-title" id="posCrmModalTitle">Customer Profile</span>
+        <div style="display:flex;gap:8px;"><button class="pos-mod-btn" onclick="posCrmSave()">Save</button><button class="pos-hst-close" onclick="posCrmCloseModal()">✕</button></div>
+      </div>
+      <div class="pos-crm-modal-body">
+        <input type="hidden" id="crmEditId" />
+        <div class="pos-crm-section">
+          <div class="pos-crm-sec-title">Contact Details</div>
+          <div class="pos-crm-field-row">
+            <div class="pos-crm-field"><label>Full Name</label><input id="crmName" placeholder="Full name" /></div>
+            <div class="pos-crm-field"><label>Phone</label><input id="crmPhone" placeholder="+974 XXXX XXXX" /></div>
+          </div>
+          <div class="pos-crm-field-row" style="margin-top:10px;">
+            <div class="pos-crm-field"><label>Email</label><input id="crmEmail" type="email" placeholder="email@example.com" /></div>
+            <div class="pos-crm-field"><label>Preferred Contact</label><select id="crmContact"><option>WhatsApp</option><option>Phone Call</option><option>Email</option></select></div>
           </div>
         </div>
-        <div id="posOrderFooter">
-          <!-- Totals -->
-          <div class="pos-totals">
-            <div class="pos-tot-row" id="posSubRow">
-              <span class="pos-tot-lbl">Subtotal</span>
-              <span class="pos-tot-val" id="posSubVal">QR 0</span>
-            </div>
-            <div class="pos-tot-row" id="posDiscRow" style="display:none;">
-              <span class="pos-tot-lbl">Discount</span>
-              <span class="pos-tot-val pos-disc-val" id="posDiscAmt">−QR 0</span>
-            </div>
-            <div class="pos-grand-row">
-              <span class="pos-grand-lbl">Total</span>
-              <span class="pos-grand-val"><sup>QR</sup><span id="posTotalVal">0</span></span>
-            </div>
-          </div>
-          <!-- Discount -->
-          <div class="pos-disc-row">
-            <span class="pos-disc-lbl">Discount</span>
-            <select id="posDiscType" class="pos-disc-sel" onchange="posDiscTypeChange(this.value)">
-              <option value="none">None</option>
-              <option value="percent">%</option>
-              <option value="fixed">QR</option>
-            </select>
-            <input type="number" id="posDiscVal" class="pos-disc-inp" min="0" value="0"
-              placeholder="0" disabled oninput="posUpdateDiscount()" />
-          </div>
-          <!-- Payment method -->
-          <div class="pos-toggle-row">
-            <button class="pos-tgl pay-active" data-method="cash" onclick="posSetPayment('cash')">💵 Cash</button>
-            <button class="pos-tgl" data-method="card" onclick="posSetPayment('card')">💳 Card</button>
-          </div>
-          <!-- Paid / Unpaid -->
-          <div class="pos-toggle-row">
-            <button class="pos-tgl paid-active" data-status="paid" onclick="posSetStatus('paid')">✓ Paid</button>
-            <button class="pos-tgl" data-status="unpaid" onclick="posSetStatus('unpaid')">○ Unpaid</button>
-          </div>
-          <!-- Actions -->
-          <div class="pos-actions">
-            <button class="pos-act pos-act-print"    onclick="posPrintReceipt()">🖨 Print</button>
-            <button class="pos-act pos-act-complete" onclick="posCompleteOrder()">✓ Complete Order</button>
-            <button class="pos-act pos-act-clear"    onclick="posClearOrder(false)">🗑</button>
-          </div>
+        <div class="pos-crm-section">
+          <div class="pos-crm-sec-title">Important Dates</div>
+          <div id="crmDatesList" class="pos-crm-dates-list"></div>
+          <button class="pos-mod-btn pos-mod-btn-ghost" style="margin-top:8px;font-size:10px;" onclick="posCrmAddDate()">+ Add Date</button>
+        </div>
+        <div class="pos-crm-section">
+          <div class="pos-crm-sec-title">Preferences & Notes</div>
+          <div class="pos-crm-field"><label>Favourite Flowers / Preferences</label><textarea id="crmPrefs" rows="2" placeholder="e.g. Loves pink roses, allergic to lilies…"></textarea></div>
+          <div class="pos-crm-field" style="margin-top:10px;"><label>Notes</label><textarea id="crmNotes" rows="2" placeholder="Any additional notes…"></textarea></div>
+        </div>
+        <div class="pos-crm-section" id="crmHistorySection" style="display:none;">
+          <div class="pos-crm-sec-title">Order History</div>
+          <div id="crmHistoryList"></div>
         </div>
       </div>
     </div>
@@ -6139,6 +6393,344 @@
 
     document.getElementById('posHistoryBody').innerHTML = summaryHtml + ordersHtml;
   }
+
+  // ══════════════════════════════════════════════
+  //  POS NAV
+  // ══════════════════════════════════════════════
+  function posNavTo(panel, btn) {
+    document.querySelectorAll('.pos-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.pos-nav-tab').forEach(t => t.classList.remove('active'));
+    const el = document.getElementById('posPanel-' + panel);
+    if (el) el.classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (panel === 'inventory')  posInvRender();
+    if (panel === 'orders')     posOrdRender();
+    if (panel === 'crm')        posCrmRender();
+    if (panel === 'analytics')  posAnalyticsRender();
+    if (panel === 'wire')       posWireRender();
+  }
+
+  // ══════════════════════════════════════════════
+  //  INVENTORY MODULE
+  // ══════════════════════════════════════════════
+  const INV_KEY = 'rosebella_inventory';
+  const DEFAULT_INVENTORY = [
+    { id:1,  name:'Red Roses',       type:'Roses',       qty:120, reorderAt:30, season:'Year-round', unit:'stems' },
+    { id:2,  name:'Pink Roses',      type:'Roses',       qty:80,  reorderAt:20, season:'Year-round', unit:'stems' },
+    { id:3,  name:'White Roses',     type:'Roses',       qty:60,  reorderAt:20, season:'Year-round', unit:'stems' },
+    { id:4,  name:'Mixed Roses',     type:'Roses',       qty:100, reorderAt:25, season:'Year-round', unit:'stems' },
+    { id:5,  name:'Peonies',         type:'Peonies',     qty:40,  reorderAt:15, season:'Spring',     unit:'stems' },
+    { id:6,  name:'Tulips',          type:'Tulips',      qty:75,  reorderAt:20, season:'Spring',     unit:'stems' },
+    { id:7,  name:'Orchids',         type:'Orchids',     qty:30,  reorderAt:10, season:'Year-round', unit:'stems' },
+    { id:8,  name:'Lilies',          type:'Lilies',      qty:50,  reorderAt:15, season:'Year-round', unit:'stems' },
+    { id:9,  name:'Godiva Chocolates', type:'Chocolates',qty:24,  reorderAt:8,  season:'Year-round', unit:'boxes' },
+    { id:10, name:'Patchi Chocolates', type:'Chocolates',qty:18,  reorderAt:6,  season:'Year-round', unit:'boxes' },
+    { id:11, name:'Balloons',        type:'Accessories', qty:50,  reorderAt:15, season:'Year-round', unit:'units' },
+    { id:12, name:'Glass Vases',     type:'Accessories', qty:25,  reorderAt:8,  season:'Year-round', unit:'units' },
+    { id:13, name:'Candles',         type:'Accessories', qty:30,  reorderAt:10, season:'Year-round', unit:'units' },
+    { id:14, name:'Perfume',         type:'Accessories', qty:12,  reorderAt:5,  season:'Year-round', unit:'units' },
+    { id:15, name:'Ribbon',          type:'Packaging',   qty:100, reorderAt:30, season:'Year-round', unit:'rolls' },
+    { id:16, name:'Gift Boxes',      type:'Packaging',   qty:40,  reorderAt:12, season:'Year-round', unit:'units' },
+  ];
+  let inventory = (function(){ try{ return JSON.parse(localStorage.getItem(INV_KEY))||DEFAULT_INVENTORY.map(i=>({...i})); }catch(e){ return DEFAULT_INVENTORY.map(i=>({...i})); } })();
+  function saveInventory() { localStorage.setItem(INV_KEY, JSON.stringify(inventory)); }
+
+  function posInvStockClass(item) {
+    if (item.qty <= 0)              return 'crit';
+    if (item.qty <= item.reorderAt) return 'low';
+    return 'ok';
+  }
+
+  function posInvRender() {
+    const q    = (document.getElementById('posInvSearch')?.value || '').toLowerCase();
+    const type = document.getElementById('posInvTypeFilter')?.value || '';
+    const stock= document.getElementById('posInvStockFilter')?.value || '';
+    const rows = inventory.filter(it => {
+      if (q && !it.name.toLowerCase().includes(q) && !it.type.toLowerCase().includes(q)) return false;
+      if (type && it.type !== type) return false;
+      if (stock && posInvStockClass(it) !== stock) return false;
+      return true;
+    });
+    const body = document.getElementById('posInvBody');
+    if (!body) return;
+    body.innerHTML = rows.map(it => {
+      const cls = posInvStockClass(it);
+      const badgeCls = { ok:'pos-inv-badge-ok', low:'pos-inv-badge-low', crit:'pos-inv-badge-crit' }[cls];
+      const badgeTxt = { ok:'In Stock', low:'Low Stock', crit:'Critical' }[cls];
+      return `<tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">${it.name}</td>
+        <td>${it.type}</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="${it.qty}" onchange="posInvSetQty(${it.id},this.value)" /></td>
+        <td>${it.unit}</td>
+        <td style="color:rgba(255,255,255,0.4);">${it.reorderAt}</td>
+        <td style="color:rgba(255,255,255,0.4);">${it.season}</td>
+        <td><span class="pos-inv-badge ${badgeCls}">${badgeTxt}</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(${it.id},-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(${it.id},1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(${it.id})">🗑</button>
+        </div></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;font-family:var(--serif);font-style:italic;color:rgba(255,255,255,0.2);">No items match filters</td></tr>';
+  }
+
+  function posInvSetQty(id, val) { const it = inventory.find(i => i.id === id); if (it) { it.qty = Math.max(0, parseInt(val)||0); saveInventory(); posInvRender(); } }
+  function posInvAdjust(id, delta) { const it = inventory.find(i => i.id === id); if (it) { it.qty = Math.max(0, it.qty + delta); saveInventory(); posInvRender(); } }
+  function posInvDelete(id) { if (!confirm('Remove this inventory item?')) return; inventory = inventory.filter(i => i.id !== id); saveInventory(); posInvRender(); }
+  function posInvAdd() {
+    const name = prompt('Item name:'); if (!name?.trim()) return;
+    const type = prompt('Type (e.g. Roses, Accessories):') || 'Other';
+    const qty  = parseInt(prompt('Starting quantity:')) || 0;
+    const unit = prompt('Unit (stems/boxes/units/rolls):') || 'units';
+    const reorder = parseInt(prompt('Reorder alert when below:')) || 10;
+    inventory.unshift({ id: Date.now(), name: name.trim(), type, qty, unit, reorderAt: reorder, season: 'Year-round' });
+    saveInventory(); posInvRender();
+  }
+
+  // ══════════════════════════════════════════════
+  //  ORDERS & DELIVERY MODULE
+  // ══════════════════════════════════════════════
+  const DEL_STATUS_KEY = 'rosebella_del_status';
+  let delStatusMap = (function(){ try{ return JSON.parse(localStorage.getItem(DEL_STATUS_KEY))||{}; }catch(e){ return {}; } })();
+  function saveDelStatus() { localStorage.setItem(DEL_STATUS_KEY, JSON.stringify(delStatusMap)); }
+  let posOrdCurrentFilter = 'all';
+
+  function posOrdSetFilter(f, btn) {
+    posOrdCurrentFilter = f;
+    document.querySelectorAll('#posOrdFilters .pos-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    posOrdRender();
+  }
+
+  function posOrdRender() {
+    const q = (document.getElementById('posOrdSearch')?.value || '').toLowerCase();
+    const onlineOrders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
+    const posOrdersRaw = (function(){ try{ return JSON.parse(localStorage.getItem(POS_ORDERS_KEY))||[]; }catch(e){ return []; } })();
+    const allOrders = [
+      ...onlineOrders.map(o => ({ ...o, source:'online', ts: o.createdAt, displayId: o.id })),
+      ...posOrdersRaw.map(o  => ({ ...o, source:'pos',    ts: o.timestamp, displayId: o.id, recipient: { name:'Walk-in', phone:'—', address:'In-store' }, deliverySlot: { type:'pos', date: o.timestamp?.slice(0,10) } }))
+    ].sort((a,b) => new Date(b.ts) - new Date(a.ts));
+    const filtered = allOrders.filter(o => {
+      const status = delStatusMap[o.displayId] || (o.source==='pos' ? 'delivered' : 'pending');
+      if (posOrdCurrentFilter !== 'all' && status !== posOrdCurrentFilter) return false;
+      if (q) { const h = [o.displayId, o.recipient?.name, o.recipient?.phone, o.recipient?.address].join(' ').toLowerCase(); if (!h.includes(q)) return false; }
+      return true;
+    });
+    const el = document.getElementById('posOrdList');
+    const countEl = document.getElementById('posOrdCount');
+    if (countEl) countEl.textContent = `${filtered.length} order${filtered.length!==1?'s':''}`;
+    if (!el) return;
+    if (!filtered.length) { el.innerHTML = '<div class="pos-no-orders">No orders found</div>'; return; }
+    const statusLabels = { pending:'Pending', preparing:'Preparing', out:'Out for Delivery', delivered:'Delivered' };
+    el.innerHTML = filtered.map(o => {
+      const status = delStatusMap[o.displayId] || (o.source==='pos' ? 'delivered' : 'pending');
+      const d = new Date(o.ts);
+      const dateStr = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+      const timeStr = d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      const itemsStr = o.items ? o.items.map(i=>`${i.name} ×${i.qty||1}`).join(', ') : '—';
+      const recip = o.recipient || {};
+      const addr = [recip.landmark, recip.address].filter(Boolean).join(', ');
+      const mapsLink = addr && addr !== 'In-store' ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}` : '';
+      const pipelineHtml = ['pending','preparing','out','delivered'].map(s => `<button class="pos-status-btn ${status===s?'status-'+s:''}" onclick="posOrdSetStatus('${o.displayId}','${s}')">${statusLabels[s]}</button>`).join('');
+      const srcTag = `<span class="pos-source-tag ${o.source==='online'?'pos-source-online':'pos-source-pos'}">${o.source==='online'?'🌐 Online':'🏪 POS'}</span>`;
+      return `<div class="pos-del-card">
+        <div class="pos-del-hd"><div><div class="pos-del-id">${o.displayId}</div><div class="pos-del-time">${dateStr} · ${timeStr}</div></div><div style="display:flex;align-items:center;gap:8px;">${srcTag}<span class="pos-ord-total" style="font-size:14px;">QR ${(o.total||0).toFixed(0)}</span></div></div>
+        <div class="pos-del-items">${itemsStr}</div>
+        ${recip.name && recip.name !== 'Walk-in' ? `<div class="pos-del-recipient">👤 ${recip.name}${recip.phone?' · '+recip.phone:''} ${addr?'· 📍 '+addr:''}</div>` : ''}
+        <div class="pos-del-footer"><div class="pos-status-pipeline">${pipelineHtml}</div>${mapsLink ? `<a class="pos-gps-btn" href="${mapsLink}" target="_blank">📍 GPS</a>` : ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function posOrdSetStatus(id, status) { delStatusMap[id] = status; saveDelStatus(); posOrdRender(); apToast(`Order ${id} → ${status}`); }
+
+  // ══════════════════════════════════════════════
+  //  CRM MODULE
+  // ══════════════════════════════════════════════
+  const CRM_KEY = 'rosebella_crm';
+  let crmCustomers = (function(){ try{ return JSON.parse(localStorage.getItem(CRM_KEY))||[]; }catch(e){ return []; } })();
+  function saveCrm() { localStorage.setItem(CRM_KEY, JSON.stringify(crmCustomers)); }
+
+  function posCrmRender() {
+    const q = (document.getElementById('posCrmSearch')?.value || '').toLowerCase();
+    const onlineOrders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
+    onlineOrders.forEach(o => {
+      if (!o.recipient?.phone) return;
+      if (!crmCustomers.find(c => c.phone === o.recipient.phone)) {
+        crmCustomers.push({ id: 'auto-' + o.recipient.phone, name: o.recipient.name||'Unknown', phone: o.recipient.phone, email:'', preferredContact:'WhatsApp', prefs:'', notes:'Auto-imported from online order', importantDates:[], createdAt: o.createdAt });
+        saveCrm();
+      }
+    });
+    const visible = crmCustomers.filter(c => !q || [c.name, c.phone, c.email].join(' ').toLowerCase().includes(q));
+    const grid = document.getElementById('posCrmGrid');
+    if (!grid) return;
+    if (!visible.length) { grid.innerHTML = '<div class="pos-no-orders" style="grid-column:1/-1;">No customers found</div>'; return; }
+    const allOrders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
+    grid.innerHTML = visible.map(c => {
+      const orders = allOrders.filter(o => o.recipient?.phone === c.phone);
+      const spend  = orders.reduce((s,o) => s + (o.total||0), 0);
+      const datesHtml = (c.importantDates||[]).slice(0,2).map(d => `<span class="pos-crm-date-tag">🗓 ${d.label}: ${d.date}</span>`).join('');
+      return `<div class="pos-crm-card" onclick="posCrmOpenModal('${c.id}')">
+        <div class="pos-crm-name">${c.name}</div>
+        <div class="pos-crm-phone">${c.phone}${c.email?' · '+c.email:''}</div>
+        <div class="pos-crm-stats">
+          <div class="pos-crm-stat"><span class="pos-crm-stat-num">${orders.length}</span><span class="pos-crm-stat-lbl">Orders</span></div>
+          <div class="pos-crm-stat"><span class="pos-crm-stat-num">QR ${spend.toFixed(0)}</span><span class="pos-crm-stat-lbl">Spent</span></div>
+          ${c.prefs ? '<div class="pos-crm-stat"><span class="pos-crm-stat-num" style="font-size:14px;">★</span><span class="pos-crm-stat-lbl">Preferences</span></div>' : ''}
+        </div>
+        ${datesHtml ? `<div class="pos-crm-dates">${datesHtml}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function posCrmAddNew() {
+    ['crmEditId','crmName','crmPhone','crmEmail','crmPrefs','crmNotes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('crmContact').value = 'WhatsApp';
+    document.getElementById('crmHistorySection').style.display = 'none';
+    posCrmRenderDates([]);
+    document.getElementById('posCrmModalTitle').textContent = 'New Customer';
+    document.getElementById('posCrmModalBg').classList.add('show');
+  }
+
+  function posCrmOpenModal(id) {
+    const c = crmCustomers.find(x => x.id === id); if (!c) return;
+    document.getElementById('crmEditId').value = id;
+    document.getElementById('crmName').value = c.name||'';
+    document.getElementById('crmPhone').value = c.phone||'';
+    document.getElementById('crmEmail').value = c.email||'';
+    document.getElementById('crmContact').value = c.preferredContact||'WhatsApp';
+    document.getElementById('crmPrefs').value = c.prefs||'';
+    document.getElementById('crmNotes').value = c.notes||'';
+    posCrmRenderDates(c.importantDates||[]);
+    document.getElementById('posCrmModalTitle').textContent = c.name||'Customer Profile';
+    const allOrders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
+    const orders = allOrders.filter(o => o.recipient?.phone === c.phone);
+    const histSec = document.getElementById('crmHistorySection');
+    if (orders.length) {
+      histSec.style.display = '';
+      document.getElementById('crmHistoryList').innerHTML = orders.map(o => {
+        const d = new Date(o.createdAt);
+        const items = o.items?.map(i=>`${i.name} ×${i.qty||1}`).join(', ')||'—';
+        return `<div class="pos-crm-history-item"><div class="pos-crm-hist-hd"><span class="pos-crm-hist-id">${o.id}</span><span class="pos-crm-hist-date">${d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span></div><div class="pos-crm-hist-items">${items} · QR ${(o.total||0).toFixed(0)}</div></div>`;
+      }).join('');
+    } else { histSec.style.display = 'none'; }
+    document.getElementById('posCrmModalBg').classList.add('show');
+  }
+
+  function posCrmRenderDates(dates) {
+    document.getElementById('crmDatesList').innerHTML = dates.map(d => `
+      <div class="pos-crm-date-row">
+        <input class="crm-date-label" value="${d.label||''}" placeholder="e.g. Birthday, Anniversary…" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(198,146,42,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:8px 12px;outline:none;" />
+        <input class="crm-date-val" type="date" value="${d.date||''}" style="background:rgba(255,255,255,0.07);border:1px solid rgba(198,146,42,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:8px;outline:none;color-scheme:dark;" />
+        <button class="pos-crm-del-date" onclick="this.closest('.pos-crm-date-row').remove()">✕</button>
+      </div>`).join('');
+  }
+
+  function posCrmAddDate() {
+    const row = document.createElement('div'); row.className = 'pos-crm-date-row';
+    row.innerHTML = `<input class="crm-date-label" placeholder="e.g. Birthday…" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(198,146,42,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:8px 12px;outline:none;" /><input class="crm-date-val" type="date" style="background:rgba(255,255,255,0.07);border:1px solid rgba(198,146,42,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:8px;outline:none;color-scheme:dark;" /><button class="pos-crm-del-date" onclick="this.closest('.pos-crm-date-row').remove()">✕</button>`;
+    document.getElementById('crmDatesList').appendChild(row);
+  }
+
+  function posCrmSave() {
+    const name = document.getElementById('crmName').value.trim(); if (!name) { alert('Name is required.'); return; }
+    const id = document.getElementById('crmEditId').value;
+    const dates = [...document.querySelectorAll('#crmDatesList .pos-crm-date-row')].map(row => ({ label: row.querySelector('.crm-date-label')?.value.trim()||'', date: row.querySelector('.crm-date-val')?.value||'' })).filter(d => d.label||d.date);
+    const data = { name, phone: document.getElementById('crmPhone').value.trim(), email: document.getElementById('crmEmail').value.trim(), preferredContact: document.getElementById('crmContact').value, prefs: document.getElementById('crmPrefs').value.trim(), notes: document.getElementById('crmNotes').value.trim(), importantDates: dates };
+    if (id) { const idx = crmCustomers.findIndex(c => c.id === id); if (idx >= 0) crmCustomers[idx] = { ...crmCustomers[idx], ...data }; }
+    else crmCustomers.unshift({ id: 'crm-' + Date.now(), createdAt: new Date().toISOString(), ...data });
+    saveCrm(); posCrmCloseModal(); posCrmRender(); apToast('Customer saved!');
+  }
+
+  function posCrmCloseModal() { document.getElementById('posCrmModalBg').classList.remove('show'); }
+
+  // ══════════════════════════════════════════════
+  //  ANALYTICS MODULE
+  // ══════════════════════════════════════════════
+  function posAnalyticsRender() {
+    const period = document.getElementById('posAnalyticsPeriod')?.value || 'today';
+    const posOrdRaw = (function(){ try{ return JSON.parse(localStorage.getItem(POS_ORDERS_KEY))||[]; }catch(e){ return []; } })();
+    const webOrdRaw = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
+    const now = new Date();
+    const cutoff = period === 'today' ? new Date(now.toDateString()) : period === 'all' ? new Date(0) : new Date(now - parseInt(period)*86400000);
+    const all = [...posOrdRaw.map(o=>({...o,source:'pos',ts:new Date(o.timestamp)})), ...webOrdRaw.map(o=>({...o,source:'online',ts:new Date(o.createdAt)}))].filter(o => o.ts >= cutoff && o.status !== 'unpaid');
+    const revenue = all.reduce((s,o)=>s+(o.total||0),0);
+    const orderCount = all.length;
+    const avgOrder = orderCount ? revenue/orderCount : 0;
+    const itemsSold = all.reduce((s,o)=>s+(o.items||[]).reduce((ss,i)=>ss+(i.qty||1),0),0);
+    const prodMap = {};
+    all.forEach(o => (o.items||[]).forEach(i => { prodMap[i.name] = (prodMap[i.name]||0) + (i.price||0)*(i.qty||1); }));
+    const topProds = Object.entries(prodMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const maxProd = topProds[0]?.[1]||1;
+    const dayRevs = [];
+    for (let i=6; i>=0; i--) { const d=new Date(now); d.setDate(d.getDate()-i); const pfx=d.toISOString().slice(0,10); const rev=all.filter(o=>o.ts.toISOString().startsWith(pfx)).reduce((s,o)=>s+(o.total||0),0); dayRevs.push({ label:i===0?'Today':d.toLocaleDateString('en-GB',{weekday:'short'}), rev, isToday:i===0 }); }
+    const maxRev = Math.max(...dayRevs.map(d=>d.rev),1);
+    const cashRev = all.filter(o=>o.paymentMethod==='cash').reduce((s,o)=>s+(o.total||0),0);
+    const cardRev = all.filter(o=>o.paymentMethod!=='cash').reduce((s,o)=>s+(o.total||0),0);
+    const hourMap = {}; all.forEach(o => { const h=o.ts.getHours(); hourMap[h]=(hourMap[h]||0)+1; });
+    const peakSlots = [{label:'9–12am',hours:[9,10,11]},{label:'12–3pm',hours:[12,13,14]},{label:'3–6pm',hours:[15,16,17]},{label:'6–9pm',hours:[18,19,20]}].map(s=>({...s,count:s.hours.reduce((n,h)=>n+(hourMap[h]||0),0)}));
+    const maxPeak = Math.max(...peakSlots.map(s=>s.count),1);
+    const periodLabel = { today:'Today', '7':'Last 7 Days', '30':'Last 30 Days', all:'All Time' }[period];
+    const el = document.getElementById('posAnalyticsContent'); if (!el) return;
+    el.innerHTML = `
+      <div class="pos-analytics-layout" style="margin-bottom:12px;">
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Revenue (${periodLabel})</div><div class="pos-kpi-val"><sup>QR</sup>${revenue.toFixed(0)}</div><div class="pos-kpi-sub">${orderCount} paid orders</div></div>
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Orders</div><div class="pos-kpi-val">${orderCount}</div><div class="pos-kpi-sub">Online + POS</div></div>
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Avg Order Value</div><div class="pos-kpi-val"><sup>QR</sup>${avgOrder.toFixed(0)}</div></div>
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Items Sold</div><div class="pos-kpi-val">${itemsSold}</div></div>
+      </div>
+      <div class="pos-analytics-row2" style="margin-bottom:12px;">
+        <div class="pos-chart-card"><div class="pos-chart-title">Top Products by Revenue</div>${topProds.length?topProds.map(([name,val])=>`<div class="pos-bar-row"><div class="pos-bar-name">${name}</div><div class="pos-bar-track"><div class="pos-bar-fill" style="width:${(val/maxProd*100).toFixed(1)}%"></div></div><div class="pos-bar-val">QR ${val.toFixed(0)}</div></div>`).join(''):'<div style="font-family:var(--serif);font-style:italic;color:rgba(255,255,255,0.2);font-size:13px;">No data yet</div>'}</div>
+        <div class="pos-chart-card"><div class="pos-chart-title">Revenue — Last 7 Days</div><div class="pos-trend-chart">${dayRevs.map(d=>`<div class="pos-trend-col"><div class="pos-trend-bar${d.isToday?' today':''}" style="height:${(d.rev/maxRev*100).toFixed(1)}%"></div><div class="pos-trend-lbl">${d.label}</div></div>`).join('')}</div></div>
+      </div>
+      <div class="pos-analytics-row2">
+        <div class="pos-chart-card"><div class="pos-chart-title">Payment Methods</div><div class="pos-pie-row"><div class="pos-pie-legend"><div class="pos-pie-leg-item"><div class="pos-pie-dot" style="background:#C6922A"></div><span class="pos-pie-leg-name">Cash</span><span class="pos-pie-leg-val">QR ${cashRev.toFixed(0)}</span></div><div class="pos-pie-leg-item"><div class="pos-pie-dot" style="background:#2196f3"></div><span class="pos-pie-leg-name">Card / Online</span><span class="pos-pie-leg-val">QR ${cardRev.toFixed(0)}</span></div></div><svg width="80" height="80" viewBox="0 0 32 32">${revenue>0?(function(){const cp=cashRev/revenue,r=14,cx=16,cy=16,toXY=p=>[cx+r*Math.cos(2*Math.PI*p-Math.PI/2),cy+r*Math.sin(2*Math.PI*p-Math.PI/2)],[x1,y1]=toXY(0),[x2,y2]=toXY(cp),[x3,y3]=toXY(0.999),lf1=cp>.5?1:0,lf2=(1-cp)>.5?1:0;return cp===0?`<circle cx="16" cy="16" r="14" fill="#2196f3"/>`:cp===1?`<circle cx="16" cy="16" r="14" fill="#C6922A"/>`:`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${lf1},1 ${x2},${y2} Z" fill="#C6922A"/><path d="M${cx},${cy} L${x2},${y2} A${r},${r} 0 ${lf2},1 ${x3},${y3} Z" fill="#2196f3"/>`;})():'<circle cx="16" cy="16" r="14" fill="rgba(255,255,255,0.06)"/>'}</svg></div></div>
+        <div class="pos-chart-card"><div class="pos-chart-title">Peak Hours</div>${peakSlots.map(s=>`<div class="pos-peak-row"><div class="pos-peak-lbl">${s.label}</div><div class="pos-peak-bar-track"><div class="pos-peak-bar-fill" style="width:${(s.count/maxPeak*100).toFixed(1)}%"></div></div><div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.4);width:24px;text-align:right;">${s.count}</div></div>`).join('')}</div>
+      </div>`;
+  }
+
+  // ══════════════════════════════════════════════
+  //  WIRE SERVICES MODULE
+  // ══════════════════════════════════════════════
+  const WIRE_KEY = 'rosebella_wire_orders';
+  const WIRE_INTEGRATIONS_KEY = 'rosebella_wire_integrations';
+  let wireOrders = (function(){ try{ return JSON.parse(localStorage.getItem(WIRE_KEY))||[]; }catch(e){ return []; } })();
+  let wireIntegrations = (function(){ try{ return JSON.parse(localStorage.getItem(WIRE_INTEGRATIONS_KEY))||{ FTD:false, Teleflora:false, '1-800-Flowers':false, BloomNation:false }; }catch(e){ return { FTD:false, Teleflora:false, '1-800-Flowers':false, BloomNation:false }; } })();
+  function saveWire() { localStorage.setItem(WIRE_KEY, JSON.stringify(wireOrders)); }
+  function saveWireIntegrations() { localStorage.setItem(WIRE_INTEGRATIONS_KEY, JSON.stringify(wireIntegrations)); }
+
+  function posWireRender() {
+    const intEl = document.getElementById('posWireIntegrations');
+    if (intEl) intEl.innerHTML = Object.keys(wireIntegrations).map(name => {
+      const active = wireIntegrations[name];
+      return `<div class="pos-wire-integ"><div class="pos-wire-logo">${name}</div><div><span class="pos-wire-status ${active?'pos-wire-status-active':'pos-wire-status-inactive'}">${active?'Connected':'Not Connected'}</span></div><button class="pos-wire-connect ${active?'pos-wire-disconnect':''}" onclick="posWireToggle('${name}')">${active?'Disconnect':'Connect'}</button></div>`;
+    }).join('');
+    const listEl = document.getElementById('posWireList');
+    if (!listEl) return;
+    listEl.innerHTML = wireOrders.length ? wireOrders.map(o => {
+      return `<div class="pos-wire-order"><div class="pos-wire-ord-hd"><span class="pos-wire-ord-id">${o.orderId}</span><span class="pos-wire-ord-src">${o.service}</span></div><div class="pos-wire-ord-details">${o.arrangement} · QR ${o.total} · ${o.recipient} · ${o.delivDate}</div>${o.notes?`<div style="font-family:var(--sans);font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:6px;">${o.notes}</div>`:''}<div class="pos-wire-ord-footer"><div class="pos-status-pipeline">${['pending','preparing','out','delivered'].map(s=>`<button class="pos-status-btn ${o.status===s?'status-'+s:''}" onclick="posWireSetStatus('${o.orderId}','${s}')">${{pending:'Pending',preparing:'Preparing',out:'Out for Delivery',delivered:'Delivered'}[s]}</button>`).join('')}</div><button class="pos-inv-btn pos-inv-btn-del" onclick="posWireDelete('${o.orderId}')">🗑</button></div></div>`;
+    }).join('') : '<div class="pos-no-orders">No wire orders yet</div>';
+  }
+
+  function posWireToggle(name) { wireIntegrations[name] = !wireIntegrations[name]; saveWireIntegrations(); posWireRender(); apToast(`${name} ${wireIntegrations[name]?'connected':'disconnected'}`); }
+
+  function posWireSubmit() {
+    const service = document.getElementById('wireService')?.value;
+    const orderId = document.getElementById('wireOrderId')?.value.trim();
+    const arrangement = document.getElementById('wireArrangement')?.value.trim();
+    const total = document.getElementById('wireTotal')?.value;
+    const recipient = document.getElementById('wireRecipient')?.value.trim();
+    const delivDate = document.getElementById('wireDelivDate')?.value;
+    const notes = document.getElementById('wireNotes')?.value.trim();
+    if (!orderId || !arrangement || !recipient) { apToast('Please fill Order ID, Arrangement, and Recipient.'); return; }
+    wireOrders.unshift({ orderId, service, arrangement, total: parseFloat(total)||0, recipient, delivDate, notes, status:'pending', createdAt: new Date().toISOString() });
+    saveWire();
+    ['wireOrderId','wireArrangement','wireTotal','wireRecipient','wireDelivDate','wireNotes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    posWireRender(); apToast('Wire order logged!');
+  }
+
+  function posWireSetStatus(orderId, status) { const o = wireOrders.find(x => x.orderId === orderId); if (o) { o.status = status; saveWire(); posWireRender(); apToast(`${orderId} → ${status}`); } }
+  function posWireDelete(orderId) { if (!confirm('Remove this wire order?')) return; wireOrders = wireOrders.filter(x => x.orderId !== orderId); saveWire(); posWireRender(); }
 
   // ── Filter helpers ────────────────────────────
   function getCardPrice(card) {
