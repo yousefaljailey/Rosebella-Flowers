@@ -6307,6 +6307,18 @@
     }
   });
 
+  // Handle redirect result (Google/Apple sign-in after page reload)
+  firebase.auth().getRedirectResult().then(async result => {
+    if (result && result.user) {
+      const method = result.providerId === 'apple.com' ? 'apple' : 'google';
+      await onAuthSuccess(result.user, method);
+    }
+  }).catch(e => {
+    if (e.code && e.code !== 'auth/no-auth-event') {
+      console.warn('[Auth redirect error]', e.message);
+    }
+  });
+
   function openAuth() {
     document.getElementById('authOverlay').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -6366,30 +6378,45 @@
 
   // ── Google ────────────────────────────────────
   async function authWithGoogle() {
-    const errEl = document.getElementById('authError');
+    const errEl    = document.getElementById('authError');
+    const provider = new firebase.auth.GoogleAuthProvider();
     try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const result   = await firebase.auth().signInWithPopup(provider);
+      // Try popup first (works in most desktop browsers)
+      const result = await firebase.auth().signInWithPopup(provider);
       await onAuthSuccess(result.user, 'google');
     } catch(e) {
-      if (e.code !== 'auth/popup-closed-by-user') errEl.textContent = e.message;
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+        // Popup blocked — fall back to redirect (works everywhere)
+        try {
+          await firebase.auth().signInWithRedirect(provider);
+          // Page will reload; result handled by getRedirectResult() above
+        } catch(re) {
+          errEl.textContent = re.message;
+        }
+      } else {
+        errEl.textContent = e.message;
+      }
     }
   }
 
   // ── Apple ─────────────────────────────────────
   async function authWithApple() {
-    const errEl = document.getElementById('authError');
+    const errEl    = document.getElementById('authError');
+    const provider = new firebase.auth.OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
     try {
-      const provider = new firebase.auth.OAuthProvider('apple.com');
-      provider.addScope('email');
-      provider.addScope('name');
       const result = await firebase.auth().signInWithPopup(provider);
       await onAuthSuccess(result.user, 'apple');
     } catch(e) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        errEl.textContent = e.code === 'auth/operation-not-supported-in-this-environment'
-          ? 'Apple Sign-In requires HTTPS. Please enable it in Firebase console first.'
-          : e.message;
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+        try {
+          await firebase.auth().signInWithRedirect(provider);
+        } catch(re) {
+          errEl.textContent = re.message;
+        }
+      } else if (e.code !== 'auth/operation-not-supported-in-this-environment') {
+        errEl.textContent = e.message;
       }
     }
   }
