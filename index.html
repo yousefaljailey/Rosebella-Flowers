@@ -2264,7 +2264,7 @@
     .co-phone-code { font-family: var(--sans); font-size: 13px; color: var(--charcoal); font-weight: 600; }
     .co-phone-input { flex: 1; border-left: none !important; }
 
-    /* ── Identity checkbox ── */
+    /* ── Gift checkbox ── */
     .co-identity-row { margin: 16px 0; }
     .co-identity-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .co-checkbox { display: none; }
@@ -2277,6 +2277,13 @@
     .co-checkbox:checked + .co-check-custom { background: var(--gold); border-color: var(--gold); }
     .co-checkbox:checked + .co-check-custom::after { content: '✓'; font-size: 11px; font-weight: 700; color: #fff; font-family: var(--sans); }
     .co-identity-note { font-family: var(--serif); font-size: 11px; font-style: italic; color: var(--taupe); margin-left: 28px; margin-top: 4px; display: block; }
+
+    /* ── Cash on Delivery panel ── */
+    .py-cod-wrap { text-align: center; padding: 24px 16px 20px; }
+    .py-cod-icon { font-size: 40px; margin-bottom: 12px; }
+    .py-cod-title { font-family: var(--serif); font-size: 18px; color: #FAF8F0; margin-bottom: 8px; }
+    .py-cod-desc { font-family: var(--sans); font-size: 13px; color: rgba(250,248,240,0.65); line-height: 1.6; }
+    .py-cod-desc strong { color: #C6922A; }
 
     /* ── Delivery time cards ── */
     .co-delivery-opts { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
@@ -2701,14 +2708,14 @@
               <textarea id="coAddress" class="co-textarea" rows="3" placeholder="Apartment/villa number, floor, building name and street"></textarea>
             </div>
 
-            <!-- Keep identity secret -->
+            <!-- Send as a gift -->
             <div class="co-identity-row">
               <label class="co-identity-label">
-                <input type="checkbox" id="coKeepSecret" class="co-checkbox" />
+                <input type="checkbox" id="coSendAsGift" class="co-checkbox" onchange="coOnSendAsGiftChange()" />
                 <span class="co-check-custom"></span>
-                Keep my identity secret
+                Send as a gift
               </label>
-              <span class="co-identity-note">Your name won't appear on the gift card</span>
+              <span class="co-identity-note">Card payment only — cash on delivery not available for gift orders</span>
             </div>
 
             <!-- Delivery time -->
@@ -2802,6 +2809,7 @@
       </div>
       <div class="py-tabs">
         <button class="py-tab active" data-tab="card"    onclick="pyTab('card',this)">💳 Card</button>
+        <button class="py-tab"        data-tab="cash"    onclick="pyTab('cash',this)"    id="pyCashTab">💵 Cash on Delivery</button>
         <button class="py-tab"        data-tab="wallets" onclick="pyTab('wallets',this)" id="pyWalletsTab" style="display:none">⚡ Express Pay</button>
       </div>
 
@@ -2832,6 +2840,18 @@
           Apple Pay and Google Pay are not available on this device or browser.<br><br>
           Please use the Card tab instead.
         </div>
+      </div>
+
+      <!-- Cash on Delivery panel -->
+      <div class="py-panel" id="pyCashPanel" style="display:none">
+        <div class="py-cod-wrap">
+          <div class="py-cod-icon">💵</div>
+          <div class="py-cod-title">Cash on Delivery</div>
+          <div class="py-cod-desc">Pay <strong>QR <span id="pyCodAmt">0</span></strong> in cash when your order arrives.</div>
+        </div>
+        <button class="py-submit" id="pyCashSubmit" onclick="pyConfirmCash()">
+          Confirm Order — Pay on Delivery
+        </button>
       </div>
 
       <!-- Loading panel -->
@@ -6574,7 +6594,7 @@
     const areaEl = document.getElementById('coArea');
     if (areaEl && recipient.landmark) areaEl.value = recipient.landmark;
     setVal('coAddress', recipient.address);
-    if (recipient.notes) document.getElementById('coKeepSecret').checked = recipient.notes === 'anonymous';
+    if (recipient.notes) document.getElementById('coSendAsGift').checked = recipient.notes === 'gift';
     // Gift message
     const gm = document.getElementById('coGiftMsg');
     if (gm) { gm.value = giftMessage; coSyncGiftCount(giftMessage.length); }
@@ -6731,14 +6751,14 @@
     }
 
     // Save to state
-    const keepSecret = document.getElementById('coKeepSecret').checked;
+    const sendAsGift = document.getElementById('coSendAsGift').checked;
     recipient = {
       name,
       phone: '+974 ' + phone,
       address,
       landmark: area,
       occasion: '',
-      notes: keepSecret ? 'anonymous' : ''
+      notes: sendAsGift ? 'gift' : ''
     };
     deliverySlot = { date: coDeliveryDate || toDateStr(new Date()), slot: coDeliverySlotId, type: coDeliveryType, expressFee: coExpressFee };
     giftMessage     = document.getElementById('coGiftMsg')?.value.trim() || '';
@@ -6785,6 +6805,10 @@
     };
     document.getElementById('pyAmountVal').textContent  = total.toFixed(0);
     document.getElementById('pyCardBtnAmt').textContent = `QR ${total.toFixed(0)}`;
+    document.getElementById('pyCodAmt').textContent     = total.toFixed(0);
+    const isGift = document.getElementById('coSendAsGift')?.checked;
+    const cashTab = document.getElementById('pyCashTab');
+    if (cashTab) cashTab.style.display = isGift ? 'none' : '';
     pyShowPanel('card');
     document.getElementById('pyOverlay').classList.add('show');
     if (!pyStripe) {
@@ -6822,17 +6846,40 @@
 
   function closePayment() { document.getElementById('pyOverlay').classList.remove('show'); }
 
+  function coOnSendAsGiftChange() {
+    const isGift = document.getElementById('coSendAsGift').checked;
+    const cashTab = document.getElementById('pyCashTab');
+    if (!cashTab) return;
+    cashTab.style.display = isGift ? 'none' : '';
+    if (isGift && cashTab.classList.contains('active')) {
+      const cardTab = document.querySelector('[data-tab="card"]');
+      if (cardTab) pyTab('card', cardTab);
+    }
+  }
+
+  function pyConfirmCash() {
+    const btn = document.getElementById('pyCashSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Placing order…';
+    pyOrderSnapshot.coPayment = 'cash';
+    pyShowSuccess(null, 'cash');
+    btn.disabled = false;
+    btn.textContent = 'Confirm Order — Pay on Delivery';
+  }
+
   function pyTab(tab, btn) {
     document.querySelectorAll('.py-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('pyCardPanel').style.display    = tab === 'card'    ? '' : 'none';
     document.getElementById('pyWalletsPanel').style.display = tab === 'wallets' ? '' : 'none';
+    document.getElementById('pyCashPanel').style.display    = tab === 'cash'    ? '' : 'none';
   }
 
   function pyShowPanel(tab) {
     document.querySelectorAll('.py-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     document.getElementById('pyCardPanel').style.display    = tab === 'card'    ? '' : 'none';
     document.getElementById('pyWalletsPanel').style.display = tab === 'wallets' ? '' : 'none';
+    document.getElementById('pyCashPanel').style.display    = tab === 'cash'    ? '' : 'none';
     document.getElementById('pyLoading').style.display      = 'none';
   }
 
@@ -6884,7 +6931,8 @@
     return data.clientSecret;
   }
 
-  function pyShowSuccess(paymentIntentId) {
+  function pyShowSuccess(paymentIntentId, paymentMethod) {
+    paymentMethod = paymentMethod || 'card';
     closePayment();
     const orderId = 'RB-' + (Date.now().toString(36).toUpperCase());
     document.getElementById('pyOrderNum').textContent = orderId;
@@ -6894,9 +6942,11 @@
     ).join('');
     document.getElementById('pySuccessTotalVal').textContent = snap.total.toFixed(0);
     const slotObj = TIME_SLOTS.find(s => s.id === snap.deliverySlot.slot);
-    let msg = `✅ *Payment Confirmed — ${orderId}*\n\n🛍 *Items:*\n`;
+    const payLabel = paymentMethod === 'cash' ? 'Cash on Delivery' : 'Card';
+    const msgHeader = paymentMethod === 'cash' ? `🛒 *New Order (Cash on Delivery) — ${orderId}*` : `✅ *Payment Confirmed — ${orderId}*`;
+    let msg = `${msgHeader}\n\n🛍 *Items:*\n`;
     snap.cart.forEach(i => { msg += `• ${i.name} ×${i.qty} — QR ${(i.price*i.qty).toFixed(0)}\n`; });
-    msg += `\n💰 *Total Paid: QR ${snap.total.toFixed(0)}* (Card)\n`;
+    msg += `\n💰 *Total: QR ${snap.total.toFixed(0)}* (${payLabel})\n`;
     if (snap.coExpressFee) msg += `(includes QAR ${snap.coExpressFee} express fee)\n`;
     msg += `\n📦 *Delivery:* ${snap.deliverySlot.type === 'express' ? 'Express (90 min)' : formatDeliveryDate(snap.deliverySlot.date) + (slotObj ? ' · ' + slotObj.label : '')}\n`;
     msg += `\n👤 *Recipient:* ${snap.recipient.name} · ${snap.recipient.phone}\n`;
@@ -6905,7 +6955,7 @@
     document.getElementById('pyWaLink').href = 'https://wa.me/97433446618?text=' + encodeURIComponent(msg);
     // Save order
     const orders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
-    orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod:'card', paymentIntentId, recipient:snap.recipient, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
+    orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod, paymentIntentId, recipient:snap.recipient, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
     localStorage.setItem('rosebella_orders', JSON.stringify(orders));
     // Clear cart
     cart=[]; appliedPromo=null; giftMessage=''; deliverySlot={date:'',slot:''}; coExpressFee=0;
