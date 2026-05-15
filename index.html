@@ -4084,80 +4084,77 @@
     });
   }
 
-  // ── Google Places API (New) — Live Reviews ────
-  (async function loadGoogleReviews() {
-    const KEY = 'AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII';
-    const GOOGLE_LOGO = `<svg viewBox="0 0 24 24" width="12" height="12"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
+  // ── Google Places API (New) — Live Reviews via Maps JS SDK ────
+  const GOOG_LOGO = `<svg viewBox="0 0 24 24" width="12" height="12"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
 
-    function renderReviews(reviews, place) {
-      const grid = document.getElementById('testGrid');
-      if (!grid) return;
-      const delayClasses = ['', ' reveal-delay-1', ' reveal-delay-2'];
-      grid.innerHTML = reviews.slice(0, 3).map((r, i) => {
-        const rating     = r.rating || 5;
-        const stars      = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-        const name       = r.authorAttribution?.displayName || 'Google Reviewer';
-        const photoUri   = r.authorAttribution?.photoUri;
-        const text       = (r.text?.text || r.originalText?.text || '').trim();
-        const excerpt    = text.length > 280 ? text.slice(0, 278) + '…' : text;
-        const timeStr    = r.relativePublishTimeDescription || 'Google Maps';
-        const initial    = name.charAt(0).toUpperCase();
-        const avatarHtml = photoUri
-          ? `<img src="${photoUri}" class="test-avatar-img" alt="${name}" referrerpolicy="no-referrer" />`
-          : `<div class="test-avatar">${initial}</div>`;
-        return `<div class="test-card reveal${delayClasses[i]}">
-          <div class="test-stars-row"><span class="test-stars">${stars}</span><span class="test-goog-badge">${GOOGLE_LOGO}Google</span></div>
-          <blockquote>"${excerpt}"</blockquote>
-          <div class="test-author">${avatarHtml}<div><span class="test-name">${name}</span><span class="test-loc">${timeStr}</span></div></div>
-        </div>`;
-      }).join('');
-      if (place.rating && place.userRatingCount) {
-        const subEl = document.querySelector('[data-tid="testSub"]');
-        if (subEl) subEl.textContent = `${place.rating.toFixed(1)} ★ on Google · ${place.userRatingCount.toLocaleString()} reviews`;
-      }
-      const attrEl = document.getElementById('testGoogAttr');
-      if (attrEl) {
-        attrEl.style.display = '';
-        const linkEl = document.getElementById('testGoogLink');
-        if (linkEl && place.googleMapsUri) linkEl.href = place.googleMapsUri;
-      }
-      window._googleReviewsLoaded = true;
+  function renderGoogleReviews(reviews, place) {
+    const grid = document.getElementById('testGrid');
+    if (!grid) return;
+    const delays = ['', ' reveal-delay-1', ' reveal-delay-2'];
+    grid.innerHTML = reviews.slice(0, 3).map((r, i) => {
+      const rating  = r.rating || 5;
+      const stars   = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const name    = r.authorAttribution?.displayName || 'Google Reviewer';
+      const photo   = r.authorAttribution?.photoUri;
+      const text    = (r.text?.text || r.text || '').trim();
+      const excerpt = text.length > 280 ? text.slice(0, 278) + '…' : text;
+      const time    = r.relativePublishTimeDescription || 'Google Maps';
+      const avatar  = photo
+        ? `<img src="${photo}" class="test-avatar-img" alt="${name}" referrerpolicy="no-referrer" />`
+        : `<div class="test-avatar">${name.charAt(0).toUpperCase()}</div>`;
+      return `<div class="test-card reveal${delays[i]}">
+        <div class="test-stars-row"><span class="test-stars">${stars}</span><span class="test-goog-badge">${GOOG_LOGO}Google</span></div>
+        <blockquote>"${excerpt}"</blockquote>
+        <div class="test-author">${avatar}<div><span class="test-name">${name}</span><span class="test-loc">${time}</span></div></div>
+      </div>`;
+    }).join('');
+    const rating = place.rating ?? place.Rating;
+    const count  = place.userRatingCount ?? place.UserRatingCount;
+    if (rating && count) {
+      const sub = document.querySelector('[data-tid="testSub"]');
+      if (sub) sub.textContent = `${Number(rating).toFixed(1)} ★ on Google · ${Number(count).toLocaleString()} reviews`;
     }
+    const attr = document.getElementById('testGoogAttr');
+    if (attr) {
+      attr.style.display = '';
+      const lnk = document.getElementById('testGoogLink');
+      const uri = place.googleMapsUri ?? place.GoogleMapsURI;
+      if (lnk && uri) lnk.href = uri;
+    }
+    window._googleReviewsLoaded = true;
+  }
 
-    try {
-      // Step 1 — Text Search: get Place ID
-      const searchRes = await fetch('https://places.googleapis.com/v1/places:searchText', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': KEY,
-          'X-Goog-FieldMask': 'places.id,places.rating,places.userRatingCount,places.displayName,places.googleMapsUri'
-        },
-        body: JSON.stringify({ textQuery: 'Rosebella Flowers & Chocolate Doha Qatar' })
-      });
-      const searchData = await searchRes.json();
-      console.log('[Rosebella Reviews] Search:', searchData);
-      const place = searchData.places?.[0];
-      if (!place?.id) { console.warn('[Rosebella Reviews] Place not found'); return; }
+  async function fetchPlaceReviews() {
+    const { Place } = await google.maps.importLibrary('places');
+    const { places } = await Place.searchByText({
+      textQuery: 'Rosebella Flowers & Chocolate Doha Qatar',
+      fields: ['id', 'displayName', 'rating', 'userRatingCount', 'googleMapsUri'],
+    });
+    console.log('[Rosebella Reviews] searchByText:', places);
+    if (!places?.length) { console.warn('[Rosebella Reviews] Place not found'); return; }
+    const place = places[0];
+    await place.fetchFields({ fields: ['reviews', 'rating', 'userRatingCount', 'googleMapsUri'] });
+    console.log('[Rosebella Reviews] fetchFields:', place);
+    if (place.reviews?.length) {
+      renderGoogleReviews(place.reviews, place);
+    } else {
+      console.warn('[Rosebella Reviews] No reviews on place object:', place);
+    }
+  }
 
-      // Step 2 — Place Details: X-Goog-FieldMask as header (required by Places API New)
-      const detailRes = await fetch(`https://places.googleapis.com/v1/${place.id}`, {
-        headers: {
-          'X-Goog-Api-Key': KEY,
-          'X-Goog-FieldMask': 'reviews,rating,userRatingCount,googleMapsUri',
-          'Accept-Language': 'en'
-        }
-      });
-      const detail = await detailRes.json();
-      console.log('[Rosebella Reviews] Details:', detail);
-
-      if (detail.reviews?.length) {
-        renderReviews(detail.reviews, { ...place, googleMapsUri: detail.googleMapsUri || place.googleMapsUri });
-      } else {
-        console.warn('[Rosebella Reviews] No reviews returned:', detail);
-      }
-    } catch (e) {
-      console.error('[Rosebella Reviews] Error:', e);
+  (function initReviews() {
+    const MAPS_KEY = 'AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII';
+    function run() { fetchPlaceReviews().catch(e => console.error('[Rosebella Reviews] Error:', e)); }
+    if (window.google?.maps?.importLibrary) { run(); return; }
+    window.__mapsForReviews = run;
+    if (!document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')) {
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&loading=async&callback=__mapsForReviews`;
+      document.head.appendChild(s);
+    } else {
+      const t = setInterval(() => { if (window.google?.maps?.importLibrary) { clearInterval(t); run(); } }, 150);
+      setTimeout(() => clearInterval(t), 15000);
     }
   })();
   </script>
