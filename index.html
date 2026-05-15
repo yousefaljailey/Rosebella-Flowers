@@ -4118,8 +4118,7 @@
     if (attr) {
       attr.style.display = '';
       const lnk = document.getElementById('testGoogLink');
-      const uri = place.googleMapsUri ?? place.GoogleMapsURI;
-      if (lnk && uri) lnk.href = uri;
+      if (lnk) lnk.href = 'https://www.google.com/maps/search/Rosebella+Flowers+%26+Chocolate+Doha+Qatar';
     }
     window._googleReviewsLoaded = true;
   }
@@ -4128,12 +4127,12 @@
     const { Place } = await google.maps.importLibrary('places');
     const { places } = await Place.searchByText({
       textQuery: 'Rosebella Flowers & Chocolate Doha Qatar',
-      fields: ['id', 'displayName', 'rating', 'userRatingCount', 'googleMapsUri'],
+      fields: ['id', 'displayName', 'rating', 'userRatingCount'],
     });
     console.log('[Rosebella Reviews] searchByText:', places);
     if (!places?.length) { console.warn('[Rosebella Reviews] Place not found'); return; }
     const place = places[0];
-    await place.fetchFields({ fields: ['reviews', 'rating', 'userRatingCount', 'googleMapsUri'] });
+    await place.fetchFields({ fields: ['reviews', 'rating', 'userRatingCount'] });
     console.log('[Rosebella Reviews] fetchFields:', place);
     if (place.reviews?.length) {
       renderGoogleReviews(place.reviews, place);
