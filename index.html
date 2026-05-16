@@ -5156,30 +5156,31 @@
 
     // Badge
     const badge = document.getElementById('cartCount');
-    badge.textContent = count;
-    badge.classList.toggle('visible', count > 0);
+    if (badge) { badge.textContent = count; badge.classList.toggle('visible', count > 0); }
 
     // Footer visibility
-    document.getElementById('cartFooter').style.display = cart.length ? 'block' : 'none';
+    const cartFooterEl = document.getElementById('cartFooter');
+    if (cartFooterEl) cartFooterEl.style.display = cart.length ? 'block' : 'none';
 
     // Subtotal row — only show when a promo is applied
     const hasDiscount = appliedPromo && discount > 0;
-    document.getElementById('cartSubtotalRow').style.display    = hasDiscount ? 'flex'  : 'none';
-    document.getElementById('cartDiscountRow').style.display    = hasDiscount ? 'flex'  : 'none';
-    document.getElementById('cartTotalsDivider').style.display  = hasDiscount ? 'block' : 'none';
-    document.getElementById('cartSubtotalVal').textContent      = subtotal.toFixed(0);
-    document.getElementById('cartDiscountVal').textContent      = discount.toFixed(0);
-    document.getElementById('cartTotalVal').textContent         = total.toFixed(0);
+    const _s = id => document.getElementById(id); // safe getter
+    if (_s('cartSubtotalRow'))   _s('cartSubtotalRow').style.display   = hasDiscount ? 'flex'  : 'none';
+    if (_s('cartDiscountRow'))   _s('cartDiscountRow').style.display   = hasDiscount ? 'flex'  : 'none';
+    if (_s('cartTotalsDivider')) _s('cartTotalsDivider').style.display = hasDiscount ? 'block' : 'none';
+    if (_s('cartSubtotalVal'))   _s('cartSubtotalVal').textContent     = subtotal.toFixed(0);
+    if (_s('cartDiscountVal'))   _s('cartDiscountVal').textContent     = discount.toFixed(0);
+    if (_s('cartTotalVal'))      _s('cartTotalVal').textContent        = total.toFixed(0);
 
     // Applied promo tag
     const appliedEl = document.getElementById('promoApplied');
     if (appliedPromo) {
-      document.getElementById('promoAppliedLabel').textContent = appliedPromo.label;
-      appliedEl.style.display = 'flex';
-      document.getElementById('promoSection').style.display = 'none';
+      if (_s('promoAppliedLabel')) _s('promoAppliedLabel').textContent = appliedPromo.label;
+      if (appliedEl) appliedEl.style.display = 'flex';
+      if (_s('promoSection')) _s('promoSection').style.display = 'none';
     } else {
-      appliedEl.style.display = 'none';
-      document.getElementById('promoSection').style.display = 'block';
+      if (appliedEl) appliedEl.style.display = 'none';
+      if (_s('promoSection')) _s('promoSection').style.display = 'block';
     }
 
     // WhatsApp message
@@ -5224,10 +5225,12 @@
     // WA message is now built and sent from the checkout page, not the cart button
 
     // Empty state
-    document.getElementById('cartEmptyState').style.display = cart.length ? 'none' : 'flex';
+    const emptyEl = document.getElementById('cartEmptyState');
+    if (emptyEl) emptyEl.style.display = cart.length ? 'none' : 'flex';
 
     // Items
     const container = document.getElementById('cartItemsContainer');
+    if (!container) return;
     container.innerHTML = cart.map(item => {
       const variantLine = (() => {
         if (!item.variants) return '';
