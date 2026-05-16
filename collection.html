@@ -376,7 +376,6 @@
     .vm-addon:hover { border-color: rgba(198,146,42,0.45); transform: translateY(-2px); }
     .vm-addon.active { border-color: var(--gold); }
     .vm-addon-visual { height: 70px; position: relative; display: flex; align-items: center; justify-content: center; }
-    .vm-addon-icon { font-size: 34px; position: relative; z-index: 1; }
     .vm-addon-tick {
       position: absolute; top: 6px; right: 6px; z-index: 2;
       background: var(--gold); color: #fff; border-radius: 50%;
@@ -522,7 +521,6 @@
   <div class="col-hero-bg"></div>
   <div class="col-hero-glow"></div>
   <div class="col-hero-inner">
-    <div class="col-hero-icon" id="heroIcon">🌸</div>
     <div>
       <div class="col-hero-eyebrow">Rosebella Collection</div>
       <h1 class="col-hero-title" id="heroTitle">Loading…</h1>
@@ -556,26 +554,11 @@ const params   = new URLSearchParams(location.search);
 const CAT_SLUG = params.get('cat') || '';
 const CAT_NAME = params.get('name') ? decodeURIComponent(params.get('name')) : CAT_SLUG.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 
-// Category icons map
-const CAT_ICONS = {
-  'bella-roses':'🌹','hand-tied-bouquets':'💐','luxury-box-arrangements':'🎁',
-  'anniversary-bouquet':'💕','floral-arrangements':'🌸','vase-collection':'🏺',
-  'al-haj-collection':'🕌','eid-collections':'🌙','birthday-arrangments':'🎂',
-  'bridal-bouquet':'👰','new-collection':'✨','i-love-you':'❤️',
-  'mother-day':'🌷','graduation-2025':'🎓','get-well-soon':'🌼',
-  'congratulations':'🎉','letters-of-love':'💌','lily-arrangement':'🌺',
-  'special-bouquet':'💫','ramadan-collection':'🌙','rosebella-valentine-menu':'💝',
-  'basket':'🧺','balloons':'🎈','fruit-arrangment':'🍓',
-  'welcome-baby':'👶','teacher-day':'🍎','garangao-2025':'🪔',
-  'qatar-national-day':'🇶🇦'
-};
-
 // Populate header
 document.title = `${CAT_NAME} — Rosebella`;
 document.getElementById('pageTitle').textContent = `${CAT_NAME} — Rosebella`;
 document.getElementById('breadcrumbName').textContent = CAT_NAME;
 document.getElementById('heroTitle').innerHTML = CAT_NAME.replace(/(\s)(\w+)$/, '$1<em>$2</em>');
-document.getElementById('heroIcon').textContent = CAT_ICONS[CAT_SLUG] || '🌸';
 
 // ── Cart system ─────────────────────────────────
 const CART_KEY = 'rosebella_cart';
@@ -632,11 +615,11 @@ function addToCart(btn, name) { openVariantModal(btn, name); }
 
 // ── Variant modal ───────────────────────────────
 const VARIANTS = { addons: [
-  { id:'balloon',   label:'Balloon',    icon:'🎈', price:35, bg:'radial-gradient(circle at 50% 35%,#fce4f0 0%,#f07898 50%,#b03060 100%)' },
-  { id:'chocolate', label:'Chocolates', icon:'🍫', price:55, bg:'radial-gradient(circle at 50% 35%,#c8a078 0%,#8c5030 50%,#3e1008 100%)' },
-  { id:'vase',      label:'Vase',       icon:'🏺', price:45, bg:'radial-gradient(circle at 50% 35%,#c8e8e0 0%,#60a890 50%,#1e6050 100%)' },
-  { id:'candle',    label:'Candle',     icon:'🕯', price:30, bg:'radial-gradient(circle at 50% 35%,#fff0c0 0%,#e8c050 50%,#987010 100%)' },
-  { id:'perfume',   label:'Perfume',    icon:'✨', price:65, bg:'radial-gradient(circle at 50% 35%,#ead0f8 0%,#9860c8 50%,#4a1080 100%)' },
+  { id:'balloon',   label:'Balloon',    price:35, bg:'radial-gradient(circle at 50% 35%,#fce4f0 0%,#f07898 50%,#b03060 100%)' },
+  { id:'chocolate', label:'Chocolates', price:55, bg:'radial-gradient(circle at 50% 35%,#c8a078 0%,#8c5030 50%,#3e1008 100%)' },
+  { id:'vase',      label:'Vase',       price:45, bg:'radial-gradient(circle at 50% 35%,#c8e8e0 0%,#60a890 50%,#1e6050 100%)' },
+  { id:'candle',    label:'Candle',     price:30, bg:'radial-gradient(circle at 50% 35%,#fff0c0 0%,#e8c050 50%,#987010 100%)' },
+  { id:'perfume',   label:'Perfume',    price:65, bg:'radial-gradient(circle at 50% 35%,#ead0f8 0%,#9860c8 50%,#4a1080 100%)' },
 ]};
 let activeVariant = { cardEl:null, name:'', cat:'', basePrice:0, addons:[] };
 
@@ -679,7 +662,6 @@ function vmRenderAddons() {
     const on = activeVariant.addons.includes(a.id);
     return `<button class="vm-addon${on?' active':''}" onclick="vmToggleAddon('${a.id}')" type="button">
       <div class="vm-addon-visual" style="background:${a.bg}">
-        <span class="vm-addon-icon">${a.icon}</span>
         ${on?'<span class="vm-addon-tick">✓</span>':''}
       </div>
       <div class="vm-addon-foot">
