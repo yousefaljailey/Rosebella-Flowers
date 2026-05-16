@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us — Rosebella Flowers & Chocolates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold:      #C6922A;
+      --gold-light:#D4A84B;
+      --charcoal:  #2D2D2D;
+      --charcoal2: #1a1a1a;
+      --charcoal3: #0f0e09;
+      --ivory:     #FAF8F0;
+      --ivory2:    #F3F0E8;
+      --white:     #FFFFFF;
+      --serif:     'Cormorant Garamond', Georgia, serif;
+      --sans:      'Montserrat', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--ivory); color: var(--charcoal); overflow-x: hidden; font-family: var(--sans); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 72px;
+      background: var(--ivory); border-bottom: 1px solid rgba(198,146,42,0.15);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    }
+    .nav-logo { font-family: var(--serif); font-size: 20px; font-weight: 600; letter-spacing: 0.12em; text-decoration: none; color: var(--charcoal); }
+    .nav-logo span { color: var(--gold); }
+    .nav-back { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--charcoal); text-decoration: none; display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
+    .nav-back:hover { color: var(--gold); }
+    .nav-shop { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; background: var(--gold); color: var(--white); padding: 10px 24px; text-decoration: none; transition: background 0.3s; }
+    .nav-shop:hover { background: var(--gold-light); }
+
+    /* ── HERO ── */
+    .contact-hero {
+      padding: 160px 64px 100px;
+      background: var(--charcoal2);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .contact-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(198,146,42,0.1) 0%, transparent 70%);
+    }
+    .contact-hero .eyebrow {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold);
+      margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 14px; position: relative;
+    }
+    .contact-hero .eyebrow::before, .contact-hero .eyebrow::after {
+      content: ''; display: block; width: 40px; height: 1px; background: var(--gold); opacity: 0.5;
+    }
+    .contact-hero h1 {
+      font-family: var(--serif); font-size: clamp(48px, 7vw, 88px);
+      font-weight: 300; color: var(--white); line-height: 1.05; letter-spacing: -0.02em;
+      margin-bottom: 20px; position: relative;
+    }
+    .contact-hero h1 em { font-style: italic; color: var(--gold); }
+    .contact-hero p {
+      font-family: var(--serif); font-size: clamp(16px, 1.8vw, 20px);
+      font-style: italic; color: rgba(255,255,255,0.55); line-height: 1.7; position: relative;
+    }
+
+    /* ── CONTACT CARDS ── */
+    .contact-section { padding: 100px 64px; background: var(--ivory); }
+    .contact-inner { max-width: 1100px; margin: 0 auto; }
+    .contact-section-label {
+      font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold);
+      text-align: center; margin-bottom: 16px;
+    }
+    .contact-section-title {
+      font-family: var(--serif); font-size: clamp(32px, 4vw, 52px);
+      font-weight: 300; color: var(--charcoal); text-align: center;
+      letter-spacing: -0.02em; margin-bottom: 60px; line-height: 1.15;
+    }
+    .contact-section-title em { font-style: italic; color: var(--gold); }
+
+    /* Primary contact cards */
+    .contact-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-bottom: 2px; }
+    .contact-card {
+      background: var(--white); padding: 52px 44px;
+      border: 1px solid rgba(198,146,42,0.12);
+      display: flex; flex-direction: column; align-items: flex-start;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+      text-decoration: none; color: inherit;
+    }
+    .contact-card:hover { border-color: var(--gold); box-shadow: 0 12px 48px rgba(198,146,42,0.12); transform: translateY(-4px); }
+    .contact-card-icon {
+      width: 56px; height: 56px; background: rgba(198,146,42,0.08);
+      border: 1px solid rgba(198,146,42,0.25);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px; transition: background 0.3s;
+    }
+    .contact-card:hover .contact-card-icon { background: var(--gold); }
+    .contact-card:hover .contact-card-icon svg { stroke: #fff; }
+    .contact-card:hover .contact-card-icon .fill-icon { fill: #fff; }
+    .contact-card-icon svg { width: 22px; height: 22px; stroke: var(--gold); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.3s; }
+    .contact-card-label {
+      font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .contact-card-value {
+      font-family: var(--serif); font-size: 24px; font-weight: 400;
+      color: var(--charcoal); line-height: 1.3; margin-bottom: 8px;
+    }
+    .contact-card-sub {
+      font-family: var(--sans); font-size: 11px; color: #999; line-height: 1.5;
+      margin-top: auto; padding-top: 20px;
+    }
+    .contact-card-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-top: 20px; padding: 11px 22px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .contact-card-btn-gold { background: var(--gold); color: #fff; }
+    .contact-card-btn-gold:hover { background: var(--gold-light); }
+    .contact-card-btn-outline { border: 1.5px solid var(--charcoal); color: var(--charcoal); }
+    .contact-card-btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .contact-card-btn-wa { background: #25D366; color: #fff; }
+    .contact-card-btn-wa:hover { background: #1ebe5d; }
+
+    /* Social row */
+    .social-section { background: var(--charcoal2); padding: 80px 64px; }
+    .social-inner { max-width: 1100px; margin: 0 auto; }
+    .social-title {
+      font-family: var(--serif); font-size: clamp(28px, 3.5vw, 48px);
+      font-weight: 300; color: var(--white); text-align: center;
+      margin-bottom: 12px; letter-spacing: -0.02em;
+    }
+    .social-title em { font-style: italic; color: var(--gold); }
+    .social-sub {
+      font-family: var(--sans); font-size: 11px; letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.35); text-align: center; margin-bottom: 52px;
+    }
+    .social-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .social-card {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 24px; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08); text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      gap: 14px;
+    }
+    .social-card:hover { background: rgba(198,146,42,0.1); border-color: rgba(198,146,42,0.4); transform: translateY(-3px); }
+    .social-card svg { width: 28px; height: 28px; }
+    .social-card-name { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+    .social-card-handle { font-family: var(--serif); font-size: 16px; color: var(--white); }
+
+    /* Info strip */
+    .info-strip { background: var(--ivory2); padding: 60px 64px; }
+    .info-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+    .info-block {}
+    .info-block-icon { font-size: 28px; margin-bottom: 16px; }
+    .info-block-title { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .info-block-body { font-family: var(--serif); font-size: 16px; color: #555; line-height: 1.7; }
+
+    /* Footer strip */
+    .contact-footer {
+      background: var(--charcoal3); padding: 40px 64px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    .contact-footer .logo { font-family: var(--serif); font-size: 18px; letter-spacing: 0.12em; color: rgba(255,255,255,0.7); }
+    .contact-footer .logo span { color: var(--gold); }
+    .contact-footer p { font-family: var(--sans); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.08em; }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
+      .contact-hero, .contact-section, .social-section, .info-strip { padding-left: 24px; padding-right: 24px; }
+      .contact-cards { grid-template-columns: 1fr; }
+      .social-cards { grid-template-columns: 1fr 1fr; }
+      .info-inner { grid-template-columns: 1fr; gap: 32px; }
+      .contact-footer { padding: 32px 24px; }
+    }
+    @media (max-width: 560px) {
+      .social-cards { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">ROSE<span>BELLA</span></a>
+    <a href="index.html" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Home
+    </a>
+    <a href="index.html#collections" class="nav-shop">Shop Now</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="contact-hero">
+    <div class="reveal">
+      <div class="eyebrow">Contact Us</div>
+      <h1>We'd love to<br>hear from <em>you</em></h1>
+      <p>Reach us any time — we're available 24 hours a day, 7 days a week.</p>
+    </div>
+  </section>
+
+  <!-- CONTACT CARDS -->
+  <section class="contact-section">
+    <div class="contact-inner">
+      <div class="contact-section-label reveal">Reach Us</div>
+      <h2 class="contact-section-title reveal">Choose your preferred<br><em>way to connect</em></h2>
+
+      <div class="contact-cards">
+
+        <!-- WhatsApp -->
+        <a href="https://wa.me/97433446618" target="_blank" rel="noopener" class="contact-card reveal">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round">
+              <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+            </svg>
+          </div>
+          <div class="contact-card-label">WhatsApp</div>
+          <div class="contact-card-value">+974 33 446 618</div>
+          <div class="contact-card-sub">Fastest response · Usually replies in minutes</div>
+          <span class="contact-card-btn contact-card-btn-wa">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.533 5.849L.057 23.617a.75.75 0 00.906.94l5.946-1.557A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.698-.5-5.254-1.376l-.372-.215-3.899 1.021 1.04-3.794-.235-.38A9.932 9.932 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+            Chat on WhatsApp
+          </span>
+        </a>
+
+        <!-- Phone -->
+        <a href="tel:+97455954896" class="contact-card reveal reveal-delay-1">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.25 9.09 19.79 19.79 0 01.22 5.56 2 2 0 012.18 3h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 10.09a16 16 0 006 6l1.27-.73a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <div class="contact-card-label">Phone</div>
+          <div class="contact-card-value">+974 55 954 896</div>
+          <div class="contact-card-sub">Available 24/7 · Same-day delivery orders welcome</div>
+          <span class="contact-card-btn contact-card-btn-outline">Call Now</span>
+        </a>
+
+        <!-- Email -->
+        <a href="mailto:Yousef@rosebella.co" class="contact-card reveal reveal-delay-2">
+          <div class="contact-card-icon">
+            <svg viewBox="0 0 24 24" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div class="contact-card-label">Email</div>
+          <div class="contact-card-value">Yousef@rosebella.co</div>
+          <div class="contact-card-sub">For enquiries, partnerships &amp; corporate orders</div>
+          <span class="contact-card-btn contact-card-btn-gold">Send Email</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- INFO STRIP -->
+  <section class="info-strip">
+    <div class="info-inner">
+      <div class="info-block reveal">
+        <div class="info-block-icon">🕐</div>
+        <div class="info-block-title">Opening Hours</div>
+        <div class="info-block-body">Open 24 hours a day,<br>7 days a week, every day of the year.<br>No time restrictions.</div>
+      </div>
+      <div class="info-block reveal reveal-delay-1">
+        <div class="info-block-icon">📍</div>
+        <div class="info-block-title">Delivery Areas</div>
+        <div class="info-block-body">All areas in Doha, Qatar.<br>Lusail · Al Wakra · Al Khor · West Bay<br>Contact us for outside Doha.</div>
+      </div>
+      <div class="info-block reveal reveal-delay-2">
+        <div class="info-block-icon">🚀</div>
+        <div class="info-block-title">Same-Day Delivery</div>
+        <div class="info-block-body">Order any time and we deliver<br>at your preferred time.<br>Average delivery: 3 hours.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL MEDIA -->
+  <section class="social-section">
+    <div class="social-inner">
+      <h2 class="social-title reveal">Follow us on<br><em>social media</em></h2>
+      <div class="social-sub reveal">Stay updated with our latest collections, offers and moments</div>
+
+      <div class="social-cards">
+
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/rosebella_co/" target="_blank" rel="noopener" class="social-card reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+          <div class="social-card-name">Instagram</div>
+          <div class="social-card-handle">@rosebella_co</div>
+        </a>
+
+        <!-- Facebook -->
+        <a href="https://www.facebook.com/p/Rosebella-Flowers-100087185779382/" target="_blank" rel="noopener" class="social-card reveal reveal-delay-1">
+          <svg viewBox="0 0 24 24" fill="var(--gold)" width="28" height="28">
+            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+          </svg>
+          <div class="social-card-name">Facebook</div>
+          <div class="social-card-handle">Rosebella Flowers</div>
+        </a>
+
+        <!-- TikTok -->
+        <a href="https://www.tiktok.com/@rosebella_co" target="_blank" rel="noopener" class="social-card reveal reveal-delay-2">
+          <svg viewBox="0 0 24 24" fill="var(--gold)" width="28" height="28">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.52V6.76a4.85 4.85 0 01-1.02-.07z"/>
+          </svg>
+          <div class="social-card-name">TikTok</div>
+          <div class="social-card-handle">@rosebella_co</div>
+        </a>
+
+        <!-- WhatsApp Channel -->
+        <a href="https://wa.me/97433446618" target="_blank" rel="noopener" class="social-card reveal reveal-delay-3">
+          <svg viewBox="0 0 24 24" fill="var(--gold)" width="28" height="28">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.533 5.849L.057 23.617a.75.75 0 00.906.94l5.946-1.557A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.698-.5-5.254-1.376l-.372-.215-3.899 1.021 1.04-3.794-.235-.38A9.932 9.932 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          <div class="social-card-name">WhatsApp</div>
+          <div class="social-card-handle">+974 33 446 618</div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER STRIP -->
+  <footer class="contact-footer">
+    <div class="logo">ROSE<span>BELLA</span></div>
+    <p>Luxury Flowers &amp; Chocolates — Doha, Qatar</p>
+    <p>© 2026 Rosebella — All Rights Reserved</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.reveal').forEach(el => {
+      new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.08 }).observe(el);
+    });
+    setTimeout(() => {
+      document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
+    }, 800);
+  </script>
+</body>
+</html>
