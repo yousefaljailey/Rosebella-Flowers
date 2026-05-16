@@ -6431,68 +6431,60 @@
     updatePosUI();
   }
 
-  // ── Print receipt ─────────────────────────────
-  function posPrintReceipt() {
-    if (posOrder.items.length === 0) { apToast('Add items before printing.'); return; }
-    const { subtotal, discount, total } = posCalcTotals();
-    const now      = new Date();
-    const dateStr  = now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
-    const timeStr  = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-    const orderId  = `#${now.getTime().toString().slice(-6)}`;
+  // ══════════════════════════════════════════════
+  //  SHARED RECEIPT ENGINE
+  // ══════════════════════════════════════════════
+  function rbOpenReceipt(html,title){const w=window.open('','_blank','width=680,height=900');w.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${title}</title><style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&display=swap');*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}@page{size:A4;margin:14mm 16mm}body{font-family:'Montserrat',Arial,sans-serif;background:#fff;color:#1a1a1a;max-width:600px;margin:0 auto;padding:32px 28px;font-size:13px}.rh{text-align:center;padding-bottom:20px;border-bottom:2px solid #C6922A;margin-bottom:20px}.rh-brand{font-family:'Playfair Display',Georgia,serif;font-size:32px;font-weight:600;letter-spacing:0.18em;color:#1a1a1a}.rh-brand span{color:#C6922A}.rh-sub{font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:#999;margin-top:4px}.rh-title{font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#C6922A;margin-top:12px}.rm{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #eee;gap:16px}.rm-id{font-family:'Playfair Display',Georgia,serif;font-size:20px;color:#1a1a1a;font-weight:600}.rm-dt{font-size:11px;color:#888;text-align:right;line-height:1.6}.rb-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.rb{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 12px;border-radius:3px}.rb-gold{background:#fdf3e0;color:#b07a10;border:1px solid #e8c870}.rb-green{background:#e8f8ec;color:#2a7a2a;border:1px solid #a8d8b8}.rb-red{background:#feeaec;color:#c0392b;border:1px solid #f5b8bc}.rb-blue{background:#e8f0ff;color:#2244aa;border:1px solid #b0c4f8}.rb-grey{background:#f4f4f4;color:#555;border:1px solid #ddd}.rb-purple{background:#f3eaff;color:#7b3fa0;border:1px solid #d0aaf0}.sec-lbl{font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#C6922A;margin-bottom:8px;margin-top:18px}table{width:100%;border-collapse:collapse}thead th{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#999;padding:6px 0;border-bottom:1px solid #eee}tbody tr td{padding:9px 0;border-bottom:1px solid #f5f5f5;vertical-align:top}.it-name{font-family:'Playfair Display',Georgia,serif;font-size:14px;color:#1a1a1a}.it-cat{font-size:10px;color:#bbb;margin-top:2px}.it-qty{font-size:12px;color:#888;text-align:center}.it-unit{font-size:11px;color:#aaa;text-align:center;margin-top:2px}.it-tot{font-size:13px;font-weight:700;color:#1a1a1a;text-align:right}.tot-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:#888}.tot-row.disc{color:#2a7a2a}.tot-row.grand{border-top:2px solid #1a1a1a;margin-top:8px;padding-top:10px;font-size:16px;font-weight:700;color:#1a1a1a}.tot-row.grand span:last-child{font-family:'Playfair Display',Georgia,serif;font-size:20px}.del-box{background:#fafaf8;border:1px solid #eee;border-radius:6px;padding:14px 16px;margin-top:6px}.del-row{display:flex;gap:10px;margin-bottom:6px;font-size:12px}.del-row:last-child{margin-bottom:0}.del-lbl{font-weight:700;color:#888;min-width:90px;font-size:11px;letter-spacing:0.04em}.del-val{color:#1a1a1a;flex:1}.pipe{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}.pipe-step{font-size:10px;font-weight:600;padding:5px 10px;border-radius:3px;background:#f4f4f4;color:#bbb}.pipe-step.done{background:#e8f8ec;color:#2a7a2a}.pipe-step.active{background:#fdf3e0;color:#b07a10;font-weight:700}.pipe-arr{color:#ccc;font-size:12px}.gift-box{background:#fdf8f0;border:1px solid #e8c870;border-radius:6px;padding:12px 16px;margin-top:6px}.gift-msg{font-family:'Playfair Display',Georgia,serif;font-size:14px;font-style:italic;color:#555;line-height:1.6}.rf{text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid #eee}.rf-msg{font-family:'Playfair Display',Georgia,serif;font-size:14px;font-style:italic;color:#888}.rf-contact{font-size:10px;color:#bbb;margin-top:6px;letter-spacing:0.04em}@media print{body{max-width:none;padding:0}.no-print{display:none!important}}.print-bar{display:flex;gap:10px;justify-content:center;margin-bottom:24px}.print-btn{font-family:'Montserrat',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:#C6922A;color:#fff;border:none;padding:10px 28px;cursor:pointer;border-radius:4px}.print-btn:hover{background:#d4a43e}</style></head><body><div class="print-bar no-print"><button class="print-btn" onclick="window.print()">🖨 Print / Save as PDF</button><button class="print-btn" style="background:#555;" onclick="window.close()">✕ Close</button></div>${html}</body></html>`);w.document.close();setTimeout(()=>w.print(),600);}
 
-    const itemRows = posOrder.items.map(i => `
-      <tr><td style="padding:4px 0;font-family:Georgia,serif;font-size:13px;">${i.name}</td>
-          <td style="text-align:center;padding:4px 8px;font-size:11px;color:#666;">×${i.qty}</td>
-          <td style="text-align:right;font-weight:700;font-size:13px;">QR&nbsp;${(i.price*i.qty).toFixed(0)}</td></tr>`).join('');
+  function rbReceiptHeader(orderId,dateStr,type,badges){return `<div class="rh"><div class="rh-brand">ROSE<span>BELLA</span></div><div class="rh-sub">Luxury Flowers &amp; Chocolates &nbsp;·&nbsp; Doha, Qatar</div><div class="rh-title">${type}</div></div><div class="rm"><div class="rm-id">${orderId}</div><div class="rm-dt">${dateStr}</div></div><div class="rb-row">${badges}</div>`;}
 
-    const discRow = discount > 0 ? `
-      <tr><td colspan="2" style="font-size:11px;color:#999;padding:3px 0;">${posOrder.discountType==='percent'?posOrder.discountValue+'% discount':'Discount'}</td>
-          <td style="text-align:right;font-size:11px;color:#999;">−QR&nbsp;${discount.toFixed(0)}</td></tr>` : '';
+  function rbItemsTable(items){return `<div class="sec-lbl">Items</div><table><thead><tr><th style="text-align:left">Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>${items.map(i=>`<tr><td><div class="it-name">${i.name}</div>${i.cat?`<div class="it-cat">${i.cat}</div>`:''}</td><td class="it-qty">${i.qty}<div class="it-unit">× QR ${(i.price||0).toFixed(0)}</div></td><td class="it-tot">QR ${((i.price||0)*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}</tbody></table>`;}
 
-    const methodLabel = posOrder.paymentMethod === 'cash' ? '💵 Cash' : '💳 Card';
-    const statusLabel = posOrder.status === 'paid' ? '✓ Paid' : '○ Unpaid';
+  function posPrintReceipt(){
+    if(posOrder.items.length===0){apToast('Add items before printing.');return;}
+    const{subtotal,discount,total}=posCalcTotals();
+    const now=new Date();
+    const dateStr=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' &nbsp;·&nbsp; '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const orderId=`#${now.getTime().toString().slice(-6)}`;
+    const payLabel=posOrder.paymentMethod==='cash'?'Cash':'Card';
+    const payBadge=posOrder.paymentMethod==='cash'?'rb-grey':'rb-blue';
+    const statusBadge=posOrder.status==='paid'?'rb-green':'rb-red';
+    const statusLabel=posOrder.status==='paid'?'✓ Paid':'○ Unpaid';
+    const discLabel=posOrder.discountType==='percent'?`${posOrder.discountValue}% discount`:'Discount';
+    const html=`${rbReceiptHeader(orderId,dateStr,'In-Store Receipt',`<span class="rb rb-gold">🏪 POS Sale</span><span class="rb ${payBadge}">💳 ${payLabel}</span><span class="rb ${statusBadge}">${statusLabel}</span>`)}${rbItemsTable(posOrder.items)}<div style="margin-top:14px;"><div class="tot-row"><span>Subtotal</span><span>QR ${subtotal.toFixed(0)}</span></div>${discount>0?`<div class="tot-row disc"><span>${discLabel}</span><span>−QR ${discount.toFixed(0)}</span></div>`:''}<div class="tot-row grand"><span>Total</span><span>QR ${total.toFixed(0)}</span></div></div><div class="rf"><div class="rf-msg">"Thank you for choosing Rosebella 🌸"</div><div class="rf-contact">+974 33 446 618 &nbsp;·&nbsp; www.rosebella.co &nbsp;·&nbsp; @rosebella.flowers</div></div>`;
+    rbOpenReceipt(html,`Receipt ${orderId}`);
+  }
 
-    const receiptWin = window.open('', '_blank', 'width=400,height=650');
-    receiptWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt ${orderId}</title>
-    <style>
-      *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:Arial,sans-serif;background:#fff;color:#222;max-width:320px;margin:0 auto;padding:24px 20px}
-      h1{font-family:Georgia,serif;font-size:22px;font-weight:400;letter-spacing:0.12em;text-align:center}
-      .sub{font-size:10px;letter-spacing:0.1em;color:#888;text-align:center;text-transform:uppercase;margin-top:3px}
-      hr{border:none;border-top:1px solid #ddd;margin:12px 0}
-      hr.dashed{border-top:1px dashed #ccc}
-      .meta{font-size:11px;color:#666;margin-bottom:10px}
-      .meta strong{font-size:13px;color:#222;display:block;letter-spacing:0.08em;margin-bottom:2px}
-      table{width:100%;border-collapse:collapse}
-      th{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;padding-bottom:6px}
-      .grand td{font-size:16px;font-weight:700;padding-top:8px;border-top:2px solid #222}
-      .tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-      .tag{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:3px}
-      .cash{background:#f0f0f0;color:#444}.card{background:#e8f0ff;color:#2244aa}
-      .paid{background:#e8f8ec;color:#2a7a2a}.unpaid{background:#feeaec;color:#c0392b}
-      .footer{text-align:center;margin-top:20px;font-family:Georgia,serif;font-size:12px;color:#888;font-style:italic}
-      @media print{body{max-width:none}}
-    </style></head><body>
-    <h1>ROSEBELLA</h1>
-    <div class="sub">Luxury Flowers &amp; Chocolates · Doha, Qatar</div>
-    <hr/><div class="meta"><strong>${orderId}</strong>${dateStr} &nbsp; ${timeStr}</div>
-    <hr class="dashed"/>
-    <table><thead><tr><th style="text-align:left">Item</th><th></th><th style="text-align:right">Amount</th></tr></thead>
-    <tbody>${itemRows}</tbody></table>
-    <hr class="dashed"/>
-    <table><tbody>
-      <tr><td style="font-size:11px;color:#888;padding:3px 0">Subtotal</td><td></td><td style="text-align:right;font-size:11px;color:#888">QR&nbsp;${subtotal.toFixed(0)}</td></tr>
-      ${discRow}
-      <tr class="grand"><td>TOTAL</td><td></td><td style="text-align:right">QR&nbsp;${total.toFixed(0)}</td></tr>
-    </tbody></table>
-    <div class="tags">
-      <span class="tag ${posOrder.paymentMethod}">${methodLabel}</span>
-      <span class="tag ${posOrder.status}">${statusLabel}</span>
-    </div>
-    <div class="footer">Thank you for choosing Rosebella 🌸</div>
-    </body></html>`);
-    receiptWin.document.close();
-    setTimeout(() => receiptWin.print(), 400);
+  function posOrdPrintReceipt(orderId){
+    const posR=(function(){try{return JSON.parse(localStorage.getItem(POS_ORDERS_KEY))||[];}catch(e){return[];}})();
+    const webR=(function(){try{return JSON.parse(localStorage.getItem('rosebella_orders'))||[];}catch(e){return[];}})();
+    let o=posR.find(x=>x.id===orderId), source='pos';
+    if(!o){o=webR.find(x=>x.id===orderId);source='online';}
+    if(!o){apToast('Order not found.');return;}
+    const ts=new Date(source==='pos'?o.timestamp:o.createdAt);
+    const dateStr=ts.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' &nbsp;·&nbsp; '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const delivStatus=delStatusMap[o.id]||(source==='pos'?'delivered':'pending');
+    const sLabels={pending:'Pending',preparing:'Preparing',out:'Out for Delivery',delivered:'Delivered'};
+    const sBadge={pending:'rb-gold',preparing:'rb-blue',out:'rb-purple',delivered:'rb-green'};
+    const payLabel=(o.paymentMethod==='cash'||o.paymentMethod==='cash_on_delivery')?'Cash on Delivery':'Card';
+    const payBadge=(o.paymentMethod==='cash'||o.paymentMethod==='cash_on_delivery')?'rb-grey':'rb-blue';
+    const paidBadge=o.status==='paid'?'rb-green':o.status==='unpaid'?'rb-red':'';
+    const paidLabel=o.status==='paid'?'✓ Paid':o.status==='unpaid'?'○ Unpaid':'';
+    const pipelineSteps=['pending','preparing','out','delivered'];
+    const doneIdx=pipelineSteps.indexOf(delivStatus);
+    const pipeHtml=pipelineSteps.map((s,i)=>`<span class="pipe-step ${i<doneIdx?'done':i===doneIdx?'active':''}">${sLabels[s]}</span>${i<pipelineSteps.length-1?'<span class="pipe-arr">›</span>':''}`).join('');
+    let delivHtml='';
+    if(source==='online'&&o.recipient){
+      const r=o.recipient;
+      const slotObj=(typeof TIME_SLOTS!=='undefined')?TIME_SLOTS.find(s=>s.id===o.deliverySlot?.slot):null;
+      const dDate=o.deliverySlot?.date?new Date(o.deliverySlot.date).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'—';
+      const dTime=o.deliverySlot?.type==='express'?'Express (90 min)':(slotObj?.label||o.deliverySlot?.slot||'—');
+      delivHtml=`<div class="sec-lbl">Delivery Details</div><div class="del-box"><div class="del-row"><span class="del-lbl">Recipient</span><span class="del-val">${r.name||'—'}</span></div><div class="del-row"><span class="del-lbl">Phone</span><span class="del-val">${r.phone||'—'}</span></div><div class="del-row"><span class="del-lbl">Address</span><span class="del-val">${[r.landmark,r.address].filter(Boolean).join(', ')||'—'}</span></div><div class="del-row"><span class="del-lbl">Date</span><span class="del-val">${dDate}</span></div><div class="del-row"><span class="del-lbl">Time slot</span><span class="del-val">${dTime}</span></div></div>`;
+    }
+    const giftHtml=o.giftMessage?`<div class="sec-lbl">Gift Message</div><div class="gift-box"><div class="gift-msg">"${o.giftMessage}"</div></div>`:'';
+    const subtotal=o.subtotal||o.total||0, disc=o.discount||0, expressFee=o.deliverySlot?.expressFee||o.coExpressFee||0;
+    const html=`${rbReceiptHeader(o.id,dateStr,source==='pos'?'In-Store Receipt':'Order Confirmation',`<span class="rb ${source==='pos'?'rb-gold':'rb-blue'}">${source==='pos'?'🏪 In-Store':'🌐 Online Order'}</span><span class="rb ${sBadge[delivStatus]}">${sLabels[delivStatus]}</span><span class="rb ${payBadge}">${payLabel}</span>${paidLabel?`<span class="rb ${paidBadge}">${paidLabel}</span>`:''}`)}${rbItemsTable(o.items||[])}<div style="margin-top:14px;">${disc>0?`<div class="tot-row"><span>Subtotal</span><span>QR ${subtotal.toFixed(0)}</span></div><div class="tot-row disc"><span>Discount</span><span>−QR ${disc.toFixed(0)}</span></div>`:''} ${expressFee>0?`<div class="tot-row"><span>Express delivery</span><span>+QR ${expressFee.toFixed(0)}</span></div>`:''}<div class="tot-row grand"><span>Total</span><span>QR ${(o.total||0).toFixed(0)}</span></div></div><div class="sec-lbl">Order Status</div><div class="pipe">${pipeHtml}</div>${delivHtml}${giftHtml}<div class="rf"><div class="rf-msg">"Thank you for choosing Rosebella 🌸"</div><div class="rf-contact">+974 33 446 618 &nbsp;·&nbsp; www.rosebella.co &nbsp;·&nbsp; @rosebella.flowers</div></div>`;
+    rbOpenReceipt(html,`Order ${o.id}`);
   }
 
   // ── History & Summary ─────────────────────────
@@ -6686,7 +6678,7 @@
         <div class="pos-del-hd"><div><div class="pos-del-id">${o.displayId}</div><div class="pos-del-time">${dateStr} · ${timeStr}</div></div><div style="display:flex;align-items:center;gap:8px;">${srcTag}<span class="pos-ord-total" style="font-size:14px;">QR ${(o.total||0).toFixed(0)}</span></div></div>
         <div class="pos-del-items">${itemsStr}</div>
         ${recip.name && recip.name !== 'Walk-in' ? `<div class="pos-del-recipient">👤 ${recip.name}${recip.phone?' · '+recip.phone:''} ${addr?'· 📍 '+addr:''}</div>` : ''}
-        <div class="pos-del-footer"><div class="pos-status-pipeline">${pipelineHtml}</div>${mapsLink ? `<a class="pos-gps-btn" href="${mapsLink}" target="_blank">📍 GPS</a>` : ''}</div>
+        <div class="pos-del-footer"><div class="pos-status-pipeline">${pipelineHtml}</div>${mapsLink ? `<a class="pos-gps-btn" href="${mapsLink}" target="_blank">📍 GPS</a>` : ''}<button class="pos-gps-btn" onclick="posOrdPrintReceipt('${o.displayId}')" style="background:none;cursor:pointer;">📄 Receipt</button></div>
       </div>`;
     }).join('');
   }
