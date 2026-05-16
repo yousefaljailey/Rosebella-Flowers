@@ -101,99 +101,69 @@
     }
     .nav-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
 
-    /* ── HERO ── */
-    .hero {
-      position: relative; min-height: 100vh;
-      background: var(--charcoal2);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    /* Architectural grid overlay */
-    .hero-grid { position: absolute; inset: 0; pointer-events: none; opacity: 0.07; }
-    .hero-grid-line { position: absolute; background: var(--gold); }
-    .hgl-v1 { left: 20%; top: 0; width: 1px; height: 100%; animation: lineRevealV 1.8s 0.2s ease both; }
-    .hgl-v2 { right: 20%; top: 0; width: 1px; height: 100%; animation: lineRevealV 1.8s 0.4s ease both; }
-    .hgl-h1 { top: 33%; left: 0; height: 1px; width: 100%; animation: lineRevealH 1.8s 0.6s ease both; }
-    .hgl-h2 { top: 66%; left: 0; height: 1px; width: 100%; animation: lineRevealH 1.8s 0.8s ease both; }
-    @keyframes lineRevealV { from { transform: scaleY(0); transform-origin: top; } to { transform: scaleY(1); } }
-    @keyframes lineRevealH { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); } }
-    /* Warm radial glow */
-    .hero-glow {
-      position: absolute; inset: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 65% 55% at 55% 48%, rgba(198,146,42,0.09) 0%, transparent 70%),
-        radial-gradient(ellipse 35% 35% at 15% 85%, rgba(198,146,42,0.05) 0%, transparent 60%);
-    }
-    /* Oversized watermark */
-    .hero-watermark {
-      position: absolute; bottom: -5%; left: 50%; transform: translateX(-50%);
-      font-family: var(--serif); font-size: clamp(140px, 22vw, 320px);
-      font-weight: 600; letter-spacing: 0.08em; white-space: nowrap;
-      color: rgba(255,255,255,0.025); pointer-events: none; user-select: none; line-height: 1;
-    }
-    .hero-content {
-      position: relative; z-index: 2;
-      display: flex; flex-direction: column; align-items: center;
-      text-align: center;
-      max-width: 860px; width: 100%; padding: 0 40px;
-      animation: heroFade 1.2s 0.4s ease both;
-    }
-    @keyframes heroFade { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
-    .hero-eyebrow {
-      font-family: var(--sans); font-size: 10px; font-weight: 600;
-      letter-spacing: 0.32em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 32px;
-      display: flex; align-items: center; justify-content: center; gap: 14px;
-    }
-    .hero-eyebrow::before, .hero-eyebrow::after {
-      content: ''; display: block; width: 40px; height: 1px; background: var(--gold); opacity: 0.5;
-    }
-    .hero-h1 {
-      font-family: var(--serif); font-weight: 300; line-height: 1.02;
-      font-size: clamp(64px, 7.5vw, 116px);
-      color: var(--white); letter-spacing: -0.02em;
-      margin-bottom: 28px;
-    }
-    .hero-h1 em { font-style: italic; color: var(--gold); }
-    .hero-tagline {
-      font-family: var(--serif); font-size: clamp(16px, 1.8vw, 22px);
-      font-weight: 300; font-style: italic;
-      color: rgba(255,255,255,0.45); line-height: 1.6;
-      margin-bottom: 52px; letter-spacing: 0.02em;
-    }
-    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
-    .btn-primary {
-      font-family: var(--sans); font-size: 10px; font-weight: 600;
-      letter-spacing: 0.2em; text-transform: uppercase; text-decoration: none;
-      background: var(--gold); color: var(--white);
-      padding: 15px 40px; transition: background 0.3s, transform 0.2s;
-      display: inline-block;
-    }
-    .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
-    .btn-ghost {
-      font-family: var(--sans); font-size: 10px; font-weight: 500;
-      letter-spacing: 0.2em; text-transform: uppercase; text-decoration: none;
-      border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7);
-      padding: 15px 40px; transition: border-color 0.3s, color 0.3s;
-      display: inline-block;
-    }
-    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
-    .hero-actions { justify-content: center; }
-    .hero-scroll {
-      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      z-index: 3; animation: heroFade 1s 1.4s ease both;
-    }
-    .hero-scroll span {
-      font-family: var(--sans); font-size: 9px; letter-spacing: 0.26em;
-      text-transform: uppercase; color: rgba(255,255,255,0.25);
-    }
-    .scroll-line {
-      width: 1px; height: 48px;
-      background: linear-gradient(to bottom, rgba(198,146,42,0.7), transparent);
-      animation: scrollPulse 2.2s infinite;
-    }
-    @keyframes scrollPulse { 0%,100%{opacity:0.35;transform:scaleY(0.7);} 50%{opacity:1;transform:scaleY(1);} }
+    /* ── HERO SLIDER (Beacon / Floward editorial) ── */
+    .hero-slider { position:relative; width:100%; height:94vh; min-height:520px; overflow:hidden; background:var(--charcoal2); }
+    .hs-track { display:flex; position:absolute; inset:0; transition:transform 0.92s cubic-bezier(0.77,0,0.175,1); will-change:transform; }
+    .hs-slide { position:relative; width:100%; height:100%; flex-shrink:0; overflow:hidden; }
+    .hs-media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+    .hs-overlay { position:absolute; inset:0; background:linear-gradient(to right,rgba(5,4,2,0.72) 0%,rgba(5,4,2,0.35) 55%,rgba(5,4,2,0.1) 100%),linear-gradient(to top,rgba(5,4,2,0.8) 0%,rgba(5,4,2,0) 55%); }
+    .hs-content { position:absolute; bottom:12%; left:7%; z-index:2; max-width:600px; opacity:0; transform:translateY(22px); transition:opacity 0.7s 0.3s ease,transform 0.7s 0.3s ease; }
+    .hs-slide.hs-active .hs-content { opacity:1; transform:none; }
+    .hs-eyebrow { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.34em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; display:flex; align-items:center; gap:12px; }
+    .hs-eyebrow::before { content:''; display:block; width:28px; height:1px; background:var(--gold); }
+    .hs-h1 { font-family:var(--serif); font-weight:300; line-height:1.0; font-size:clamp(52px,6.5vw,96px); color:var(--white); letter-spacing:-0.02em; margin-bottom:18px; }
+    .hs-h1 em { font-style:italic; color:var(--gold); }
+    .hs-tagline { font-family:var(--serif); font-size:clamp(14px,1.5vw,19px); font-style:italic; font-weight:300; color:rgba(255,255,255,0.65); line-height:1.65; margin-bottom:38px; }
+    .hs-cta { display:inline-block; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; background:var(--gold); color:var(--white); padding:14px 38px; transition:background 0.25s,transform 0.2s; }
+    .hs-cta:hover { background:var(--gold-light); transform:translateY(-2px); }
+    .hs-arrow { position:absolute; top:50%; transform:translateY(-50%); z-index:10; width:48px; height:48px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#fff; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s,border-color 0.2s,transform 0.2s; backdrop-filter:blur(6px); }
+    .hs-arrow:hover { background:rgba(198,146,42,0.25); border-color:var(--gold); }
+    .hs-arrow:active { transform:translateY(-50%) scale(0.93); }
+    .hs-prev { left:22px; } .hs-next { right:22px; }
+    .hs-arrow.hs-hidden { display:none; }
+    .hs-dots { position:absolute; bottom:26px; left:50%; transform:translateX(-50%); display:flex; gap:7px; z-index:10; }
+    .hs-dot { height:2px; width:22px; background:rgba(255,255,255,0.28); cursor:pointer; transition:background 0.3s,width 0.35s cubic-bezier(0.34,1.4,0.64,1); }
+    .hs-dot.hs-dot-active { background:var(--gold); width:42px; }
+    .hs-controls { position:absolute; bottom:18px; right:22px; display:flex; gap:7px; z-index:10; }
+    .hs-ctrl { width:34px; height:34px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#fff; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s,border-color 0.2s; backdrop-filter:blur(6px); }
+    .hs-ctrl:hover { background:rgba(198,146,42,0.25); border-color:var(--gold); }
+    .hs-admin-fab { position:absolute; top:14px; right:14px; z-index:20; display:none; }
+    .hs-admin-fab.show { display:block; }
+    .hs-fab-btn { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:var(--gold); color:#fff; border:none; padding:8px 14px; cursor:pointer; transition:background 0.2s; }
+    .hs-fab-btn:hover { background:var(--gold-light); }
+    #hsMgrBg { display:none; position:fixed; inset:0; z-index:99998; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px; }
+    #hsMgrBg.show { display:flex; }
+    #hsMgrPanel { background:#18160f; border:1px solid rgba(198,146,42,0.25); border-radius:14px; width:680px; max-width:96vw; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; }
+    .hs-mgr-hd { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid rgba(198,146,42,0.15); background:#0f0e09; flex-shrink:0; }
+    .hs-mgr-title { font-family:var(--serif); font-size:18px; color:#fff; }
+    .hs-mgr-title em { color:var(--gold); font-style:italic; }
+    .hs-mgr-body { flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:14px; }
+    .hs-mgr-body::-webkit-scrollbar { width:3px; }
+    .hs-mgr-body::-webkit-scrollbar-thumb { background:rgba(198,146,42,0.3); }
+    .hs-slide-row { background:#1e1a10; border:1px solid rgba(198,146,42,0.12); border-radius:8px; padding:14px 16px; display:flex; align-items:center; gap:14px; }
+    .hs-slide-num { font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.1em; color:var(--gold); width:22px; flex-shrink:0; }
+    .hs-slide-thumb { width:80px; height:50px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .hs-slide-thumb img, .hs-slide-thumb video { width:100%; height:100%; object-fit:cover; }
+    .hs-slide-thumb-icon { font-size:20px; opacity:0.3; }
+    .hs-slide-info { flex:1; min-width:0; }
+    .hs-slide-type { font-family:var(--sans); font-size:8px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:3px; }
+    .hs-slide-title-preview { font-family:var(--serif); font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hs-slide-actions { display:flex; gap:6px; flex-shrink:0; }
+    .hs-row-btn { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:none; border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.4); padding:6px 10px; cursor:pointer; transition:all 0.2s; }
+    .hs-row-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .hs-row-btn-del:hover { border-color:#e05060; color:#e05060; }
+    .hs-edit-form { background:#121007; border:1px solid rgba(198,146,42,0.15); border-radius:8px; padding:18px; display:flex; flex-direction:column; gap:12px; }
+    .hs-edit-title { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); margin-bottom:2px; }
+    .hs-field { display:flex; flex-direction:column; gap:5px; }
+    .hs-field label { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); }
+    .hs-field input, .hs-field select, .hs-field textarea { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:#fff; font-family:var(--sans); font-size:12px; padding:9px 12px; outline:none; transition:border-color 0.2s; color-scheme:dark; resize:none; }
+    .hs-field input:focus, .hs-field textarea:focus { border-color:var(--gold); }
+    .hs-field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .btn-primary { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; background:var(--gold); color:var(--white); padding:15px 40px; transition:background 0.3s,transform 0.2s; display:inline-block; }
+    .btn-primary:hover { background:var(--gold-light); transform:translateY(-2px); }
+    .btn-ghost { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; border:1px solid rgba(255,255,255,0.25); color:rgba(255,255,255,0.7); padding:15px 40px; transition:border-color 0.3s,color 0.3s; display:inline-block; }
+    .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
+    @keyframes heroFade { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
 
     /* ── EXPERIENCE (NEW) ── */
     .experience {
@@ -3021,30 +2991,34 @@
     </div>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero" id="home">
-    <div class="hero-glow"></div>
-    <div class="hero-grid">
-      <div class="hero-grid-line hgl-v1"></div>
-      <div class="hero-grid-line hgl-v2"></div>
-      <div class="hero-grid-line hgl-h1"></div>
-      <div class="hero-grid-line hgl-h2"></div>
+  <!-- HERO SLIDER -->
+  <section class="hero-slider" id="home">
+    <div class="hs-track" id="hsTrack"></div>
+    <button class="hs-arrow hs-prev" id="hsPrev" onclick="hsPrev()" aria-label="Previous slide">&#8249;</button>
+    <button class="hs-arrow hs-next" id="hsNext" onclick="hsNext()" aria-label="Next slide">&#8250;</button>
+    <div class="hs-dots" id="hsDots"></div>
+    <div class="hs-controls">
+      <button class="hs-ctrl" id="hsPauseBtn" onclick="hsTogglePause()" title="Pause/Play">⏸</button>
+      <button class="hs-ctrl" id="hsMuteBtn"  onclick="hsToggleMute()"  title="Mute/Unmute">🔇</button>
     </div>
-    <div class="hero-watermark">ROSEBELLA</div>
-    <div class="hero-content">
-      <div class="hero-eyebrow">Luxury Flowers &amp; Chocolates</div>
-      <h1 class="hero-h1">Elegance<br><em>Delivered</em></h1>
-      <p class="hero-tagline">Crafted with care.<br>Delivered with love.</p>
-      <div class="hero-actions">
-        <a href="#collections" class="btn-primary">Explore Collections</a>
-        <a href="#story" class="btn-ghost">Our Story</a>
-      </div>
-    </div>
-    <div class="hero-scroll">
-      <span>Scroll</span>
-      <div class="scroll-line"></div>
+    <div class="hs-admin-fab" id="hsAdminFab">
+      <button class="hs-fab-btn" onclick="hsMgrOpen()">⚙ Manage Slides</button>
     </div>
   </section>
+
+  <!-- Hero Slide Manager Modal -->
+  <div id="hsMgrBg">
+    <div id="hsMgrPanel">
+      <div class="hs-mgr-hd">
+        <span class="hs-mgr-title">Hero <em>Slides</em></span>
+        <div style="display:flex;gap:8px;">
+          <button class="hs-fab-btn" onclick="hsAddSlide()">+ Add Slide</button>
+          <button class="pos-hst-close" onclick="hsMgrClose()">✕</button>
+        </div>
+      </div>
+      <div class="hs-mgr-body" id="hsMgrBody"></div>
+    </div>
+  </div>
 
   <!-- MARQUEE -->
   <div class="marquee-wrap">
@@ -3952,22 +3926,19 @@
     const navCta = document.querySelector('.nav-cta');
     if(navCta) navCta.textContent = t.navCta;
 
-    // Hero
-    const heroEye = document.querySelector('.hero-eyebrow');
-    if(heroEye) { const spans = heroEye.querySelectorAll('span,::before'); heroEye.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=t.heroEye; }); heroEye.innerHTML = heroEye.innerHTML.replace(/[^<>✦·&;]+(?=[^<]*>|$)/, ''); heroEye.textContent = ''; heroEye.innerHTML = t.heroEye; }
-
-    const h1 = document.querySelector('.hero-h1');
-    if(h1) h1.innerHTML = `${t.heroH1[0]}<br><em>${t.heroH1[1]}</em>`;
-
-    const heroTag = document.querySelector('.hero-tagline');
-    if(heroTag) heroTag.textContent = t.heroTag;
-
-    const heroBtns = document.querySelectorAll('.hero-actions a');
-    if(heroBtns[0]) heroBtns[0].textContent = t.heroCta1;
-    if(heroBtns[1]) heroBtns[1].textContent = t.heroCta2;
-
-    const scrollSpan = document.querySelector('.hero-scroll span');
-    if(scrollSpan) scrollSpan.textContent = t.scrollTxt;
+    // Hero slider — update visible slide text
+    const activeSlide = document.querySelector('.hs-slide.hs-active');
+    if (activeSlide) {
+      const eye = activeSlide.querySelector('.hs-eyebrow');
+      if (eye) eye.textContent = t.heroEye;
+      const h1 = activeSlide.querySelector('.hs-h1');
+      if (h1) h1.innerHTML = `${t.heroH1[0]} <em>${t.heroH1[1]}</em>`;
+      const tag = activeSlide.querySelector('.hs-tagline');
+      if (tag) tag.textContent = t.heroTag;
+      const cta = activeSlide.querySelector('.hs-cta');
+      if (cta) cta.textContent = t.heroCta1;
+    }
+    // hero-scroll removed with old hero — no-op
 
     // Story
     const storyLabel = document.querySelector('.story .section-label');
@@ -5930,6 +5901,7 @@
       document.getElementById('adminBar').classList.add('show');
       document.getElementById('adminTrigger').style.display = 'none';
       document.body.classList.add('admin-active');
+      const fab = document.getElementById('hsAdminFab'); if (fab) fab.classList.add('show');
       apToast('Welcome back, Yousef! 👋');
     } else {
       err.textContent = 'Incorrect email or password. Please try again.';
@@ -5941,6 +5913,7 @@
     document.getElementById('adminBar').classList.remove('show');
     document.getElementById('adminTrigger').style.display = 'flex';
     document.body.classList.remove('admin-active');
+    const fab = document.getElementById('hsAdminFab'); if (fab) fab.classList.remove('show');
     closePanel();
     apToast('Signed out successfully.');
   }
@@ -8204,17 +8177,159 @@
   })();
 
   // ── Scroll reveal ─────────────────────────────
-  // Reveal observer + immediate fallback
   document.querySelectorAll('.reveal').forEach(el => {
     new IntersectionObserver(entries=>{
       entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
     },{threshold:0.05}).observe(el);
   });
-  // Fallback: force-show all reveals after 800ms
   setTimeout(() => {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
   }, 800);
 
+</script>
+
+<script>
+(function() {
+  const HS_KEY = 'rosebella_hero_slides';
+  function defaultSlides() {
+    return [{ id:1, type:'video', src:'AdobeStock_437011671.mov', poster:'', eyebrow:'Luxury Flowers & Chocolates', title:'Elegance', titleItalic:'Delivered', subtitle:'Crafted with care. Delivered with love.', cta:'Explore Collections', ctaLink:'#collections' }];
+  }
+  let slides = (function(){ try{ return JSON.parse(localStorage.getItem(HS_KEY))||defaultSlides(); }catch(e){ return defaultSlides(); } })();
+  let index=0, paused=false, muted=true, timer=null, editing=null;
+  const DELAY=6000;
+  function save(){ localStorage.setItem(HS_KEY,JSON.stringify(slides)); }
+
+  function render(){
+    const track=document.getElementById('hsTrack'), dots=document.getElementById('hsDots');
+    if(!track||!dots) return;
+    track.innerHTML=slides.map((s,i)=>{
+      const media=s.type==='video'
+        ?`<video class="hs-media" id="hsVid${s.id}" autoplay muted loop playsinline preload="auto"${s.poster?` poster="${s.poster}"`:''}><source src="${s.src}" type="video/mp4"><source src="${s.src}" type="video/quicktime"></video>`
+        :`<img class="hs-media" src="${s.src}" alt="${s.title||''}" loading="${i===0?'eager':'lazy'}" />`;
+      return `<div class="hs-slide${i===index?' hs-active':''}" data-idx="${i}">${media}<div class="hs-overlay"></div><div class="hs-content"><div class="hs-eyebrow">${s.eyebrow||'Luxury Flowers &amp; Chocolates'}</div><h1 class="hs-h1">${s.title||''} <em>${s.titleItalic||''}</em></h1><p class="hs-tagline">${s.subtitle||''}</p><a href="${s.ctaLink||'#collections'}" class="hs-cta">${s.cta||'Shop Now'}</a></div></div>`;
+    }).join('');
+    dots.innerHTML=slides.map((_,i)=>`<div class="hs-dot${i===index?' hs-dot-active':''}" onclick="hsGoTo(${i})"></div>`).join('');
+    const prev=document.getElementById('hsPrev'), next=document.getElementById('hsNext');
+    if(prev) prev.classList.toggle('hs-hidden',slides.length<=1);
+    if(next) next.classList.toggle('hs-hidden',slides.length<=1);
+    applyVideoState(); goToTrack(index);
+  }
+
+  function goToTrack(i){
+    const track=document.getElementById('hsTrack'); if(!track) return;
+    track.style.transform=`translateX(-${i*100}%)`;
+    document.querySelectorAll('.hs-slide').forEach((el,idx)=>el.classList.toggle('hs-active',idx===i));
+    document.querySelectorAll('.hs-dot').forEach((d,idx)=>d.classList.toggle('hs-dot-active',idx===i));
+  }
+
+  window.hsGoTo=function(i){ index=((i%slides.length)+slides.length)%slides.length; goToTrack(index); applyVideoState(); resetTimer(); };
+  window.hsPrev=function(){ window.hsGoTo(index-1); };
+  window.hsNext=function(){ window.hsGoTo(index+1); };
+
+  function startTimer(){ clearInterval(timer); if(slides.length>1&&!paused) timer=setInterval(()=>window.hsGoTo(index+1),DELAY); }
+  function resetTimer(){ startTimer(); }
+
+  function applyVideoState(){
+    document.querySelectorAll('.hs-slide').forEach((slide,i)=>{
+      const vid=slide.querySelector('video'); if(!vid) return;
+      vid.muted=muted;
+      if(i===index){ if(!paused) vid.play().catch(()=>{}); else vid.pause(); } else vid.pause();
+    });
+  }
+
+  window.hsTogglePause=function(){
+    paused=!paused;
+    const btn=document.getElementById('hsPauseBtn'); if(btn) btn.textContent=paused?'▶':'⏸';
+    if(paused) clearInterval(timer); else startTimer();
+    applyVideoState();
+  };
+  window.hsToggleMute=function(){
+    muted=!muted;
+    const btn=document.getElementById('hsMuteBtn'); if(btn) btn.textContent=muted?'🔇':'🔊';
+    applyVideoState();
+  };
+
+  let touchX=null;
+  document.addEventListener('touchstart',e=>{ if(e.target.closest('.hero-slider')) touchX=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',e=>{ if(touchX===null||!e.target.closest('.hero-slider')) return; const dx=e.changedTouches[0].clientX-touchX; if(Math.abs(dx)>44) dx<0?window.hsNext():window.hsPrev(); touchX=null; },{passive:true});
+
+  function syncAdminFab(){ const fab=document.getElementById('hsAdminFab'); if(fab) fab.classList.toggle('show',!!window.isAdmin); }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const _login=window.doLogin, _logout=window.doLogout;
+    if(_login)  window.doLogin  =function(){ _login.apply(this,arguments);  syncAdminFab(); };
+    if(_logout) window.doLogout =function(){ _logout.apply(this,arguments); syncAdminFab(); };
+    syncAdminFab(); render(); startTimer();
+  });
+
+  window.hsMgrOpen=function(){ editing=null; renderMgr(); document.getElementById('hsMgrBg').classList.add('show'); };
+  window.hsMgrClose=function(){ document.getElementById('hsMgrBg').classList.remove('show'); editing=null; };
+
+  function renderMgr(){
+    const body=document.getElementById('hsMgrBody'); if(!body) return;
+    body.innerHTML=slides.map((s,i)=>`
+      <div class="hs-slide-row">
+        <div class="hs-slide-num">${i+1}</div>
+        <div class="hs-slide-thumb">${s.type==='video'?`<video src="${s.src}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;"></video>`:(s.src?`<img src="${s.src}" style="width:100%;height:100%;object-fit:cover;" />`:`<span class="hs-slide-thumb-icon">🖼</span>`)}</div>
+        <div class="hs-slide-info"><div class="hs-slide-type">${s.type==='video'?'🎬 Video':'🖼 Image'}</div><div class="hs-slide-title-preview">${s.title} ${s.titleItalic}</div></div>
+        <div class="hs-slide-actions">
+          <button class="hs-row-btn" onclick="hsEditSlide(${s.id})">Edit</button>
+          ${i>0?`<button class="hs-row-btn" onclick="hsMoveSlide(${s.id},-1)">↑</button>`:''}
+          ${i<slides.length-1?`<button class="hs-row-btn" onclick="hsMoveSlide(${s.id},1)">↓</button>`:''}
+          ${slides.length>1?`<button class="hs-row-btn hs-row-btn-del" onclick="hsDeleteSlide(${s.id})">🗑</button>`:''}
+        </div>
+      </div>
+      ${editing===s.id?editForm(s):''}
+    `).join('');
+  }
+
+  function editForm(s){
+    return `<div class="hs-edit-form"><div class="hs-edit-title">Edit Slide</div>
+      <div class="hs-field"><label>Media Type</label><select id="ef_type_${s.id}"><option value="video"${s.type==='video'?' selected':''}>Video</option><option value="image"${s.type==='image'?' selected':''}>Image</option></select></div>
+      <div class="hs-field"><label>Source URL / Filename</label><input id="ef_src_${s.id}" value="${s.src||''}" placeholder="e.g. AdobeStock_437011671.mov or https://..." /></div>
+      <div class="hs-field"><label>Poster image (optional)</label><input id="ef_poster_${s.id}" value="${s.poster||''}" placeholder="poster.jpg" /></div>
+      <div class="hs-field-row">
+        <div class="hs-field"><label>Heading</label><input id="ef_title_${s.id}" value="${s.title||''}" /></div>
+        <div class="hs-field"><label>Heading italic</label><input id="ef_italic_${s.id}" value="${s.titleItalic||''}" /></div>
+      </div>
+      <div class="hs-field"><label>Subtext</label><input id="ef_sub_${s.id}" value="${s.subtitle||''}" /></div>
+      <div class="hs-field-row">
+        <div class="hs-field"><label>Button label</label><input id="ef_cta_${s.id}" value="${s.cta||'Shop Now'}" /></div>
+        <div class="hs-field"><label>Button link</label><input id="ef_link_${s.id}" value="${s.ctaLink||'#collections'}" /></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;"><button class="hs-fab-btn" onclick="hsSaveSlide(${s.id})">Save</button><button class="hs-row-btn" onclick="hsCancelEdit()">Cancel</button></div>
+    </div>`;
+  }
+
+  window.hsEditSlide=function(id){ editing=id; renderMgr(); };
+  window.hsCancelEdit=function(){ editing=null; renderMgr(); };
+  window.hsSaveSlide=function(id){
+    const s=slides.find(x=>x.id===id); if(!s) return;
+    s.type=document.getElementById(`ef_type_${id}`)?.value||s.type;
+    s.src=document.getElementById(`ef_src_${id}`)?.value.trim()||s.src;
+    s.poster=document.getElementById(`ef_poster_${id}`)?.value.trim()||'';
+    s.title=document.getElementById(`ef_title_${id}`)?.value.trim()||s.title;
+    s.titleItalic=document.getElementById(`ef_italic_${id}`)?.value.trim()||s.titleItalic;
+    s.subtitle=document.getElementById(`ef_sub_${id}`)?.value.trim()||s.subtitle;
+    s.cta=document.getElementById(`ef_cta_${id}`)?.value.trim()||s.cta;
+    s.ctaLink=document.getElementById(`ef_link_${id}`)?.value.trim()||s.ctaLink;
+    editing=null; save(); render(); renderMgr();
+  };
+  window.hsAddSlide=function(){
+    const n={id:Date.now(),type:'image',src:'',poster:'',eyebrow:'Luxury Flowers & Chocolates',title:'New',titleItalic:'Slide',subtitle:'Add your subtitle here.',cta:'Shop Now',ctaLink:'#collections'};
+    slides.push(n); editing=n.id; save(); render(); renderMgr();
+  };
+  window.hsDeleteSlide=function(id){
+    if(!confirm('Remove this slide?')) return;
+    slides=slides.filter(s=>s.id!==id); if(index>=slides.length) index=slides.length-1;
+    editing=null; save(); render(); renderMgr();
+  };
+  window.hsMoveSlide=function(id,dir){
+    const i=slides.findIndex(s=>s.id===id), j=i+dir;
+    if(j<0||j>=slides.length) return;
+    [slides[i],slides[j]]=[slides[j],slides[i]]; save(); render(); renderMgr();
+  };
+})();
 </script>
 </body>
 </html>
