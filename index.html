@@ -3694,8 +3694,8 @@
       </div>
 
       <!-- Horizontally scrollable collection cards -->
-      <div class="coll-scroll-wrap reveal">
-        <div class="coll-scroll-track" id="collScrollTrack">
+      <div class="coll-scroll-outer reveal">
+        <div class="coll-scroll-wrap" id="collScrollTrack">
 
           <a class="coll-card" href="collection.html?cat=bella-roses&name=Bella+Roses">
             <div class="coll-card-img" style="background:linear-gradient(150deg,#c04060 0%,#8b1a35 100%)"></div>
@@ -3837,12 +3837,12 @@
             <div class="coll-card-body"><span class="coll-icon">🇶🇦</span><span class="coll-name">Qatar National Day</span></div>
           </a>
 
-        </div><!-- /coll-scroll-track -->
+        </div><!-- /coll-scroll-wrap (the scroll container) -->
 
-        <!-- Scroll arrows -->
+        <!-- Scroll arrows sit outside the scroll container so they're never clipped -->
         <button class="coll-arrow coll-arrow-l" onclick="scrollCollections(-1)" aria-label="Scroll left">&#8249;</button>
         <button class="coll-arrow coll-arrow-r" onclick="scrollCollections(1)"  aria-label="Scroll right">&#8250;</button>
-      </div><!-- /coll-scroll-wrap -->
+      </div><!-- /coll-scroll-outer -->
 
     </div>
   </section>
@@ -3967,22 +3967,21 @@
 
   <style>
     /* ── COLLECTION SCROLL SECTION ── */
-    .coll-scroll-wrap {
+    /* Outer: position:relative anchor for the arrow buttons */
+    .coll-scroll-outer {
       position: relative; max-width: 1280px; margin: 0 auto;
+      padding-top: 24px; /* visible breathing room above cards */
     }
-    .coll-scroll-track {
+    /* Wrap: the actual horizontal scroll container.
+       overflow-x:auto forces overflow-y:auto, but since height =
+       card height + padding there is zero vertical overflow — nothing clips. */
+    .coll-scroll-wrap {
       display: flex; gap: 20px;
-      overflow-x: auto;
-      /* overflow-y: clip allows overflow-x: auto without forcing
-         overflow-y: hidden — padding-top gives clearance so card
-         tops, rounded corners and box-shadows are not clipped */
-      overflow-y: clip;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      padding-top: 24px;   /* clearance above cards for shadows & hover lift */
-      padding-bottom: 24px;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      scrollbar-width: none; padding-bottom: 24px;
       -webkit-overflow-scrolling: touch;
     }
+    .coll-scroll-wrap::-webkit-scrollbar { display: none; }
     .coll-scroll-track::-webkit-scrollbar { display: none; }
 
     /* ── Bigger cards ── */
