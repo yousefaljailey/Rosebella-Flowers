@@ -158,6 +158,18 @@
     .hs-field input, .hs-field select, .hs-field textarea { background:rgba(255,255,255,0.07); border:1px solid rgba(198,146,42,0.2); color:#fff; font-family:var(--sans); font-size:12px; padding:9px 12px; outline:none; transition:border-color 0.2s; color-scheme:dark; resize:none; }
     .hs-field input:focus, .hs-field textarea:focus { border-color:var(--gold); }
     .hs-field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .hs-dropzone { border:2px dashed rgba(198,146,42,0.35); border-radius:8px; padding:28px 20px; text-align:center; cursor:pointer; transition:border-color 0.2s,background 0.2s; position:relative; }
+    .hs-dropzone:hover, .hs-dropzone.drag-over { border-color:var(--gold); background:rgba(198,146,42,0.06); }
+    .hs-dropzone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .hs-dz-icon { font-size:28px; margin-bottom:8px; }
+    .hs-dz-text { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.08em; color:rgba(255,255,255,0.5); margin-bottom:4px; }
+    .hs-dz-sub  { font-family:var(--sans); font-size:10px; color:rgba(255,255,255,0.25); }
+    .hs-dz-preview { display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.05); border-radius:6px; margin-top:8px; }
+    .hs-dz-preview-thumb { width:60px; height:40px; object-fit:cover; border-radius:4px; flex-shrink:0; }
+    .hs-dz-preview-name { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.6); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .hs-dz-preview-clear { background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size:14px; padding:2px 6px; transition:color 0.2s; }
+    .hs-dz-preview-clear:hover { color:#e05060; }
+    .hs-dz-warning { font-family:var(--sans); font-size:10px; color:#e8c870; margin-top:6px; line-height:1.5; }
     .btn-primary { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; background:var(--gold); color:var(--white); padding:15px 40px; transition:background 0.3s,transform 0.2s; display:inline-block; }
     .btn-primary:hover { background:var(--gold-light); transform:translateY(-2px); }
     .btn-ghost { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; border:1px solid rgba(255,255,255,0.25); color:rgba(255,255,255,0.7); padding:15px 40px; transition:border-color 0.3s,color 0.3s; display:inline-block; }
@@ -8278,35 +8290,74 @@
   }
 
   function editForm(s){
-    return `<div class="hs-edit-form"><div class="hs-edit-title">Edit Slide</div>
-      <div class="hs-field"><label>Media Type</label><select id="ef_type_${s.id}"><option value="video"${s.type==='video'?' selected':''}>Video</option><option value="image"${s.type==='image'?' selected':''}>Image</option></select></div>
-      <div class="hs-field"><label>Source URL / Filename</label><input id="ef_src_${s.id}" value="${s.src||''}" placeholder="e.g. AdobeStock_437011671.mov or https://..." /></div>
-      <div class="hs-field"><label>Poster image (optional)</label><input id="ef_poster_${s.id}" value="${s.poster||''}" placeholder="poster.jpg" /></div>
-      <div class="hs-field-row">
-        <div class="hs-field"><label>Heading</label><input id="ef_title_${s.id}" value="${s.title||''}" /></div>
-        <div class="hs-field"><label>Heading italic</label><input id="ef_italic_${s.id}" value="${s.titleItalic||''}" /></div>
+    const hasMedia=!!s.src, isVid=s.type==='video';
+    const previewHtml=hasMedia?`<div class="hs-dz-preview">${isVid?`<video class="hs-dz-preview-thumb" src="${s.src}" muted preload="metadata"></video>`:`<img class="hs-dz-preview-thumb" src="${s.src}" />`}<span class="hs-dz-preview-name">${s.src.length>60?s.src.slice(0,57)+'…':s.src}</span><button class="hs-dz-preview-clear" onclick="hsDzClear(${s.id})">✕</button></div>`:'';
+    const isCustomLink=s.ctaLink&&!['#collections','#story','#contact'].includes(s.ctaLink);
+    return `<div class="hs-edit-form" id="hsForm${s.id}"><div class="hs-edit-title">Edit Slide</div>
+      <div class="hs-field"><label>Photo or Video</label>
+        <div class="hs-dropzone" id="hsDz${s.id}" ondragover="hsDzOver(event,${s.id})" ondragleave="hsDzLeave(${s.id})" ondrop="hsDzDrop(event,${s.id})">
+          <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onchange="hsDzPick(event,${s.id})" />
+          <div class="hs-dz-icon">${hasMedia?(isVid?'🎬':'🖼'):'⬆'}</div>
+          <div class="hs-dz-text">${hasMedia?'Drop to replace':'Drag & drop here'}</div>
+          <div class="hs-dz-sub">or click to browse · Images &amp; Videos (MP4)</div>
+        </div>
+        ${previewHtml}
+        <div id="hsDzWarn${s.id}" class="hs-dz-warning" style="display:none;"></div>
       </div>
-      <div class="hs-field"><label>Subtext</label><input id="ef_sub_${s.id}" value="${s.subtitle||''}" /></div>
+      <div class="hs-field-row">
+        <div class="hs-field"><label>Heading</label><input id="ef_title_${s.id}" value="${s.title||''}" placeholder="Elegance" /></div>
+        <div class="hs-field"><label>Heading in italics</label><input id="ef_italic_${s.id}" value="${s.titleItalic||''}" placeholder="Delivered" /></div>
+      </div>
+      <div class="hs-field"><label>Subtitle text</label><input id="ef_sub_${s.id}" value="${s.subtitle||''}" placeholder="Crafted with care. Delivered with love." /></div>
       <div class="hs-field-row">
         <div class="hs-field"><label>Button label</label><input id="ef_cta_${s.id}" value="${s.cta||'Shop Now'}" /></div>
-        <div class="hs-field"><label>Button link</label><input id="ef_link_${s.id}" value="${s.ctaLink||'#collections'}" /></div>
+        <div class="hs-field"><label>Button goes to</label>
+          <select id="ef_link_${s.id}" onchange="hsDzLinkChange(${s.id})">
+            <option value="#collections" ${!isCustomLink&&(s.ctaLink||'#collections')==='#collections'?'selected':''}>🌸 Shop / Collections</option>
+            <option value="#story"       ${s.ctaLink==='#story'?'selected':''}>📖 Our Story</option>
+            <option value="#contact"     ${s.ctaLink==='#contact'?'selected':''}>📞 Contact</option>
+            <option value="custom"       ${isCustomLink?'selected':''}>🔗 Custom link…</option>
+          </select>
+          <input id="ef_link_custom_${s.id}" placeholder="https://…" value="${isCustomLink?s.ctaLink:''}" style="margin-top:6px;display:${isCustomLink?'block':'none'};" />
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:4px;"><button class="hs-fab-btn" onclick="hsSaveSlide(${s.id})">Save</button><button class="hs-row-btn" onclick="hsCancelEdit()">Cancel</button></div>
+      <div style="display:flex;gap:8px;margin-top:4px;"><button class="hs-fab-btn" onclick="hsSaveSlide(${s.id})">Save Slide</button><button class="hs-row-btn" onclick="hsCancelEdit()">Cancel</button></div>
     </div>`;
+  }
+
+  window.hsDzOver =function(e,id){ e.preventDefault(); document.getElementById('hsDz'+id)?.classList.add('drag-over'); };
+  window.hsDzLeave=function(id){   document.getElementById('hsDz'+id)?.classList.remove('drag-over'); };
+  window.hsDzDrop =function(e,id){ e.preventDefault(); document.getElementById('hsDz'+id)?.classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f) hsDzProcess(f,id); };
+  window.hsDzPick =function(e,id){ const f=e.target.files[0]; if(f) hsDzProcess(f,id); };
+  window.hsDzClear=function(id){ const s=slides.find(x=>x.id===id); if(!s) return; s.src=''; s.type='image'; save(); renderMgr(); };
+  window.hsDzLinkChange=function(id){ const sel=document.getElementById('ef_link_'+id),custom=document.getElementById('ef_link_custom_'+id); if(sel&&custom) custom.style.display=sel.value==='custom'?'block':'none'; };
+  function hsDzProcess(file,id){
+    const s=slides.find(x=>x.id===id); if(!s) return;
+    const isVideo=file.type.startsWith('video/');
+    const warnEl=document.getElementById('hsDzWarn'+id);
+    const MB=file.size/1024/1024;
+    if(isVideo){
+      const objUrl=URL.createObjectURL(file);
+      s.type='video'; s.src=objUrl; save(); renderMgr();
+      if(warnEl&&MB>20){ warnEl.style.display=''; warnEl.textContent=`⚠ This video is ${MB.toFixed(0)} MB. For the live site, upload the file to your server and enter the filename manually.`; }
+    } else {
+      if(warnEl&&MB>5){ warnEl.style.display=''; warnEl.textContent=`⚠ Image is ${MB.toFixed(1)} MB. Consider resizing to under 1 MB for faster loading.`; }
+      const reader=new FileReader();
+      reader.onload=e=>{ s.type='image'; s.src=e.target.result; save(); renderMgr(); };
+      reader.readAsDataURL(file);
+    }
   }
 
   window.hsEditSlide=function(id){ editing=id; renderMgr(); };
   window.hsCancelEdit=function(){ editing=null; renderMgr(); };
   window.hsSaveSlide=function(id){
     const s=slides.find(x=>x.id===id); if(!s) return;
-    s.type=document.getElementById(`ef_type_${id}`)?.value||s.type;
-    s.src=document.getElementById(`ef_src_${id}`)?.value.trim()||s.src;
-    s.poster=document.getElementById(`ef_poster_${id}`)?.value.trim()||'';
     s.title=document.getElementById(`ef_title_${id}`)?.value.trim()||s.title;
     s.titleItalic=document.getElementById(`ef_italic_${id}`)?.value.trim()||s.titleItalic;
     s.subtitle=document.getElementById(`ef_sub_${id}`)?.value.trim()||s.subtitle;
     s.cta=document.getElementById(`ef_cta_${id}`)?.value.trim()||s.cta;
-    s.ctaLink=document.getElementById(`ef_link_${id}`)?.value.trim()||s.ctaLink;
+    const linkSel=document.getElementById(`ef_link_${id}`);
+    if(linkSel){ const val=linkSel.value; s.ctaLink=val==='custom'?(document.getElementById(`ef_link_custom_${id}`)?.value.trim()||s.ctaLink):val; }
     editing=null; save(); render(); renderMgr();
   };
   window.hsAddSlide=function(){
