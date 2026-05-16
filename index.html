@@ -3868,30 +3868,39 @@
     .coll-scroll-track::-webkit-scrollbar { display: none; }
 
     .coll-card {
-      flex-shrink: 0; width: 180px; border-radius: 16px; overflow: hidden;
+      flex-shrink: 0; width: 200px; height: 260px;
+      border-radius: 16px; overflow: hidden; position: relative;
       text-decoration: none; scroll-snap-align: start;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.10);
-      transition: transform 0.28s ease, box-shadow 0.28s;
-      display: flex; flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.14);
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      display: block;
     }
     .coll-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+      transform: translateY(-6px);
+      box-shadow: 0 18px 48px rgba(0,0,0,0.24);
     }
+    .coll-card:hover .coll-card-img { transform: scale(1.07); }
     .coll-card-img {
-      height: 130px; width: 100%;
-      flex-shrink: 0;
+      position: absolute; inset: 0;
+      transition: transform 0.5s ease;
+    }
+    /* gradient overlay always visible */
+    .coll-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.08) 55%, transparent 100%);
     }
     .coll-card-body {
-      background: var(--white); padding: 14px 12px 16px;
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      flex: 1;
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 18px 16px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+      z-index: 1;
     }
-    .coll-icon { font-size: 26px; line-height: 1; }
+    .coll-icon { font-size: 24px; line-height: 1; }
     .coll-name {
-      font-family: var(--sans); font-size: 10px; font-weight: 600;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--charcoal); text-align: center; line-height: 1.35;
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--white); line-height: 1.35;
     }
 
     /* Scroll arrows */
