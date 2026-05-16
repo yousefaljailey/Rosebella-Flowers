@@ -5323,7 +5323,7 @@
   }
 
   // Restore state on page load
-  updateCartUI();
+  try { updateCartUI(); } catch(e) { /* DOM not ready yet — will re-run after DOMContentLoaded */ }
 
   // ══════════════════════════════════════════════
   //  VARIANT SYSTEM
