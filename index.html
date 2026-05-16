@@ -3969,15 +3969,18 @@
     /* ── COLLECTION SCROLL SECTION ── */
     .coll-scroll-wrap {
       position: relative; max-width: 1280px; margin: 0 auto;
-      /* padding gives room so overflow-x:auto doesn't clip the
-         card box-shadow + hover translateY(-8px) at the top */
-      padding-top: 16px; margin-top: -16px;
     }
     .coll-scroll-track {
       display: flex; gap: 20px;
-      overflow-x: auto; scroll-snap-type: x mandatory;
+      overflow-x: auto;
+      /* overflow-y: clip allows overflow-x: auto without forcing
+         overflow-y: hidden — padding-top gives clearance so card
+         tops, rounded corners and box-shadows are not clipped */
+      overflow-y: clip;
+      scroll-snap-type: x mandatory;
       scrollbar-width: none;
-      padding-bottom: 20px; /* room for bottom shadows */
+      padding-top: 24px;   /* clearance above cards for shadows & hover lift */
+      padding-bottom: 24px;
       -webkit-overflow-scrolling: touch;
     }
     .coll-scroll-track::-webkit-scrollbar { display: none; }
