@@ -861,8 +861,8 @@
     .nav-hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
     #mobNavOverlay { display:none; position:fixed; inset:0; z-index:9989; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); }
     #mobNavOverlay.show { display:block; }
-    #mobNav { position:fixed; top:0; right:-100%; width:min(320px,88vw); height:100dvh; background:var(--charcoal3); z-index:9990; display:flex; flex-direction:column; transition:right 0.35s cubic-bezier(0.25,0.46,0.45,0.94); overflow-y:auto; }
-    #mobNav.show { right:0; }
+    #mobNav { position:fixed; top:0; right:0; width:min(320px,88vw); height:100vh; background:var(--charcoal3); z-index:9990; display:flex; flex-direction:column; transform:translateX(100%); visibility:hidden; transition:transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94),visibility 0s 0.35s; overflow-y:auto; }
+    #mobNav.show { transform:translateX(0); visibility:visible; transition:transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94),visibility 0s 0s; }
     .mob-nav-hd { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid rgba(198,146,42,0.15); }
     .mob-nav-brand { font-family:var(--serif); font-size:18px; letter-spacing:0.12em; color:var(--white); }
     .mob-nav-brand span { color:var(--gold); }
