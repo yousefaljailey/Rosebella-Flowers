@@ -3663,11 +3663,22 @@
   <div id="hsMgrBg">
     <div id="hsMgrPanel">
       <div class="hs-mgr-hd">
-        <span class="hs-mgr-title">Hero <em>Slides</em></span>
+        <span class="hs-mgr-title" id="hsMgrTitle">Hero <em>Slides</em></span>
         <div style="display:flex;gap:8px;">
-          <button class="hs-fab-btn" onclick="hsAddSlide()">+ Add Slide</button>
+          <button class="hs-fab-btn" id="hsMgrAddBtn" onclick="hsAddSlide()">+ Add Slide</button>
           <button class="pos-hst-close" onclick="hsMgrClose()">✕</button>
         </div>
+      </div>
+      <!-- Tab bar -->
+      <div style="display:flex;gap:0;background:#0f0e09;border-bottom:1px solid rgba(198,146,42,0.15);flex-shrink:0;">
+        <button id="hsMgrTabSlides" onclick="hsMgrSwitchTab('slides')"
+          style="flex:1;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid var(--gold);color:var(--gold);padding:11px 16px;cursor:pointer;transition:all 0.2s;">
+          🎬 Hero Slides
+        </button>
+        <button id="hsMgrTabColl" onclick="hsMgrSwitchTab('collections')"
+          style="flex:1;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.35);padding:11px 16px;cursor:pointer;transition:all 0.2s;">
+          🌸 Collection Cards
+        </button>
       </div>
       <div class="hs-mgr-body" id="hsMgrBody"></div>
     </div>
@@ -3944,6 +3955,19 @@
     }
 
     if (editBtn) { editBtn.textContent = '✓ Saved!'; setTimeout(() => { editBtn.textContent = '📷 Change Image'; editBtn.disabled = false; }, 2000); }
+
+    // Refresh the manager grid if upload came from there
+    if (document.getElementById('collImgInput')._fromMgr) {
+      document.getElementById('collImgInput')._fromMgr = false;
+      // Update the mini-preview card in the manager
+      const mgr = document.getElementById('collmgr-' + slug);
+      if (mgr) {
+        const statusEl = document.getElementById('collmgr-status-' + slug);
+        if (statusEl) statusEl.textContent = '✓ Photo saved!';
+        // Refresh the full manager to show updated preview
+        setTimeout(() => window.renderCollMgr && window.renderCollMgr(), 400);
+      }
+    }
   });
 
   /* Sync admin visibility: called from existing syncAdminFab, also polled */
@@ -9683,14 +9707,114 @@
   // ══════════════════════════════════════════
   //  SLIDE MANAGER (Admin)
   // ══════════════════════════════════════════
-  window.hsMgrOpen = function() {
+  let _hsMgrTab = 'slides'; // 'slides' | 'collections'
+
+  window.hsMgrOpen = function(tab) {
     editing = null;
-    renderMgr();
+    _hsMgrTab = tab || 'slides';
+    hsMgrSwitchTab(_hsMgrTab);
     document.getElementById('hsMgrBg').classList.add('show');
   };
   window.hsMgrClose = function() {
     document.getElementById('hsMgrBg').classList.remove('show');
     editing = null;
+  };
+
+  window.hsMgrSwitchTab = function(tab) {
+    _hsMgrTab = tab;
+    const tabSlides = document.getElementById('hsMgrTabSlides');
+    const tabColl   = document.getElementById('hsMgrTabColl');
+    const addBtn    = document.getElementById('hsMgrAddBtn');
+    const title     = document.getElementById('hsMgrTitle');
+
+    if (tab === 'slides') {
+      if (tabSlides) { tabSlides.style.borderBottomColor = 'var(--gold)'; tabSlides.style.color = 'var(--gold)'; }
+      if (tabColl)   { tabColl.style.borderBottomColor = 'transparent'; tabColl.style.color = 'rgba(255,255,255,0.35)'; }
+      if (addBtn)    { addBtn.style.display = ''; }
+      if (title)     title.innerHTML = 'Hero <em>Slides</em>';
+      renderMgr();
+    } else {
+      if (tabSlides) { tabSlides.style.borderBottomColor = 'transparent'; tabSlides.style.color = 'rgba(255,255,255,0.35)'; }
+      if (tabColl)   { tabColl.style.borderBottomColor = 'var(--gold)'; tabColl.style.color = 'var(--gold)'; }
+      if (addBtn)    { addBtn.style.display = 'none'; }
+      if (title)     title.innerHTML = 'Collection <em>Card Images</em>';
+      renderCollMgr();
+    }
+  };
+
+  // ── Collection card image manager ────────────
+  window.renderCollMgr = function() {
+    const body = document.getElementById('hsMgrBody');
+    if (!body) return;
+
+    const cards = document.querySelectorAll('.coll-card');
+    if (!cards.length) {
+      body.innerHTML = '<div style="font-family:var(--serif);font-style:italic;color:rgba(255,255,255,0.2);text-align:center;padding:40px;">No collection cards found.</div>';
+      return;
+    }
+
+    const GOOG_LOGO = `<svg viewBox="0 0 24 24" width="11" height="11"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
+
+    let html = `
+      <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.06em;margin-bottom:16px;line-height:1.6;">
+        Click any card to upload a photo. Images are saved and shown immediately on the page.
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">`;
+
+    cards.forEach(card => {
+      let slug = card.dataset.slug || '';
+      if (!slug) {
+        try { const u = new URL(card.href, location.href); slug = u.searchParams.get('cat') || ''; } catch(e) {}
+      }
+      const nameEl = card.querySelector('.coll-name');
+      const name   = nameEl ? nameEl.textContent.trim() : slug;
+      const imgEl  = card.querySelector('.coll-card-img');
+      const saved  = slug && localStorage.getItem('rosebella_coll_bg_' + slug);
+      const hasImg = !!saved;
+
+      // Build preview background CSS
+      let previewBg = '';
+      if (saved) {
+        previewBg = `background-image:url(${saved});background-size:cover;background-position:center;`;
+      } else if (imgEl) {
+        // Clone the inline gradient from the card img div
+        previewBg = imgEl.getAttribute('style') || 'background:#333;';
+      }
+
+      html += `
+        <div onclick="collMgrUpload('${slug}')" id="collmgr-${slug}"
+          style="cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;transition:border-color 0.2s;background:#1e1a10;"
+          onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
+          <div style="height:90px;${previewBg}position:relative;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
+            ${hasImg ? `<div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>` : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0.4;">📷</div>`}
+          </div>
+          <div style="padding:8px 10px;">
+            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div id="collmgr-status-${slug}" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">${hasImg ? 'Tap to replace' : 'Tap to add photo'}</div>
+          </div>
+        </div>`;
+    });
+
+    html += '</div>';
+    body.innerHTML = html;
+  };
+
+  window.collMgrUpload = function(slug) {
+    if (!window.isAdmin) return;
+    // Find the matching card
+    let card = document.querySelector(`.coll-card[data-slug="${slug}"]`);
+    if (!card) {
+      document.querySelectorAll('.coll-card').forEach(c => {
+        try { const u = new URL(c.href, location.href); if (u.searchParams.get('cat') === slug) card = c; } catch(e) {}
+      });
+    }
+    _pendingCollSlug = slug;
+    _pendingCollCard = card;
+    // Tag the upload as coming from the manager
+    document.getElementById('collImgInput')._fromMgr = true;
+    document.getElementById('collImgInput').value = '';
+    document.getElementById('collImgInput').click();
   };
 
   function renderMgr() {
