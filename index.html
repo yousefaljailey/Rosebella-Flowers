@@ -3683,62 +3683,237 @@
     </div>
   </div>
 
-  <!-- OCCASIONS -->
-  <section class="occasions">
+  <!-- COLLECTIONS SCROLL (replaces occasions grid) -->
+  <section class="occasions" id="occasions">
     <div class="occ-inner">
       <div class="occ-header reveal">
         <div>
-          <div class="section-label">Shop by Occasion</div>
+          <div class="section-label">Shop by Collection</div>
           <h2 class="section-title">Every <em>moment</em><br>deserves flowers</h2>
         </div>
-        <a href="#collections" class="col-link">View All Collections →</a>
       </div>
-      <div class="occ-grid reveal">
-        <div class="occ-item" onclick="filterByOccasion('anniversary-bouquet')">
-          <div class="occ-img occ-c1"></div>
-          <div class="occ-overlay">
-            <span class="occ-label">Anniversary</span>
-            <span class="occ-sub">Romance &amp; love</span>
-          </div>
-        </div>
-        <div class="occ-item" onclick="filterByOccasion('bella-roses')">
-          <div class="occ-img occ-c2"></div>
-          <div class="occ-overlay">
-            <span class="occ-label">Birthday</span>
-            <span class="occ-sub">Celebrate in style</span>
-          </div>
-        </div>
-        <div class="occ-item" onclick="filterByOccasion('luxury-box-arrangements')">
-          <div class="occ-img occ-c3"></div>
-          <div class="occ-overlay">
-            <span class="occ-label">Luxury Boxes</span>
-            <span class="occ-sub">Artisan luxury</span>
-          </div>
-        </div>
-        <div class="occ-item" onclick="filterByOccasion('al-haj-collection')">
-          <div class="occ-img occ-c4"></div>
-          <div class="occ-overlay">
-            <span class="occ-label">Al Haj</span>
-            <span class="occ-sub">Blessed occasions</span>
-          </div>
-        </div>
-        <div class="occ-item" onclick="filterByOccasion('floral-arrangements')">
-          <div class="occ-img occ-c5"></div>
-          <div class="occ-overlay">
-            <span class="occ-label">Floral</span>
-            <span class="occ-sub">Curated collections</span>
-          </div>
-        </div>
-        <div class="occ-item" onclick="filterByOccasion('hand-tied-bouquets')">
-          <div class="occ-img occ-c6"></div>
-          <div class="occ-overlay">
-            <span class="occ-label">Bouquets</span>
-            <span class="occ-sub">Hand-crafted blooms</span>
-          </div>
-        </div>
-      </div>
+
+      <!-- Horizontally scrollable collection cards -->
+      <div class="coll-scroll-wrap reveal">
+        <div class="coll-scroll-track" id="collScrollTrack">
+
+          <a class="coll-card" href="collection.html?cat=bella-roses&name=Bella+Roses">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#c04060 0%,#8b1a35 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌹</span><span class="coll-name">Bella Roses</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=hand-tied-bouquets&name=Hand-Tied+Bouquets">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#d46a3a 0%,#8c3210 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">💐</span><span class="coll-name">Hand-Tied Bouquets</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=luxury-box-arrangements&name=Luxury+Box+Arrangements">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#7a3a8a 0%,#3a1050 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🎁</span><span class="coll-name">Luxury Box Arrangements</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=anniversary-bouquet&name=Anniversary+Bouquet">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#e06070 0%,#9a2040 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">💕</span><span class="coll-name">Anniversary Bouquet</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=floral-arrangements&name=Floral+Arrangements">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#c09030 0%,#7a5010 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌸</span><span class="coll-name">Floral Arrangements</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=vase-collection&name=Vase+Collection">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#4a8a5a 0%,#1a4a2a 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🏺</span><span class="coll-name">Vase Collection</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=al-haj-collection&name=Al+Haj+Collection">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#3a7a4a 0%,#1a4020 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🕌</span><span class="coll-name">Al Haj Collection</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=eid-collections&name=Eid+Collections">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#c0a030 0%,#806010 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌙</span><span class="coll-name">Eid Collections</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=birthday-arrangments&name=Birthday+Arrangements">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#d06090 0%,#901040 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🎂</span><span class="coll-name">Birthday Arrangements</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=bridal-bouquet&name=Bridal+Bouquet">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#e0d0b0 0%,#a09060 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">👰</span><span class="coll-name">Bridal Bouquet</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=new-collection&name=New+Collection">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#5070c0 0%,#102060 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">✨</span><span class="coll-name">New Collection</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=i-love-you&name=I+Love+You">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#d04050 0%,#801020 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">❤️</span><span class="coll-name">I Love You</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=mother-day&name=Mother%27s+Day">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#d080a0 0%,#903060 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌷</span><span class="coll-name">Mother's Day</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=graduation-2025&name=Graduation+2025">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#4060a0 0%,#102040 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🎓</span><span class="coll-name">Graduation 2025</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=get-well-soon&name=Get+Well+Soon">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#60a080 0%,#205040 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌼</span><span class="coll-name">Get Well Soon</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=congratulations&name=Congratulations">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#c0a020 0%,#806000 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🎉</span><span class="coll-name">Congratulations</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=letters-of-love&name=Letters+of+Love">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#c06080 0%,#801040 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">💌</span><span class="coll-name">Letters of Love</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=lily-arrangement&name=Lily+Arrangement">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#e0b0d0 0%,#a06080 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌺</span><span class="coll-name">Lily Arrangement</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=special-bouquet&name=Special+Bouquet">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#b04070 0%,#701030 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">💫</span><span class="coll-name">Special Bouquet</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=ramadan-collection&name=Ramadan+Collection">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#204060 0%,#102030 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🌙</span><span class="coll-name">Ramadan Collection</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=rosebella-valentine-menu&name=Valentine%27s+Day">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#d03050 0%,#800020 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">💝</span><span class="coll-name">Valentine's Day</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=basket&name=Basket">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#b08040 0%,#705010 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🧺</span><span class="coll-name">Basket</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=balloons&name=Balloons">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#6090d0 0%,#204080 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🎈</span><span class="coll-name">Balloons</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=fruit-arrangment&name=Fruit+Arrangement">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#d08030 0%,#804010 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🍓</span><span class="coll-name">Fruit Arrangement</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=welcome-baby&name=Welcome+Baby">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#a0c0e0 0%,#406080 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">👶</span><span class="coll-name">Welcome Baby</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=teacher-day&name=Teacher%27s+Day">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#80a060 0%,#405020 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🍎</span><span class="coll-name">Teacher's Day</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=garangao-2025&name=Garangao+2025">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#c0a040 0%,#806010 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🪔</span><span class="coll-name">Garangao 2025</span></div>
+          </a>
+
+          <a class="coll-card" href="collection.html?cat=qatar-national-day&name=Qatar+National+Day">
+            <div class="coll-card-img" style="background:linear-gradient(150deg,#8b1a35 0%,#4a0a18 100%)"></div>
+            <div class="coll-card-body"><span class="coll-icon">🇶🇦</span><span class="coll-name">Qatar National Day</span></div>
+          </a>
+
+        </div><!-- /coll-scroll-track -->
+
+        <!-- Scroll arrows -->
+        <button class="coll-arrow coll-arrow-l" onclick="scrollCollections(-1)" aria-label="Scroll left">&#8249;</button>
+        <button class="coll-arrow coll-arrow-r" onclick="scrollCollections(1)"  aria-label="Scroll right">&#8250;</button>
+      </div><!-- /coll-scroll-wrap -->
+
     </div>
   </section>
+
+  <script>
+  function scrollCollections(dir) {
+    const track = document.getElementById('collScrollTrack');
+    track.scrollBy({ left: dir * 700, behavior: 'smooth' });
+  }
+  </script>
+
+  <style>
+    /* ── COLLECTION SCROLL SECTION ── */
+    .coll-scroll-wrap {
+      position: relative; max-width: 1280px; margin: 0 auto;
+    }
+    .coll-scroll-track {
+      display: flex; gap: 16px;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      scrollbar-width: none; padding-bottom: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .coll-scroll-track::-webkit-scrollbar { display: none; }
+
+    .coll-card {
+      flex-shrink: 0; width: 180px; border-radius: 16px; overflow: hidden;
+      text-decoration: none; scroll-snap-align: start;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+      transition: transform 0.28s ease, box-shadow 0.28s;
+      display: flex; flex-direction: column;
+    }
+    .coll-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+    }
+    .coll-card-img {
+      height: 130px; width: 100%;
+      flex-shrink: 0;
+    }
+    .coll-card-body {
+      background: var(--white); padding: 14px 12px 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      flex: 1;
+    }
+    .coll-icon { font-size: 26px; line-height: 1; }
+    .coll-name {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--charcoal); text-align: center; line-height: 1.35;
+    }
+
+    /* Scroll arrows */
+    .coll-arrow {
+      position: absolute; top: 50%; transform: translateY(-calc(50% + 20px));
+      width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(198,146,42,0.3);
+      background: var(--white); color: var(--gold); font-size: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+      transition: background 0.2s, border-color 0.2s;
+      z-index: 2;
+    }
+    .coll-arrow:hover { background: var(--gold); color: var(--white); border-color: var(--gold); }
+    .coll-arrow-l { left: -22px; }
+    .coll-arrow-r { right: -22px; }
+
+    @media (max-width: 768px) {
+      .coll-arrow { display: none; }
+      .coll-card { width: 140px; }
+      .coll-card-img { height: 100px; }
+    }
+  </style>
 
   <!-- COLLECTIONS (Floward-style) -->
   <section class="collections" id="collections">
@@ -3800,37 +3975,9 @@
     </div>
     <div class="filter-result-count" id="filterResultCount"></div>
 
-    <!-- Category Filter Tabs -->
-        <div class="cat-tabs reveal">
+    <!-- Category Filter Tabs (hidden — browsing is now via the collection cards above) -->
+    <div class="cat-tabs" style="display:none;">
       <button class="cat-tab active" data-cat="all">All Collections</button>
-      <button class="cat-tab" data-cat="al-haj-collection">Al Haj Collection</button>
-      <button class="cat-tab" data-cat="anniversary-bouquet">Anniversary Bouquet</button>
-      <button class="cat-tab" data-cat="balloons">Balloons</button>
-      <button class="cat-tab" data-cat="basket">Basket</button>
-      <button class="cat-tab" data-cat="bella-roses">Bella Roses</button>
-      <button class="cat-tab" data-cat="birthday-arrangments">Birthday Arrangments</button>
-      <button class="cat-tab" data-cat="bridal-bouquet">Bridal Bouquet</button>
-      <button class="cat-tab" data-cat="congratulations">Congratulations</button>
-      <button class="cat-tab" data-cat="eid-collections">Eid Collections</button>
-      <button class="cat-tab" data-cat="floral-arrangements">Floral Arrangements</button>
-      <button class="cat-tab" data-cat="fruit-arrangment">Fruit Arrangment</button>
-      <button class="cat-tab" data-cat="garangao-2025">Garangao 2025</button>
-      <button class="cat-tab" data-cat="get-well-soon">Get Well Soon</button>
-      <button class="cat-tab" data-cat="graduation-2025">Graduation 2025</button>
-      <button class="cat-tab" data-cat="hand-tied-bouquets">Hand-Tied Bouquets</button>
-      <button class="cat-tab" data-cat="i-love-you">I Love You</button>
-      <button class="cat-tab" data-cat="letters-of-love">Letters of Love</button>
-      <button class="cat-tab" data-cat="lily-arrangement">Lily Arrangement</button>
-      <button class="cat-tab" data-cat="luxury-box-arrangements">Luxury Box Arrangements</button>
-      <button class="cat-tab" data-cat="mother-day">Mother Day</button>
-      <button class="cat-tab" data-cat="new-collection">New Collection</button>
-      <button class="cat-tab" data-cat="qatar-national-day">Qatar National Day</button>
-      <button class="cat-tab" data-cat="ramadan-collection">Ramadan Collection</button>
-      <button class="cat-tab" data-cat="rosebella-valentine-menu">Rosebella Valentine menu</button>
-      <button class="cat-tab" data-cat="special-bouquet">Special Bouquet</button>
-      <button class="cat-tab" data-cat="teacher-day">Teacher Day</button>
-      <button class="cat-tab" data-cat="vase-collection">Vase Collection</button>
-      <button class="cat-tab" data-cat="welcome-baby">Welcome Baby</button>
     </div>
 
     <!-- Product Grid -->
