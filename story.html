@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Story — Rosebella Flowers & Chocolates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold:      #C6922A;
+      --gold-light:#D4A84B;
+      --charcoal:  #2D2D2D;
+      --charcoal2: #1a1a1a;
+      --ivory:     #FAF8F0;
+      --ivory2:    #F3F0E8;
+      --white:     #FFFFFF;
+      --serif:     'Cormorant Garamond', Georgia, serif;
+      --sans:      'Montserrat', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--ivory); color: var(--charcoal); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 72px;
+      background: var(--ivory); border-bottom: 1px solid rgba(198,146,42,0.15);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    }
+    .nav-logo {
+      font-family: var(--serif); font-size: 20px; font-weight: 600;
+      letter-spacing: 0.12em; text-decoration: none; color: var(--charcoal);
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-back {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--charcoal); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--gold); }
+    .nav-shop {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      background: var(--gold); color: var(--white);
+      padding: 10px 24px; text-decoration: none;
+      transition: background 0.3s;
+    }
+    .nav-shop:hover { background: var(--gold-light); }
+
+    /* ── HERO BANNER ── */
+    .story-hero {
+      padding: 160px 64px 100px;
+      background: var(--charcoal2);
+      position: relative; overflow: hidden;
+    }
+    .story-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 60% 50%, rgba(198,146,42,0.08) 0%, transparent 70%);
+    }
+    .story-hero-inner { max-width: 800px; margin: 0 auto; position: relative; text-align: center; }
+    .story-hero .eyebrow {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold);
+      margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 14px;
+    }
+    .story-hero .eyebrow::before, .story-hero .eyebrow::after {
+      content: ''; display: block; width: 40px; height: 1px; background: var(--gold); opacity: 0.5;
+    }
+    .story-hero h1 {
+      font-family: var(--serif); font-size: clamp(52px, 7vw, 96px);
+      font-weight: 300; color: var(--white); line-height: 1.05;
+      letter-spacing: -0.02em; margin-bottom: 24px;
+    }
+    .story-hero h1 em { font-style: italic; color: var(--gold); }
+    .story-hero p {
+      font-family: var(--serif); font-size: clamp(16px, 1.8vw, 20px);
+      font-style: italic; color: rgba(255,255,255,0.55); line-height: 1.7;
+    }
+
+    /* ── STORY SECTION ── */
+    .story { background: var(--ivory); padding: 120px 64px; }
+    .story-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center;
+    }
+    .section-label {
+      font-family: var(--sans); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--serif); font-size: clamp(36px, 4.5vw, 60px);
+      font-weight: 300; line-height: 1.1; color: var(--charcoal);
+      letter-spacing: -0.02em;
+    }
+    .section-title em { font-style: italic; color: var(--gold); }
+    .story-text .section-label { margin-bottom: 16px; }
+    .story-text p {
+      font-family: var(--serif); font-size: 18px; line-height: 1.8; color: #4a4a4a;
+      margin-top: 24px;
+    }
+    .story-values {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      margin-top: 48px; border: 1px solid rgba(198,146,42,0.2);
+    }
+    .value-cell {
+      padding: 24px; border: 1px solid rgba(198,146,42,0.12);
+      transition: background 0.3s;
+    }
+    .value-cell:hover { background: rgba(198,146,42,0.06); }
+    .value-cell .icon { font-size: 22px; margin-bottom: 8px; }
+    .value-cell strong { font-family: var(--sans); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; display: block; margin-bottom: 4px; color: var(--gold); }
+    .value-cell span { font-family: var(--serif); font-size: 15px; color: #666; }
+    .story-visual { position: relative; }
+    .story-card { background: var(--charcoal); padding: 60px 50px; position: relative; overflow: hidden; }
+    .story-card::before {
+      content: '"'; position: absolute; top: -20px; left: 30px;
+      font-family: var(--serif); font-size: 200px; line-height: 1;
+      color: var(--gold); opacity: 0.08;
+    }
+    .story-card blockquote {
+      font-family: var(--serif); font-size: 24px; font-style: italic;
+      line-height: 1.6; color: var(--white); margin-bottom: 32px;
+    }
+    .story-card cite {
+      font-family: var(--sans); font-size: 10px; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); font-style: normal;
+    }
+    .story-stat-row {
+      display: flex; gap: 0; margin-top: 48px; border-top: 1px solid rgba(198,146,42,0.15);
+      padding-top: 40px;
+    }
+    .story-stat { flex: 1; text-align: center; padding: 0 20px; }
+    .story-stat:not(:last-child) { border-right: 1px solid rgba(198,146,42,0.15); }
+    .story-stat .num {
+      font-family: var(--serif); font-size: 48px; font-weight: 300;
+      color: var(--gold); line-height: 1; display: block;
+    }
+    .story-stat .lbl {
+      font-family: var(--sans); font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 4px; display: block;
+    }
+
+    /* ── EXPERIENCE ── */
+    .experience {
+      background: var(--charcoal2); padding: 100px 64px;
+      position: relative; overflow: hidden;
+    }
+    .experience::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        90deg, transparent, transparent 120px,
+        rgba(198,146,42,0.02) 120px, rgba(198,146,42,0.02) 121px
+      );
+    }
+    .exp-inner { max-width: 1240px; margin: 0 auto; position: relative; }
+    .exp-header { margin-bottom: 72px; }
+    .exp-header .section-label { color: var(--gold); }
+    .exp-header h2.section-title { color: var(--white); max-width: 540px; }
+    .exp-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .exp-step {
+      padding: 44px 36px; border: 1px solid rgba(198,146,42,0.22);
+      position: relative; transition: background 0.4s, border-color 0.4s;
+    }
+    .exp-step:hover { background: rgba(198,146,42,0.05); border-color: rgba(198,146,42,0.5); }
+    .exp-step-num {
+      font-family: var(--serif); font-size: 72px; font-weight: 300;
+      color: rgba(198,146,42,0.25); line-height: 1; margin-bottom: 24px; display: block;
+    }
+    .exp-step-icon {
+      width: 44px; height: 44px; border: 1px solid rgba(198,146,42,0.3);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    }
+    .exp-step-icon svg { width: 20px; height: 20px; stroke: var(--gold); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .exp-step h3 { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--white); margin-bottom: 12px; }
+    .exp-step p { font-family: var(--serif); font-size: 15px; color: rgba(255,255,255,0.5); font-style: italic; line-height: 1.7; }
+
+    /* ── CTA STRIP ── */
+    .story-cta {
+      background: var(--gold); padding: 80px 64px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .story-cta::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.04) 40px, rgba(255,255,255,0.04) 80px);
+    }
+    .story-cta h2 {
+      font-family: var(--serif); font-size: clamp(36px, 5vw, 64px);
+      font-weight: 300; color: var(--white); margin-bottom: 16px; position: relative;
+    }
+    .story-cta h2 em { font-style: italic; }
+    .story-cta p {
+      font-family: var(--serif); font-size: 18px; font-style: italic;
+      color: rgba(255,255,255,0.8); margin-bottom: 40px; position: relative;
+    }
+    .story-cta a {
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      background: var(--white); color: var(--gold);
+      padding: 16px 48px; text-decoration: none; display: inline-block; position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .story-cta a:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+
+    /* ── FOOTER STRIP ── */
+    .story-footer {
+      background: var(--charcoal2); padding: 40px 64px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    .story-footer .logo { font-family: var(--serif); font-size: 18px; letter-spacing: 0.12em; color: rgba(255,255,255,0.7); }
+    .story-footer .logo span { color: var(--gold); }
+    .story-footer p { font-family: var(--sans); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.08em; }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
+      .story-hero, .story, .experience, .story-cta { padding-left: 24px; padding-right: 24px; }
+      .story-grid { grid-template-columns: 1fr; gap: 48px; }
+      .exp-steps { grid-template-columns: 1fr 1fr; }
+      .story-footer { padding: 32px 24px; }
+    }
+    @media (max-width: 560px) {
+      .exp-steps { grid-template-columns: 1fr; }
+      .story-values { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">ROSE<span>BELLA</span></a>
+    <a href="index.html" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Home
+    </a>
+    <a href="index.html#collections" class="nav-shop">Shop Now</a>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <section class="story-hero">
+    <div class="story-hero-inner reveal">
+      <div class="eyebrow">Our Story</div>
+      <h1>Created from a love<br>for <em>beautiful</em> gifting</h1>
+      <p>Rosebella turns everyday occasions into something unforgettable with premium flowers, chocolates, and thoughtful presentation.</p>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="story">
+    <div class="story-grid">
+      <div class="story-text reveal">
+        <div class="section-label">Our Story</div>
+        <h2 class="section-title">Created from a<br>love for <em>beautiful</em><br>gifting</h2>
+        <p>Rosebella turns everyday occasions into something unforgettable with premium flowers, chocolates, and thoughtful presentation. Every bouquet is designed with care. Every delivery is made to bring a smile.</p>
+        <div class="story-values">
+          <div class="value-cell">
+            <div class="icon">✦</div>
+            <strong>Elegance</strong>
+            <span>Refined luxury in every detail</span>
+          </div>
+          <div class="value-cell">
+            <div class="icon">◈</div>
+            <strong>Convenience</strong>
+            <span>Effortless gifting experience</span>
+          </div>
+          <div class="value-cell">
+            <div class="icon">♡</div>
+            <strong>Emotion</strong>
+            <span>Gifts that speak for you</span>
+          </div>
+          <div class="value-cell">
+            <div class="icon">◇</div>
+            <strong>Excellence</strong>
+            <span>Uncompromising quality</span>
+          </div>
+        </div>
+      </div>
+      <div class="story-visual reveal reveal-delay-2">
+        <div class="story-card">
+          <blockquote>"We believe giving should feel effortless, yet truly special."</blockquote>
+          <cite>— Rosebella Mission</cite>
+          <div class="story-stat-row">
+            <div class="story-stat">
+              <span class="num">500<small style="font-size:28px">+</small></span>
+              <span class="lbl">Bouquets Daily</span>
+            </div>
+            <div class="story-stat">
+              <span class="num">4.9</span>
+              <span class="lbl">Star Rating</span>
+            </div>
+            <div class="story-stat">
+              <span class="num">3h</span>
+              <span class="lbl">Avg. Delivery</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="experience">
+    <div class="exp-inner">
+      <div class="exp-header reveal">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">The <em>Rosebella</em><br>experience</h2>
+      </div>
+      <div class="exp-steps">
+        <div class="exp-step reveal">
+          <span class="exp-step-num">01</span>
+          <div class="exp-step-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          </div>
+          <h3>Choose Your Gift</h3>
+          <p>Browse our curated collections of fresh flowers, luxury chocolates, and bespoke arrangements.</p>
+        </div>
+        <div class="exp-step reveal reveal-delay-1">
+          <span class="exp-step-num">02</span>
+          <div class="exp-step-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3>Personalise It</h3>
+          <p>Add a heartfelt message, select your packaging, and choose add-ons to make it truly yours.</p>
+        </div>
+        <div class="exp-step reveal reveal-delay-2">
+          <span class="exp-step-num">03</span>
+          <div class="exp-step-icon">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <h3>We Deliver</h3>
+          <p>Same-day delivery across Doha, Qatar. Track your order and schedule the perfect time.</p>
+        </div>
+        <div class="exp-step reveal reveal-delay-3">
+          <span class="exp-step-num">04</span>
+          <div class="exp-step-icon">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <h3>Make It Memorable</h3>
+          <p>Every gift arrives beautifully wrapped, ready to create a moment they will never forget.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="story-cta">
+    <h2>Make every moment <em>unforgettable</em></h2>
+    <p>Deliver elegance to someone special today.</p>
+    <a href="index.html#collections">Shop Our Collections</a>
+  </section>
+
+  <!-- FOOTER STRIP -->
+  <footer class="story-footer">
+    <div class="logo">ROSE<span>BELLA</span></div>
+    <p>Luxury Flowers &amp; Chocolates — Doha, Qatar</p>
+    <p>+974 33 446 618 &nbsp;·&nbsp; @rosebella.flowers</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.reveal').forEach(el => {
+      new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.08 }).observe(el);
+    });
+    setTimeout(() => {
+      document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
+    }, 800);
+  </script>
+</body>
+</html>
