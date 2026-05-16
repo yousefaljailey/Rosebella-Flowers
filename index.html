@@ -4990,28 +4990,25 @@
     #adminBar {
       display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9990;
       background: #0f0e09; border-bottom: 1px solid rgba(198,146,42,0.2);
-      padding: 10px 24px; align-items: center; justify-content: space-between;
-      gap: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+      padding: 8px 20px; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px; box-shadow: 0 2px 20px rgba(0,0,0,0.4);
     }
     #adminBar.show { display: flex; }
-    body.admin-active { padding-top: 48px; }
-    .ab-left { display: flex; align-items: center; gap: 12px; }
-    .ab-logo {
-      font-family: var(--serif); font-size: 15px; color: var(--white);
-      letter-spacing: 0.1em;
-    }
+    body.admin-active { padding-top: 52px; }
+    .ab-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .ab-logo { font-family: var(--serif); font-size: 15px; color: var(--white); letter-spacing: 0.1em; }
     .ab-logo span { color: var(--gold); }
     .ab-badge {
       font-family: var(--sans); font-size: 8px; font-weight: 700;
       letter-spacing: 0.2em; text-transform: uppercase;
       background: var(--gold); color: #000; padding: 3px 8px; border-radius: 3px;
     }
-    .ab-right { display: flex; align-items: center; gap: 10px; }
+    .ab-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .ab-btn {
       font-family: var(--sans); font-size: 10px; font-weight: 600;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 7px 16px; border-radius: 6px; cursor: pointer; border: none;
-      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer; border: none;
+      transition: background 0.2s, transform 0.15s; white-space: nowrap;
     }
     .ab-btn:hover { transform: translateY(-1px); }
     .ab-btn-gold   { background: var(--gold); color: #fff; }
