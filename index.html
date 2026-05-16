@@ -8192,7 +8192,7 @@
 (function() {
   const HS_KEY = 'rosebella_hero_slides';
   function defaultSlides() {
-    return [{ id:1, type:'video', src:'AdobeStock_437011671.mov', poster:'', eyebrow:'Luxury Flowers & Chocolates', title:'Elegance', titleItalic:'Delivered', subtitle:'Crafted with care. Delivered with love.', cta:'Explore Collections', ctaLink:'#collections' }];
+    return [{ id:1, type:'video', src:'AdobeStock_437011671.mp4', poster:'', eyebrow:'Luxury Flowers & Chocolates', title:'Elegance', titleItalic:'Delivered', subtitle:'Crafted with care. Delivered with love.', cta:'Explore Collections', ctaLink:'#collections' }];
   }
   let slides = (function(){ try{ return JSON.parse(localStorage.getItem(HS_KEY))||defaultSlides(); }catch(e){ return defaultSlides(); } })();
   let index=0, paused=false, muted=true, timer=null, editing=null;
@@ -8204,7 +8204,7 @@
     if(!track||!dots) return;
     track.innerHTML=slides.map((s,i)=>{
       const media=s.type==='video'
-        ?`<video class="hs-media" id="hsVid${s.id}" autoplay muted loop playsinline preload="auto"${s.poster?` poster="${s.poster}"`:''}><source src="${s.src}" type="video/mp4"><source src="${s.src}" type="video/quicktime"></video>`
+        ?`<video class="hs-media" id="hsVid${s.id}" autoplay muted loop playsinline preload="auto"${s.poster?` poster="${s.poster}"`:''}><source src="${s.src}" type="video/mp4"></video>`
         :`<img class="hs-media" src="${s.src}" alt="${s.title||''}" loading="${i===0?'eager':'lazy'}" />`;
       return `<div class="hs-slide${i===index?' hs-active':''}" data-idx="${i}">${media}<div class="hs-overlay"></div><div class="hs-content"><div class="hs-eyebrow">${s.eyebrow||'Luxury Flowers &amp; Chocolates'}</div><h1 class="hs-h1">${s.title||''} <em>${s.titleItalic||''}</em></h1><p class="hs-tagline">${s.subtitle||''}</p><a href="${s.ctaLink||'#collections'}" class="hs-cta">${s.cta||'Shop Now'}</a></div></div>`;
     }).join('');
