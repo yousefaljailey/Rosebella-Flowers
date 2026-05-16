@@ -849,33 +849,64 @@
     .reveal-delay-2 { transition-delay: 0.2s; }
     .reveal-delay-3 { transition-delay: 0.3s; }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 1100px) {
-      .hero-content { padding: 0 32px; }
+    /* ══════════════════════════════════════════
+       RESPONSIVE — comprehensive mobile / tablet
+    ══════════════════════════════════════════ */
+    .nav-hamburger { display:none; flex-direction:column; justify-content:center; gap:5px; width:44px; height:44px; background:none; border:none; cursor:pointer; padding:8px; border-radius:4px; transition:background 0.2s; flex-shrink:0; color:var(--white); }
+    nav.scrolled .nav-hamburger { color:var(--charcoal); }
+    .nav-hamburger:hover { background:rgba(198,146,42,0.08); }
+    .nav-hamburger span { display:block; width:22px; height:1.5px; background:currentColor; transition:transform 0.3s,opacity 0.3s; }
+    .nav-hamburger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity:0; }
+    .nav-hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    #mobNavOverlay { display:none; position:fixed; inset:0; z-index:9989; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); }
+    #mobNavOverlay.show { display:block; }
+    #mobNav { position:fixed; top:0; right:-100%; width:min(320px,88vw); height:100dvh; background:var(--charcoal3); z-index:9990; display:flex; flex-direction:column; transition:right 0.35s cubic-bezier(0.25,0.46,0.45,0.94); overflow-y:auto; }
+    #mobNav.show { right:0; }
+    .mob-nav-hd { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid rgba(198,146,42,0.15); }
+    .mob-nav-brand { font-family:var(--serif); font-size:18px; letter-spacing:0.12em; color:var(--white); }
+    .mob-nav-brand span { color:var(--gold); }
+    .mob-nav-close { width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,0.15); background:none; color:rgba(255,255,255,0.55); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    .mob-nav-close:hover { background:rgba(255,255,255,0.1); }
+    .mob-nav-links { display:flex; flex-direction:column; padding:24px 0; }
+    .mob-nav-links a { font-family:var(--sans); font-size:13px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.7); text-decoration:none; padding:16px 24px; border-bottom:1px solid rgba(255,255,255,0.05); transition:color 0.2s,background 0.2s; display:flex; align-items:center; justify-content:space-between; }
+    .mob-nav-links a::after { content:'›'; font-size:18px; opacity:0.3; }
+    .mob-nav-links a:hover { color:var(--gold); background:rgba(198,146,42,0.06); }
+    .mob-nav-bottom { padding:24px; display:flex; flex-direction:column; gap:12px; margin-top:auto; border-top:1px solid rgba(255,255,255,0.06); }
+    .mob-nav-cta { display:block; text-align:center; font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; background:var(--gold); color:#fff; padding:15px; text-decoration:none; transition:background 0.2s; }
+    .mob-nav-cta:hover { background:var(--gold-light); }
+    .mob-nav-wa { display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; background:#25D366; color:#fff; padding:14px; text-decoration:none; transition:background 0.2s; }
+    .mob-nav-wa:hover { background:#1ebe5d; }
+    .mob-nav-langs { display:flex; gap:8px; padding:16px 24px 0; }
+    .mob-lang-btn { flex:1; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; border:1.5px solid rgba(255,255,255,0.2); background:none; color:rgba(255,255,255,0.55); padding:10px; cursor:pointer; border-radius:4px; transition:all 0.2s; }
+    .mob-lang-btn.active { background:var(--gold); border-color:var(--gold); color:#fff; }
+
+    @media (max-width:1100px) { .collections{padding:80px 40px;} .occasions{padding:80px 40px;} .testimonials{padding:80px 40px;} .occ-grid{grid-template-columns:repeat(3,1fr);} }
+    @media (max-width:900px) {
+      nav { padding:0 20px; } nav.scrolled { padding:0 20px; }
+      .nav-links{display:none;} .nav-cta{display:none;} .nav-hamburger{display:flex;}
+      section{padding:64px 24px!important;} .collections{padding:64px 24px!important;} .occasions{padding:64px 24px!important;} .testimonials{padding:64px 24px!important;} footer{padding:48px 24px!important;}
+      .story-grid{grid-template-columns:1fr;gap:48px;} .exp-steps{grid-template-columns:1fr 1fr;} .occ-grid{grid-template-columns:repeat(3,1fr);} .items-grid{grid-template-columns:1fr;} .test-grid{grid-template-columns:1fr;}
+      .footer-grid{grid-template-columns:1fr 1fr;gap:32px;} .footer-brand{grid-column:span 2;}
+      .featured-top{flex-direction:column;align-items:flex-start;gap:12px;} .test-header{flex-direction:column;align-items:flex-start;gap:16px;} .footer-bottom{flex-direction:column;gap:10px;text-align:center;} .occ-header{flex-direction:column;align-items:flex-start;gap:12px;} .col-header-row{flex-direction:column;align-items:flex-start;gap:12px;}
+      .hs-content{bottom:10%;left:5%;max-width:90%;} .hs-prev{left:12px;} .hs-next{right:12px;}
+      .cat-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;} .cat-tabs::-webkit-scrollbar{height:2px;} .cat-tabs::-webkit-scrollbar-thumb{background:rgba(198,146,42,0.3);}
+      .filter-bar{flex-wrap:wrap;gap:12px;} .marquee-wrap{padding:16px 0;}
     }
-    @media (max-width: 900px) {
-      nav { padding: 16px 24px; }
-      nav.scrolled { padding: 12px 24px; }
-      .nav-links { display: none; }
-      section { padding: 80px 24px; }
-      .experience { padding: 80px 24px; }
-      .occasions  { padding: 80px 24px; }
-      .story-grid { grid-template-columns: 1fr; gap: 48px; }
-      .exp-steps  { grid-template-columns: 1fr 1fr; }
-      .occ-grid   { grid-template-columns: repeat(3, 1fr); }
-      .items-grid { grid-template-columns: 1fr; }
-      .test-grid  { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
-      .footer-brand { grid-column: span 2; }
-      .featured-top { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .test-header  { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-      .occ-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    @media (max-width:768px) {
+      .occ-grid{grid-template-columns:repeat(2,1fr);} .exp-steps{grid-template-columns:1fr;} .footer-grid{grid-template-columns:1fr;} .footer-brand{grid-column:span 1;}
+      .hs-h1{font-size:clamp(36px,9vw,60px);} .hs-tagline{font-size:14px;margin-bottom:24px;} .hs-cta{padding:12px 28px;}
+      .test-header > div{width:100%;} .write-review-btn{font-size:9px;padding:9px 14px;}
     }
-    @media (max-width: 600px) {
-      .exp-steps { grid-template-columns: 1fr; }
-      .occ-grid  { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width:600px) {
+      section{padding:52px 16px!important;} .collections{padding:52px 16px!important;} .occasions{padding:52px 16px!important;} .testimonials{padding:52px 16px!important;} footer{padding:40px 16px!important;}
+      .section-title{font-size:clamp(28px,8vw,44px);} .products-grid{grid-template-columns:1fr 1fr!important;gap:10px;} .occ-grid{grid-template-columns:1fr 1fr;}
+      .hero-slider{height:75vh;min-height:420px;} .hs-arrow{width:40px;height:40px;font-size:20px;} .hs-content{bottom:8%;left:4%;}
+      #waBubble .wa-text-en,#waBubble .wa-text-ar{display:none!important;} #waBubble{padding:12px;border-radius:50%;}
+      .nav-right{gap:8px;} .lang-btn{padding:5px 10px;font-size:9px;}
     }
+    @media (max-width:480px) { .products-grid{grid-template-columns:1fr 1fr!important;gap:8px;} .occ-item{min-height:120px;} }
+    @media (max-width:900px) { input,select,textarea,.ap-fi,.ap-rename-inp,.co-input,.co-textarea,.co-promo-inp,.pos-disc-inp,.pos-mod-search,.hs-field input,.hs-field select,.hs-field textarea{font-size:16px!important;} .prod-add,.cat-tab,.btn-primary,.hs-ctrl,.hs-dot{min-height:44px;} .cat-tab{padding:10px 18px;} }
   </style>
 
 
@@ -2979,6 +3010,31 @@
     <span class="wa-text-ar">واتساب</span>
   </a>
 
+  <!-- Mobile Nav -->
+  <div id="mobNavOverlay" onclick="closeMobileNav()"></div>
+  <div id="mobNav">
+    <div class="mob-nav-hd">
+      <span class="mob-nav-brand">ROSE<span>BELLA</span></span>
+      <button class="mob-nav-close" onclick="closeMobileNav()">✕</button>
+    </div>
+    <nav class="mob-nav-links">
+      <a href="#collections" onclick="closeMobileNav()">Collections</a>
+      <a href="story.html">Our Story</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="mob-nav-langs">
+      <button class="mob-lang-btn active" id="mobBtnEN" onclick="setLang('en');updateMobLangBtns('en')">EN</button>
+      <button class="mob-lang-btn" id="mobBtnAR" onclick="setLang('ar');updateMobLangBtns('ar')">عربي</button>
+    </div>
+    <div class="mob-nav-bottom">
+      <a href="#collections" class="mob-nav-cta" onclick="closeMobileNav()">Shop Now</a>
+      <a href="https://wa.me/97433446618" class="mob-nav-wa" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.533 5.849L.057 23.617a.75.75 0 00.906.94l5.946-1.557A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.698-.5-5.254-1.376l-.372-.215-3.899 1.021 1.04-3.794-.235-.38A9.932 9.932 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        WhatsApp Us
+      </a>
+    </div>
+  </div>
+
   <!-- NAV -->
   <nav id="navbar">
     <a href="#" class="nav-brand">
@@ -2999,6 +3055,9 @@
       <button id="btnEN" onclick="setLang('en')" class="lang-btn active">EN</button>
       <button id="btnAR" onclick="setLang('ar')" class="lang-btn">عربي</button>
       <a href="#collections" class="nav-cta">Shop Now</a>
+      <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
 
@@ -8133,6 +8192,27 @@
     };
 
   })();
+
+  // ── Mobile nav ────────────────────────────────
+  function toggleMobileNav() {
+    const nav=document.getElementById('mobNav'), overlay=document.getElementById('mobNavOverlay'), btn=document.getElementById('navHamburger');
+    const open=nav.classList.toggle('show');
+    overlay.classList.toggle('show',open); btn.classList.toggle('open',open);
+    btn.setAttribute('aria-expanded',open); document.body.style.overflow=open?'hidden':'';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobNav').classList.remove('show');
+    document.getElementById('mobNavOverlay').classList.remove('show');
+    const btn=document.getElementById('navHamburger'); btn.classList.remove('open'); btn.setAttribute('aria-expanded','false');
+    document.body.style.overflow='';
+  }
+  function updateMobLangBtns(lang) {
+    document.getElementById('mobBtnEN').classList.toggle('active',lang==='en');
+    document.getElementById('mobBtnAR').classList.toggle('active',lang==='ar');
+  }
+  const _origSetLang=window.setLang;
+  if(_origSetLang) window.setLang=function(lang){_origSetLang(lang);updateMobLangBtns(lang);};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape') closeMobileNav();});
 
   // ── Scroll reveal ─────────────────────────────
   document.querySelectorAll('.reveal').forEach(el => {
