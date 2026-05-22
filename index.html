@@ -6863,7 +6863,7 @@
       isAdmin = true;
       hideLogin();
       document.getElementById('adminBar').classList.add('show');
-      document.getElementById('adminTrigger').style.display = 'none';
+      const _at = document.getElementById('adminTrigger'); if (_at) _at.style.display = 'none';
       document.body.classList.add('admin-active');
       const fab = document.getElementById('hsAdminFab'); if (fab) fab.classList.add('show');
       apToast('Welcome back, Yousef! 👋');
@@ -6875,7 +6875,7 @@
   function doLogout() {
     isAdmin = false;
     document.getElementById('adminBar').classList.remove('show');
-    document.getElementById('adminTrigger').style.display = 'flex';
+    const _at2 = document.getElementById('adminTrigger'); if (_at2) _at2.style.display = 'flex';
     document.body.classList.remove('admin-active');
     const fab = document.getElementById('hsAdminFab'); if (fab) fab.classList.remove('show');
     closePanel();
@@ -7144,7 +7144,7 @@
   async function cloudinaryUpload(file, folder, transforms) {
     const fd = new FormData();
     fd.append('file', file);
-    fd.append('upload_preset', 'rosebella_unsigned');
+    fd.append('upload_preset', 'rosebella');
     fd.append('folder', folder || 'rosebella');
     const res = await fetch('https://api.cloudinary.com/v1_1/dp6x1cfmj/image/upload', { method: 'POST', body: fd });
     if (!res.ok) throw new Error('Cloudinary upload failed');
