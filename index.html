@@ -5901,31 +5901,25 @@
     .ab-btn-red    { background: rgba(192,57,43,0.15); color: #e05060; border: 1px solid rgba(192,57,43,0.3); }
     .ab-btn-red:hover { background: rgba(192,57,43,0.3); }
 
-    /* ── Admin Side Panel ── */
-    #apOverlay {
-      display: none; position: fixed; inset: 0; z-index: 9991;
-      background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
-    }
-    #apOverlay.show { display: block; }
+    /* ── Admin Full-Page Panel ── */
+    #apOverlay { display: none; }
     #apPanel {
-      position: fixed; top: 48px; right: -860px; width: 860px; max-width: 100vw;
-      height: calc(100vh - 48px); z-index: 9992;
-      background: #18160f; display: flex; flex-direction: column;
-      border-left: 1px solid rgba(198,146,42,0.15);
-      box-shadow: -10px 0 60px rgba(0,0,0,0.5);
-      transition: right 0.36s cubic-bezier(0.4,0,0.2,1);
+      position: fixed; inset: 0; z-index: 9995;
+      background: #13110a; display: flex; flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
     }
-    #apPanel.show { right: 0; }
+    #apPanel.show { transform: translateY(0); }
 
     /* Panel header */
     .ap-ph {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 24px; border-bottom: 1px solid rgba(198,146,42,0.15);
-      background: #0f0e09; flex-shrink: 0;
+      padding: 18px 32px; border-bottom: 1px solid rgba(198,146,42,0.15);
+      background: #0d0b07; flex-shrink: 0;
     }
-    .ap-ph h2 { font-family: var(--serif); font-size: 18px; color: var(--white); font-weight: 400; }
+    .ap-ph h2 { font-family: var(--serif); font-size: 22px; color: var(--white); font-weight: 400; }
     .ap-ph h2 em { font-style: italic; color: var(--gold); }
-    .ap-ph-btns { display: flex; gap: 8px; }
+    .ap-ph-btns { display: flex; gap: 10px; align-items: center; }
     .ap-close-btn {
       width: 32px; height: 32px; border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.15); background: none;
@@ -5940,9 +5934,9 @@
 
     /* Sidebar */
     .ap-sb {
-      width: 220px; flex-shrink: 0; overflow-y: auto;
-      border-right: 1px solid rgba(198,146,42,0.1); padding: 12px 0;
-      background: #121007;
+      width: 260px; flex-shrink: 0; overflow-y: auto;
+      border-right: 1px solid rgba(198,146,42,0.12); padding: 16px 0;
+      background: #0d0b07;
     }
     .ap-sb::-webkit-scrollbar { width: 3px; }
     .ap-sb::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); border-radius: 2px; }
@@ -5976,8 +5970,8 @@
 
     /* Main content */
     .ap-mc {
-      flex: 1; overflow-y: auto; padding: 20px 20px 80px;
-      display: flex; flex-direction: column; gap: 18px;
+      flex: 1; overflow-y: auto; padding: 28px 32px 80px;
+      display: flex; flex-direction: column; gap: 24px;
     }
     .ap-mc::-webkit-scrollbar { width: 3px; }
     .ap-mc::-webkit-scrollbar-thumb { background: rgba(198,146,42,0.3); border-radius: 2px; }
@@ -6010,7 +6004,7 @@
     .ap-rename-btn:hover { background: var(--gold-light); }
 
     /* Products grid */
-    .ap-pg { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .ap-pg { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
     /* Admin product card */
     .ap-pc {
@@ -6022,8 +6016,13 @@
 
     /* Image area */
     .ap-pi {
-      width: 100%; height: 130px; position: relative; overflow: hidden;
-      background: #121007; cursor: pointer;
+      width: 100%; height: 240px; position: relative; overflow: hidden;
+      background: #0d0b07; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ap-pi img {
+      width: 100%; height: 100%;
+      object-fit: contain; display: block;
     }
     
     
@@ -6954,22 +6953,9 @@
         <div class="ap-pc" id="apc-${uid}">
           <div class="ap-pi" onclick="trigImg('${uid}')">
             ${imgSrc
-              ? `<div id="apim-${uid}" class="ap-editor-wrap"
-                   style="background-image:url(${imgSrc});background-size:100% auto;background-position:50% 0%;background-repeat:no-repeat;"></div>`
+              ? `<img id="apim-${uid}" src="${imgSrc}" alt="${cardName}" />`
               : `<div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>`}
             <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('${uid}')"><span>📷 Change Photo</span></div>
-            <div class="ap-img-bar" id="apbar-${uid}">
-              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',-0.15)">−</button>
-              <span class="ap-ipct" id="appct-${uid}">100%</span>
-              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',0.15)">+</button>
-              <button class="ap-ireset" onclick="event.stopPropagation();edReset('${uid}')">↺ Fit</button>
-            </div>
-            <div class="ap-img-bar" id="apbar-${uid}">
-              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',-0.15)">−</button>
-              <span class="ap-ipct" id="appct-${uid}">Fit</span>
-              <button class="ap-ib" onclick="event.stopPropagation();edZoom('${uid}',0.15)">+</button>
-              <button class="ap-ireset" onclick="event.stopPropagation();edReset('${uid}')">↺ Fit</button>
-            </div>
           </div>
           <div class="ap-pb">
             <div><span class="ap-fl">Name</span>
@@ -7152,6 +7138,7 @@
     if (overlay) overlay.innerHTML = '<span>⏳ Uploading…</span>';
 
     function applyImg(src) {
+      // Update main page product card
       const card = document.querySelector(`.prod-card[data-apid="${uid}"]`);
       if (card) {
         const mImg = card.querySelector('.prod-img img');
@@ -7160,11 +7147,25 @@
         else if (mBg) { mBg.style.cssText=`background-image:url(${src});background-size:cover;background-position:center;`; mBg.className='prod-img-bg'; }
         else { const pi=card.querySelector('.prod-img'); if(pi){ const img=document.createElement('img'); img.src=src; img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;'; pi.insertBefore(img,pi.firstChild); } }
       }
-      selectCol(curSlug, document.querySelector(`.cat-tab[data-cat="${curSlug}"]`)?.textContent.trim() || curSlug);
+      // Update admin panel preview directly
+      const apImg = document.getElementById(`apim-${uid}`);
+      if (apImg) {
+        apImg.src = src;
+      } else {
+        // No preview img yet — swap placeholder for real img
+        const apPi = document.querySelector(`#apc-${uid} .ap-pi`);
+        if (apPi) {
+          const placeholder = apPi.querySelector('.ap-pi-placeholder');
+          if (placeholder) placeholder.remove();
+          const newImg = document.createElement('img');
+          newImg.id = `apim-${uid}`; newImg.src = src; newImg.alt = '';
+          apPi.insertBefore(newImg, apPi.firstChild);
+        }
+      }
     }
 
     try {
-      const src = await cloudinaryUpload(file, 'rosebella/products', 'f_auto,q_auto,w_800,c_fill');
+      const src = await cloudinaryUpload(file, 'rosebella/products', 'f_auto,q_auto,w_1200');
       applyImg(src);
       apToast('Photo uploaded & optimized!');
     } catch(err) {
