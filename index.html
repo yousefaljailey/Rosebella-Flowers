@@ -1196,7 +1196,8 @@
 
     /* 1 ── Cart drawer: full-width + tighter padding on phones */
     @media (max-width: 520px) {
-      #cartPanel { width: 100% !important; max-width: 100% !important; right: 0 !important; }
+      #cartPanel { width: 100% !important; max-width: 100% !important; }
+      #cartPanel.show { right: 0 !important; }
       .cart-ph { padding: 14px 16px !important; }
       .cart-ph h2 { font-size: 18px !important; }
       .cart-items { padding: 12px 14px !important; }
