@@ -5712,12 +5712,13 @@
 
   // Restore state on page load — always ensure panels start closed
   try {
-    ['cartPanel','cartOverlay','apPanel','apOverlay','mobNav','mobNavOverlay'].forEach(id => {
+    ['cartPanel','cartOverlay','apPanel','apOverlay','mobNav','mobNavOverlay','adminBar','loginModalBg','hsMgrBg'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('show');
     });
     document.body.classList.remove('cart-open','admin-active');
     document.body.style.overflow = '';
+    window.isAdmin = false;
     updateCartUI();
   } catch(e) { /* DOM not ready yet — will re-run after DOMContentLoaded */ }
 
@@ -7322,6 +7323,9 @@
         { el: document.getElementById('apOverlay'),    cls: 'show' },
         { el: document.getElementById('mobNav'),       cls: 'show' },
         { el: document.getElementById('mobNavOverlay'),cls: 'show' },
+        { el: document.getElementById('adminBar'),     cls: 'show' },
+        { el: document.getElementById('loginModalBg'), cls: 'show' },
+        { el: document.getElementById('hsMgrBg'),      cls: 'show' },
         { el: document.body,                           cls: 'cart-open' },
         { el: document.body,                           cls: 'admin-active' },
       ];
