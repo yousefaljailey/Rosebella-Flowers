@@ -1020,7 +1020,7 @@
     .mob-nav-brand { font-family: var(--serif); font-size: 18px; letter-spacing: 0.12em; color: var(--white); }
     .mob-nav-brand span { color: var(--gold); }
     .mob-nav-close {
-      width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15);
+      width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15);
       background: none; color: rgba(255,255,255,0.55); font-size: 16px; cursor: pointer;
       display: flex; align-items: center; justify-content: center; transition: background 0.2s;
     }
@@ -1152,7 +1152,7 @@
 
       /* Hero slider */
       .hero-slider { height: 75vh; min-height: 420px; }
-      .hs-arrow { width: 40px; height: 40px; font-size: 20px; }
+      .hs-arrow { width: 44px; height: 44px; font-size: 20px; }
       .hs-content { bottom: 8%; left: 4%; }
 
       /* WhatsApp bubble — icon only on small screens */
@@ -1245,12 +1245,14 @@
 
     /* 6 ── Admin bar: more top padding when buttons wrap on mobile */
     @media (max-width: 700px) {
-      body.admin-active { padding-top: 96px !important; }
+      body.admin-active { padding-top: 80px !important; }
+      #adminBar { flex-wrap: wrap; gap: 6px; padding: 8px 12px !important; }
     }
     @media (max-width: 480px) {
-      body.admin-active { padding-top: 140px !important; }
-      #adminBar { padding: 6px 12px !important; }
-      .ab-btn { padding: 5px 10px !important; font-size: 9px !important; }
+      body.admin-active { padding-top: 100px !important; }
+      #adminBar { padding: 6px 10px !important; }
+      .ab-btn { padding: 6px 10px !important; font-size: 9px !important; }
+      .ab-right { flex-wrap: wrap; gap: 5px; }
     }
 
     /* 7 ── WhatsApp bubble: safe area so it never overlaps nav or other buttons */
@@ -1268,6 +1270,14 @@
     }
 
     /* 9 ── Product cards: min height so images don't collapse */
+    @media (max-width: 600px) {
+      .prod-img { min-height: 180px !important; }
+      .prod-body { padding: 10px 12px !important; }
+      .prod-body h3 { font-size: 13px !important; }
+      .prod-desc { font-size: 11px !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .prod-price { font-size: 15px !important; }
+      .prod-add { font-size: 10px !important; padding: 9px 12px !important; }
+    }
     @media (max-width: 480px) {
       .prod-img { min-height: 160px !important; }
     }
@@ -1289,7 +1299,7 @@
     /* 12 ── Modal close buttons: always reachable */
     @media (max-width: 520px) {
       .co-close-btn, #coCloseBtn, .vm-close, .py-hd-close,
-      #trackClose, .pos-hst-close { min-width: 40px !important; min-height: 40px !important; }
+      #trackClose, .pos-hst-close { min-width: 44px !important; min-height: 44px !important; }
     }
 
     /* 13 ── Footer single column on very small screens */
@@ -1301,6 +1311,55 @@
     /* 14 ── Promo input in checkout: 44px touch target */
     .co-promo-inp { min-height: 44px; font-size: 16px !important; }
     .co-promo-apply { min-height: 44px; }
+
+    /* 15 ── Filter bar: full-width on phones */
+    @media (max-width: 600px) {
+      .filter-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .fb-group { width: 100%; }
+      .fb-select { min-width: 0; width: 100%; }
+      .fb-price-group { min-width: 0; max-width: none; width: 100%; }
+    }
+
+    /* 16 ── Admin full-page panel: mobile layout */
+    @media (max-width: 768px) {
+      .ap-body { flex-direction: column; }
+      .ap-sb {
+        width: 100%; height: auto; flex-shrink: 0;
+        border-right: none; border-bottom: 1px solid rgba(198,146,42,0.12);
+        display: flex; flex-direction: row; overflow-x: auto; padding: 8px 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .ap-sb::-webkit-scrollbar { height: 2px; }
+      .ap-sb-title { display: none; }
+      .ap-ci {
+        white-space: nowrap; flex-shrink: 0;
+        border-left: none !important; border-bottom: 2px solid transparent;
+        padding: 10px 16px;
+      }
+      .ap-ci.active { border-left: none !important; border-bottom: 2px solid var(--gold) !important; }
+      .ap-add-col-btn { flex-shrink: 0; width: auto; white-space: nowrap; margin: 6px 8px; padding: 8px 14px; }
+      .ap-mc { padding: 16px 12px 80px; gap: 16px; }
+      .ap-pg { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+      .ap-ph { padding: 12px 16px; }
+      .ap-ph h2 { font-size: 16px; }
+      .ap-rename-bar { flex-wrap: wrap; gap: 8px; }
+      .ap-rename-inp { min-width: 0; }
+    }
+    @media (max-width: 480px) {
+      .ap-pg { grid-template-columns: 1fr !important; }
+      .ap-pi { height: 200px !important; }
+    }
+
+    /* 17 ── Occasions grid: 2 columns on very small phones */
+    @media (max-width: 380px) {
+      .occ-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+
+    /* 18 ── Collections scroll: touch friendly */
+    @media (max-width: 768px) {
+      .shop-by-coll-scroll { scroll-snap-type: x mandatory; }
+      .coll-card { scroll-snap-align: start; }
+    }
   </style>
 
 
