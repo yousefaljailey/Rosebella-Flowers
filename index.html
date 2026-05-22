@@ -7112,6 +7112,21 @@
     apToast('Product deleted.');
   }
 
+  // ── Photoroom background removal ─────────────
+  const _PR_KEY = 'sk_pr_default_1c2940b8beefeed59caebc8c07ef740694027596';
+  async function photoroomRemoveBg(file) {
+    const fd = new FormData();
+    fd.append('image_file', file);
+    const res = await fetch('https://sdk.photoroom.com/v1/segment', {
+      method: 'POST',
+      headers: { 'x-api-key': _PR_KEY },
+      body: fd
+    });
+    if (!res.ok) throw new Error('Photoroom failed: ' + res.status);
+    const blob = await res.blob();
+    return new File([blob], 'processed.png', { type: 'image/png' });
+  }
+
   // ── Cloudinary upload helper ──────────────────
   async function cloudinaryUpload(file, folder, transforms) {
     const fd = new FormData();
@@ -7121,7 +7136,7 @@
     const res = await fetch('https://api.cloudinary.com/v1_1/dp6x1cfmj/image/upload', { method: 'POST', body: fd });
     if (!res.ok) throw new Error('Cloudinary upload failed');
     const data = await res.json();
-    const t = transforms || 'f_auto,q_auto,w_800,c_fill';
+    const t = transforms || 'f_auto,q_auto,w_1200';
     return `https://res.cloudinary.com/dp6x1cfmj/image/upload/${t}/${data.public_id}`;
   }
 
@@ -7135,7 +7150,8 @@
     this.value = '';
 
     const overlay = document.querySelector(`#apc-${uid} .ap-pi-overlay`);
-    if (overlay) overlay.innerHTML = '<span>⏳ Uploading…</span>';
+    const setStatus = t => { if (overlay) overlay.innerHTML = `<span>${t}</span>`; };
+    setStatus('🔍 Removing background…');
 
     function applyImg(src) {
       // Update main page product card
@@ -7165,9 +7181,19 @@
     }
 
     try {
-      const src = await cloudinaryUpload(file, 'rosebella/products', 'f_auto,q_auto,w_1200');
+      // Step 1: Remove background with Photoroom
+      let processedFile = file;
+      try {
+        processedFile = await photoroomRemoveBg(file);
+        setStatus('☁️ Uploading…');
+      } catch(prErr) {
+        console.warn('Photoroom skipped:', prErr.message);
+        setStatus('☁️ Uploading…');
+      }
+      // Step 2: Upload to Cloudinary
+      const src = await cloudinaryUpload(processedFile, 'rosebella/products', 'f_auto,q_auto,w_1200');
       applyImg(src);
-      apToast('Photo uploaded & optimized!');
+      apToast('✓ Background removed & uploaded!');
     } catch(err) {
       const reader = new FileReader();
       reader.onload = ev => { applyImg(ev.target.result); apToast('Photo uploaded!'); };
