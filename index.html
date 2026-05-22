@@ -5709,8 +5709,16 @@
     updateCartUI();
   }
 
-  // Restore state on page load
-  try { updateCartUI(); } catch(e) { /* DOM not ready yet — will re-run after DOMContentLoaded */ }
+  // Restore state on page load — always ensure panels start closed
+  try {
+    ['cartPanel','cartOverlay','apPanel','apOverlay','mobNav','mobNavOverlay'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    });
+    document.body.classList.remove('cart-open','admin-active');
+    document.body.style.overflow = '';
+    updateCartUI();
+  } catch(e) { /* DOM not ready yet — will re-run after DOMContentLoaded */ }
 
   // ══════════════════════════════════════════════
   //  VARIANT SYSTEM
@@ -7305,8 +7313,26 @@
       const shaData = await shaRes.json();
       if (!shaData.sha) throw new Error(shaData.message || 'Could not get file SHA');
 
+      // Strip transient open-state classes before saving so visitors never see open panels
+      const transient = [
+        { el: document.getElementById('cartPanel'),    cls: 'show' },
+        { el: document.getElementById('cartOverlay'),  cls: 'show' },
+        { el: document.getElementById('apPanel'),      cls: 'show' },
+        { el: document.getElementById('apOverlay'),    cls: 'show' },
+        { el: document.getElementById('mobNav'),       cls: 'show' },
+        { el: document.getElementById('mobNavOverlay'),cls: 'show' },
+        { el: document.body,                           cls: 'cart-open' },
+        { el: document.body,                           cls: 'admin-active' },
+      ];
+      const removed = transient.filter(t => t.el && t.el.classList.contains(t.cls));
+      removed.forEach(t => t.el.classList.remove(t.cls));
+      if (document.body.style.overflow === 'hidden') document.body.style.overflow = '';
+
       const html    = '<!DOCTYPE html>' + document.documentElement.outerHTML;
       const content = btoa(unescape(encodeURIComponent(html)));
+
+      // Restore state after capturing
+      removed.forEach(t => t.el.classList.add(t.cls));
 
       const pushRes = await fetch(apiUrl, {
         method: 'PUT',
