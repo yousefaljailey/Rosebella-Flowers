@@ -1117,7 +1117,9 @@
 
     /* ── 768px — small tablets / large phones ── */
     @media (max-width: 768px) {
-      .occ-grid { grid-template-columns: repeat(2, 1fr); }
+      /* 3 columns so all 6 items fit in 2 rows without overflowing the viewport */
+      .occ-grid { grid-template-columns: repeat(3, 1fr); }
+      .occ-item { aspect-ratio: 2/3; }
       .exp-steps { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
       .footer-brand { grid-column: span 1; }
@@ -1147,8 +1149,8 @@
       /* Product grid */
       .products-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
 
-      /* Occasions 2x3 */
-      .occ-grid { grid-template-columns: 1fr 1fr; }
+      /* Occasions: keep 3 columns so 6 items fit in 2 complete rows */
+      .occ-grid { grid-template-columns: repeat(3, 1fr); }
 
       /* Hero slider */
       .hero-slider { height: 75vh; min-height: 420px; }
@@ -1167,8 +1169,8 @@
     /* ── 480px — small phones ── */
     @media (max-width: 480px) {
       .products-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
-      .occ-grid { grid-template-columns: 1fr 1fr; }
-      .occ-item { min-height: 120px; }
+      .occ-grid { grid-template-columns: repeat(3, 1fr); }
+      .occ-item { min-height: 100px; }
       .footer-social { justify-content: flex-start; }
       .footer-bottom p { font-size: 9px; }
     }
@@ -3913,7 +3915,7 @@
     });
   }
 
-  /* File chosen → upload to Firebase Storage → store URL → apply to card */
+  /* File chosen → upload to Cloudinary → store URL → apply to card */
   document.getElementById('collImgInput').addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (!file || !_pendingCollSlug || !_pendingCollCard) return;
@@ -3925,12 +3927,7 @@
 
     if (editBtn) { editBtn.textContent = '⏳ Uploading…'; editBtn.disabled = true; }
 
-    try {
-      /* Try Firebase Storage (same bucket as product images) */
-      const storageRef = firebase.storage().ref('collection-banners/' + slug + '_' + Date.now());
-      const snap = await storageRef.put(file);
-      const url  = await snap.ref.getDownloadURL();
-
+    function applyCollImg(url) {
       localStorage.setItem('rosebella_coll_bg_' + slug, url);
       if (imgEl) {
         imgEl.style.background         = 'none';
@@ -3938,19 +3935,14 @@
         imgEl.style.backgroundSize     = 'cover';
         imgEl.style.backgroundPosition = 'center';
       }
+    }
+
+    try {
+      const url = await cloudinaryUpload(file, 'rosebella/collections', 'f_auto,q_auto,w_1200,h_700,c_fill');
+      applyCollImg(url);
     } catch (err) {
-      /* Fallback: base64 in localStorage (for smaller images / no Storage) */
       const reader = new FileReader();
-      reader.onload = function(ev) {
-        const dataUrl = ev.target.result;
-        localStorage.setItem('rosebella_coll_bg_' + slug, dataUrl);
-        if (imgEl) {
-          imgEl.style.background         = 'none';
-          imgEl.style.backgroundImage    = 'url(' + dataUrl + ')';
-          imgEl.style.backgroundSize     = 'cover';
-          imgEl.style.backgroundPosition = 'center';
-        }
-      };
+      reader.onload = ev => applyCollImg(ev.target.result);
       reader.readAsDataURL(file);
     }
 
@@ -6585,7 +6577,7 @@
       <button class="ab-btn ab-btn-dark" onclick="hsMgrOpen()">🎬 Manage Slides</button>
       <button class="ab-btn ab-btn-dark" onclick="openSlotMgr()">🕐 Delivery Slots</button>
       <button class="ab-btn ab-btn-dark" onclick="openCustomers()">👥 Customers</button>
-      <button class="ab-btn ab-btn-dark" onclick="downloadSite()">⬇ Save & Download</button>
+      <button class="ab-btn ab-btn-gold" id="ghSaveBtn" onclick="pushToGitHub()">🚀 Save & Publish</button>
       <button class="ab-btn ab-btn-red" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
@@ -6596,7 +6588,7 @@
     <div class="ap-ph">
       <h2>Manage <em>Collections & Products</em></h2>
       <div class="ap-ph-btns">
-        <button class="ab-btn ab-btn-dark" style="font-size:10px;" onclick="downloadSite()">⬇ Save</button>
+        <button class="ab-btn ab-btn-gold" id="ghSavePanelBtn" style="font-size:10px;" onclick="pushToGitHub()">🚀 Save & Publish</button>
         <button class="ap-close-btn" onclick="closePanel()">✕</button>
       </div>
     </div>
@@ -7148,17 +7140,32 @@
     apToast('Product deleted.');
   }
 
+  // ── Cloudinary upload helper ──────────────────
+  async function cloudinaryUpload(file, folder, transforms) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', 'rosebella_unsigned');
+    fd.append('folder', folder || 'rosebella');
+    const res = await fetch('https://api.cloudinary.com/v1_1/dp6x1cfmj/image/upload', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Cloudinary upload failed');
+    const data = await res.json();
+    const t = transforms || 'f_auto,q_auto,w_800,c_fill';
+    return `https://res.cloudinary.com/dp6x1cfmj/image/upload/${t}/${data.public_id}`;
+  }
+
   // ── Image upload ──────────────────────────────
   function trigImg(uid) { pendingImgUid = uid; document.getElementById('apFileIn').click(); }
 
-  document.getElementById('apFileIn').addEventListener('change', function(e) {
+  document.getElementById('apFileIn').addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (!file || !pendingImgUid) return;
     const uid = pendingImgUid;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const src = ev.target.result;
-      // Update main page card
+    this.value = '';
+
+    const overlay = document.querySelector(`#apc-${uid} .ap-pi-overlay`);
+    if (overlay) overlay.innerHTML = '<span>⏳ Uploading…</span>';
+
+    function applyImg(src) {
       const card = document.querySelector(`.prod-card[data-apid="${uid}"]`);
       if (card) {
         const mImg = card.querySelector('.prod-img img');
@@ -7167,12 +7174,18 @@
         else if (mBg) { mBg.style.cssText=`background-image:url(${src});background-size:cover;background-position:center;`; mBg.className='prod-img-bg'; }
         else { const pi=card.querySelector('.prod-img'); if(pi){ const img=document.createElement('img'); img.src=src; img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;'; pi.insertBefore(img,pi.firstChild); } }
       }
-      // Update admin preview - re-render the whole card
       selectCol(curSlug, document.querySelector(`.cat-tab[data-cat="${curSlug}"]`)?.textContent.trim() || curSlug);
-      apToast('Photo uploaded!');
-    };
-    reader.readAsDataURL(file);
-    this.value = '';
+    }
+
+    try {
+      const src = await cloudinaryUpload(file, 'rosebella/products', 'f_auto,q_auto,w_800,c_fill');
+      applyImg(src);
+      apToast('Photo uploaded & optimized!');
+    } catch(err) {
+      const reader = new FileReader();
+      reader.onload = ev => { applyImg(ev.target.result); apToast('Photo uploaded!'); };
+      reader.readAsDataURL(file);
+    }
   });
 
   // ── Add new product ───────────────────────────
@@ -7203,14 +7216,80 @@
     apToast('New product added — fill in the details!');
   }
 
-  // ── Download ──────────────────────────────────
+  // ── GitHub push ───────────────────────────────
+  const _GH_OWNER    = 'yousefaljailey';
+  const _GH_REPO     = 'Rosebella-Flowers';
+  const _GH_FILE     = 'index.html';
+  const _GH_TKEY     = 'rosebella_gh_token';
+
   function downloadSite() {
     const h = '<!DOCTYPE html>' + document.documentElement.outerHTML;
     const b = new Blob([h],{type:'text/html'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(b); a.download='rosebella-website.html'; a.click();
     URL.revokeObjectURL(a.href);
-    apToast('Downloading updated website!');
+    apToast('Downloaded — remember to push to GitHub!');
+  }
+
+  async function pushToGitHub() {
+    let token = localStorage.getItem(_GH_TKEY);
+    if (!token) {
+      token = prompt('Paste your GitHub Personal Access Token to enable one-click saving:');
+      if (!token || !token.trim()) return;
+      localStorage.setItem(_GH_TKEY, token.trim());
+      token = token.trim();
+    }
+
+    const saveBtn = document.getElementById('ghSaveBtn');
+    const panelBtn = document.getElementById('ghSavePanelBtn');
+    const setLabel = t => { if(saveBtn) saveBtn.textContent = t; if(panelBtn) panelBtn.textContent = t; };
+
+    setLabel('⏳ Saving…');
+
+    try {
+      const headers = {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+      const apiUrl = 'https://api.github.com/repos/' + _GH_OWNER + '/' + _GH_REPO + '/contents/' + _GH_FILE;
+
+      const shaRes  = await fetch(apiUrl, { headers });
+      const shaData = await shaRes.json();
+      if (!shaData.sha) throw new Error(shaData.message || 'Could not get file SHA');
+
+      const html    = '<!DOCTYPE html>' + document.documentElement.outerHTML;
+      const content = btoa(unescape(encodeURIComponent(html)));
+
+      const pushRes = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Update site via admin panel',
+          content: content,
+          sha: shaData.sha
+        })
+      });
+
+      if (!pushRes.ok) {
+        const e = await pushRes.json();
+        throw new Error(e.message || 'Push failed');
+      }
+
+      setLabel('✓ Saved!');
+      apToast('Pushed to GitHub — Vercel deploying now!');
+      setTimeout(() => setLabel('🚀 Save & Publish'), 3000);
+    } catch(err) {
+      console.error('GitHub push error:', err);
+      if (err.message && err.message.includes('Bad credentials')) {
+        localStorage.removeItem(_GH_TKEY);
+        apToast('Token invalid — cleared. Try again.');
+      } else {
+        apToast('Push failed — downloading instead');
+        downloadSite();
+      }
+      setLabel('🚀 Save & Publish');
+    }
   }
 
   // ── Toast ─────────────────────────────────────
