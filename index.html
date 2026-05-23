@@ -3103,8 +3103,474 @@
     }
   </style>
 
-<script async="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII&amp;loading=async&amp;callback=__mapsForReviews"></script><script src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/main.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/common.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/util.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/log.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/places.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/controls.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/places_impl.js"></script><link rel="stylesheet" href="chrome-extension://paodpkkacimmkacaecjmhdncjgjepcai/content-static.css"></head>
-<body data-new-gr-c-s-check-loaded="14.1295.0" data-gr-ext-installed="" class="admin-active">
+<script async="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII&amp;loading=async&amp;callback=__mapsForReviews"></script><script src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/main.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/common.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/util.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/log.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/places.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/controls.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/places_impl.js"></script><link rel="stylesheet" href="chrome-extension://paodpkkacimmkacaecjmhdncjgjepcai/content-static.css"><script src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/main.js"></script><script src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/main.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/places.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/common.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/util.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/controls.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/places_impl.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/intl/en_gb/log.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/places.js"></script><style type="text/css">.lf-progress {
+  -webkit-appearance: none;
+  -moz-apperance: none;
+  width: 100%;
+  /* margin: 0 10px; */
+  height: 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.lf-progress:focus {
+  outline: none;
+  border: none;
+}
+.lf-progress::-moz-range-track {
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+.lf-progress::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  height: 13px;
+  width: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress::-moz-range-thumb {
+  -moz-appearance: none !important;
+  height: 13px;
+  width: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress::-ms-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+.lf-progress::-ms-fill-lower {
+  background: #ccc;
+  border-radius: 3px;
+}
+.lf-progress::-ms-fill-upper {
+  background: #ccc;
+  border-radius: 3px;
+}
+.lf-progress::-ms-thumb {
+  border: 0;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress:focus::-ms-fill-lower {
+  background: #ccc;
+}
+.lf-progress:focus::-ms-fill-upper {
+  background: #ccc;
+}
+.lf-player-container :focus {
+  outline: 0;
+}
+.lf-popover {
+  position: relative;
+}
+
+.lf-popover-content {
+  display: inline-block;
+  position: absolute;
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -10px);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  transition: all 0.3s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+}
+
+.lf-popover-content.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0px);
+}
+
+.lf-player-btn-container {
+  display: flex;
+  align-items: center;
+}
+.lf-player-btn {
+  cursor: pointer;
+  fill: #999;
+  width: 14px;
+}
+
+.lf-player-btn.active {
+  fill: #555;
+}
+
+.lf-popover {
+  position: relative;
+}
+
+.lf-popover-content {
+  display: inline-block;
+  position: absolute;
+  background-color: #ffffff;
+  opacity: 1;
+
+  transform: translate(0, -10px);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  transition: all 0.3s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+  padding: 10px;
+}
+
+.lf-popover-content.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0px);
+}
+
+.lf-arrow {
+  position: absolute;
+  z-index: -1;
+  content: '';
+  bottom: -9px;
+  border-style: solid;
+  border-width: 10px 10px 0px 10px;
+}
+
+.lf-left-align,
+.lf-left-align .lfarrow {
+  left: 0;
+  right: unset;
+}
+
+.lf-right-align,
+.lf-right-align .lf-arrow {
+  right: 0;
+  left: unset;
+}
+
+.lf-text-input {
+  border: 1px #ccc solid;
+  border-radius: 5px;
+  padding: 3px;
+  width: 60px;
+  margin: 0;
+}
+
+.lf-color-picker {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 90px;
+}
+
+.lf-color-selectors {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.lf-color-component {
+  display: flex;
+  flex-direction: row;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.lf-color-component strong {
+  width: 40px;
+}
+
+.lf-color-component input[type='range'] {
+  margin: 0 0 0 10px;
+}
+
+.lf-color-component input[type='number'] {
+  width: 50px;
+  margin: 0 0 0 10px;
+}
+
+.lf-color-preview {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 5px;
+}
+
+.lf-preview {
+  height: 60px;
+  width: 60px;
+}
+
+.lf-popover-snapshot {
+  width: 150px;
+}
+.lf-popover-snapshot h5 {
+  margin: 5px 0 10px 0;
+  font-size: 0.75rem;
+}
+.lf-popover-snapshot a {
+  display: block;
+  text-decoration: none;
+}
+.lf-popover-snapshot a:before {
+  content: '⥼';
+  margin-right: 5px;
+}
+.lf-popover-snapshot .lf-note {
+  display: block;
+  margin-top: 10px;
+  color: #999;
+}
+.lf-player-controls > div {
+  margin-right: 5px;
+  margin-left: 5px;
+}
+.lf-player-controls > div:first-child {
+  margin-left: 0px;
+}
+.lf-player-controls > div:last-child {
+  margin-right: 0px;
+}
+</style><style type="text/css">.lf-progress {
+  -webkit-appearance: none;
+  -moz-apperance: none;
+  width: 100%;
+  /* margin: 0 10px; */
+  height: 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.lf-progress:focus {
+  outline: none;
+  border: none;
+}
+.lf-progress::-moz-range-track {
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+.lf-progress::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  height: 13px;
+  width: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress::-moz-range-thumb {
+  -moz-appearance: none !important;
+  height: 13px;
+  width: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress::-ms-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+.lf-progress::-ms-fill-lower {
+  background: #ccc;
+  border-radius: 3px;
+}
+.lf-progress::-ms-fill-upper {
+  background: #ccc;
+  border-radius: 3px;
+}
+.lf-progress::-ms-thumb {
+  border: 0;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress:focus::-ms-fill-lower {
+  background: #ccc;
+}
+.lf-progress:focus::-ms-fill-upper {
+  background: #ccc;
+}
+.lf-player-container :focus {
+  outline: 0;
+}
+.lf-popover {
+  position: relative;
+}
+
+.lf-popover-content {
+  display: inline-block;
+  position: absolute;
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -10px);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  transition: all 0.3s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+}
+
+.lf-popover-content.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0px);
+}
+
+.lf-player-btn-container {
+  display: flex;
+  align-items: center;
+}
+.lf-player-btn {
+  cursor: pointer;
+  fill: #999;
+  width: 14px;
+}
+
+.lf-player-btn.active {
+  fill: #555;
+}
+
+.lf-popover {
+  position: relative;
+}
+
+.lf-popover-content {
+  display: inline-block;
+  position: absolute;
+  background-color: #ffffff;
+  opacity: 1;
+
+  transform: translate(0, -10px);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  transition: all 0.3s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+  padding: 10px;
+}
+
+.lf-popover-content.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0px);
+}
+
+.lf-arrow {
+  position: absolute;
+  z-index: -1;
+  content: '';
+  bottom: -9px;
+  border-style: solid;
+  border-width: 10px 10px 0px 10px;
+}
+
+.lf-left-align,
+.lf-left-align .lfarrow {
+  left: 0;
+  right: unset;
+}
+
+.lf-right-align,
+.lf-right-align .lf-arrow {
+  right: 0;
+  left: unset;
+}
+
+.lf-text-input {
+  border: 1px #ccc solid;
+  border-radius: 5px;
+  padding: 3px;
+  width: 60px;
+  margin: 0;
+}
+
+.lf-color-picker {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 90px;
+}
+
+.lf-color-selectors {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.lf-color-component {
+  display: flex;
+  flex-direction: row;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.lf-color-component strong {
+  width: 40px;
+}
+
+.lf-color-component input[type='range'] {
+  margin: 0 0 0 10px;
+}
+
+.lf-color-component input[type='number'] {
+  width: 50px;
+  margin: 0 0 0 10px;
+}
+
+.lf-color-preview {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 5px;
+}
+
+.lf-preview {
+  height: 60px;
+  width: 60px;
+}
+
+.lf-popover-snapshot {
+  width: 150px;
+}
+.lf-popover-snapshot h5 {
+  margin: 5px 0 10px 0;
+  font-size: 0.75rem;
+}
+.lf-popover-snapshot a {
+  display: block;
+  text-decoration: none;
+}
+.lf-popover-snapshot a:before {
+  content: '⥼';
+  margin-right: 5px;
+}
+.lf-popover-snapshot .lf-note {
+  display: block;
+  margin-top: 10px;
+  color: #999;
+}
+.lf-player-controls > div {
+  margin-right: 5px;
+  margin-left: 5px;
+}
+.lf-player-controls > div:first-child {
+  margin-left: 0px;
+}
+.lf-player-controls > div:last-child {
+  margin-right: 0px;
+}
+</style><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/common.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/65/1c/util.js"></script></head>
+<body data-new-gr-c-s-check-loaded="14.1295.0" data-gr-ext-installed="" class="">
 
   <!-- Variant selection modal -->
   <div id="variantBg" onclick="if(event.target===this)closeVariantModal()">
@@ -3690,7 +4156,7 @@
       </button>
       <button id="cartNavBtn" onclick="openCart()" title="Gift Bag">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 01-8 0"></path></svg>
-        <span id="cartCount" class="visible">1</span>
+        <span id="cartCount" class="">0</span>
       </button>
       <button id="btnEN" onclick="setLang('en')" class="lang-btn active">EN</button>
       <button id="btnAR" onclick="setLang('ar')" class="lang-btn">عربي</button>
@@ -4297,19 +4763,19 @@
       </div>
 
       <!-- BOUQUETS -->
-      <div class="prod-card show" data-cat="hand-tied-bouquets" data-original-index="3">
+      <div class="prod-card show" data-cat="hand-tied-bouquets" data-original-index="3" data-apid="u-hand-tied-bouquets-0">
         <div class="prod-img">
-          <div class="prod-img-bg pi-3"></div>
+          <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/qkrii8gimpyn2bg1utzw&quot;); background-size: cover; background-position: center center;"></div>
           <span class="prod-badge badge-popular">Bestseller</span>
           <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
         </div>
         <div class="prod-body">
           <span class="prod-cat">Hand-Tied Bouquets</span>
-          <h3>Garden of Eden</h3>
-          <p class="prod-desc">Mixed seasonal blooms in pastel tones</p>
+          <h3>alexandra bouquet</h3>
+          <p class="prod-desc">This Bouquet Is Distinguished By Its Delicate, Peaceful Appearance, Which Is Compose Of White Carnation, Peach Baby Rose And Accent Flowers, Its Perfect Present For Brightening.</p>
           <div class="prod-footer">
-            <div class="prod-price"><span class="currency">QR</span>189</div>
-            <button class="prod-add" onclick="openVariantModal(this,'Garden of Eden')">
+            <div class="prod-price"><span class="currency">QR</span>480</div>
+            <button class="prod-add" onclick="openVariantModal(this,'alexandra bouquet')">
               <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>
               Add
             </button>
@@ -4317,19 +4783,19 @@
         </div>
       </div>
 
-      <div class="prod-card show" data-cat="hand-tied-bouquets" data-original-index="4">
+      <div class="prod-card show" data-cat="hand-tied-bouquets" data-original-index="4" data-apid="u-hand-tied-bouquets-1">
         <div class="prod-img">
-          <div class="prod-img-bg pi-7"></div>
+          <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/rzofg6hiomwrcmjvicze&quot;); background-size: cover; background-position: center center;"></div>
           <span class="prod-badge badge-new">New</span>
           <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
         </div>
         <div class="prod-body">
           <span class="prod-cat">Hand-Tied Bouquets</span>
-          <h3>Sunrise Bloom</h3>
-          <p class="prod-desc">Warm orange tulips, sunflowers &amp; peonies</p>
+          <h3>Amazing bouquet</h3>
+          <p class="prod-desc">Pastle Color Of Flower Bouquet Shows A Mild And Sweet Care, This Pastle Color Flowers Comes With A Gerbera Calla Lily, Spray Roses, Carnation, And A Accent Flowers With Greens, Wrapp In A White Wrapping And Tie In A Brown Tred</p>
           <div class="prod-footer">
-            <div class="prod-price"><span class="currency">QR</span>175</div>
-            <button class="prod-add" onclick="openVariantModal(this,'Sunrise Bloom')">
+            <div class="prod-price"><span class="currency">QR</span>490</div>
+            <button class="prod-add" onclick="openVariantModal(this,'Amazing bouquet')">
               <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>
               Add
             </button>
@@ -4662,7 +5128,338 @@
         <div class="search-empty-sub">Try a different name or category</div>
         <button class="search-empty-clear" onclick="clearSearch()">Clear Search</button>
       </div>
-    </div><!-- /products-grid -->
+    <div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-2" data-original-index="21">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/qdlvexjmuebntk4poxgk&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Astera bouquet</h3>
+        <p class="prod-desc">This Hand Bouquet Contains 20 pink Roses with carnation and eucalyptus. pink is considered as the hue of peace, positivity, inspiration, and optimism, A one-of-a kind best-selling beauty who interprets the true meaning of floral power.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>380</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Astera bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-3">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/jes1paexgdby42jonao1&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Joey Bouquet</h3>
+        <p class="prod-desc">Love for your soulmate is limitless, a single rose will not suffice to justify your feelings. You'd need this arrangement of 25 red roses hand-tied with affection,</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>300</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Joey Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-4">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/eu5mj6m4siry1zqluca5&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Elena Bouquet</h3>
+        <p class="prod-desc">A banch of wax flower bouquet in a white news paper wrapping its fit in all occasionn.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>330</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Elena Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-5">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/bt62kxmleptus85r1pgq&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Butterfly Bouquet</h3>
+        <p class="prod-desc">the beauty of long stemmed fresh red roses combining in a black and white wrapped in a buttefly way. This bouquet instantly makes its way to someone's heart</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>300</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Butterfly Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-6">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/ujui4hlm39rkxek6efbj&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Vera Bouquet</h3>
+        <p class="prod-desc">yellow baby roses with sunflower in a beautifull round bouquet with a eucaliptus in a white big wrapped. You can create a endless love joy and happiness in the lives of your loved one's</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>550</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Vera Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-7">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/krcghygpe9tzpsvbu7zl&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Mía Bouquet</h3>
+        <p class="prod-desc">Modern big bouquet of pink tulip in a purple wrapped around a simple and elegant creation. You can show your care and love for some one you love.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>800</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Mía Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-8">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/mpwqyci6onit3wfmpgwe&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Daniela Bag</h3>
+        <p class="prod-desc">yellow rose with solidago in a beaitfull paper bag it will be a nice gift</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>350</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Daniela Bag')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-9">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/dqqcregko8nk7urxvqnl&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Classic Tulips</h3>
+        <p class="prod-desc">A classic arrangment Contain 40 stem tulips You can choose any color</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>500</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Classic Tulips')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-10">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/rmorjmlhfoc9usws35jp&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Isabella Bouquet</h3>
+        <p class="prod-desc">make the season an extravaganza of smiles! Our truly original arrangement of pastel color carnaion,lily, hydrengea with mix limonium and eucaliptus</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>530</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Isabella Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-11">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/okv5fgwgv4ff64tpxp54&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Patricia Bouquet</h3>
+        <p class="prod-desc">Orange and pink baby rose. mix with purple limonium and greens,, for the special person,</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>600</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Patricia Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-12">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/a6usrloagdd6uwpxojxf&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Spring bouquet</h3>
+        <p class="prod-desc">The glorious hand-tied bouquet is wonderfully feminine and exudes and sense of timeless elegance and beauty. We love the array of  texture plus shades of soft pink , fresh white and greens, in a irresistable gift.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>450</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Spring bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-13">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/xxtj7wyzya9mcpg8fnq0&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Alexandra Bouquet</h3>
+        <p class="prod-desc">This bouquet is distinguished by its delicate, peaceul appearance, which is compse of white carnatin, peach baby rose and accent flowers, its perfect present for brightening.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>480</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Alexandra Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-14">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/isbtkiyla7snbowbke4f&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Paula bouquet</h3>
+        <p class="prod-desc">this arrangement is fit for any occation even in a simple day, its good to show to your love one special,  this bouquet of pastel color of tulip carnation spray rose with acent flowers.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>700</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Paula bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-15">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/t7tzyqj4dnrdqnpisroj&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Toba bouquet</h3>
+        <p class="prod-desc">It isn't just the beauty of this toba buquet that will empress, but the skill and care that’s gone into creating it, toba bouquet of 50 stem of red roses in a black and gold wrapping</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>550</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Toba bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-16">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/yji4ux1o1wx6pejco8ay&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Sandy Bouquet</h3>
+        <p class="prod-desc">A wonderful bouquet that contains lily and wax flower with a touch of aluminum</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>500</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Sandy Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-17">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/ounp3mfzpwpkee2uek9a&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>White Dream Bouquet</h3>
+        <p class="prod-desc">high spirits hand bouquet of rose with gypsu  and ruscus greens. Is a good gift for some one  you love</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>500</div>
+          <button class="prod-add" onclick="openVariantModal(this,'White Dream Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-18">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/scomnut5z6w9peyp18cr&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Gabriela Bouquet</h3>
+        <p class="prod-desc">simple purple tulip and purple wax flower in a simple purple wrapping for special love one This stunning flower arrangement has</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>400</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Gabriela Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-19">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/f83kki9kl78ffwadursp&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Aurora Bouquet</h3>
+        <p class="prod-desc">we've chosen beautiful roses and astoma and lillium, this stunning gift is a large version of our popular pink radiance hand -tied bouquet and has chic, contemporary feel-perfect for any occasion.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>550</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Aurora Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-20">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/a2pnewmo4ygfzyhijqms&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Nova Bouquet</h3>
+        <p class="prod-desc">what else is there to say about love. romance?
+ Isn't that the case with gifting? this stunning bouquet of 100 rose is sure to make an impression on you loved ones. if it's anniversary , a friend's , or you want to express yout thoughts to someone special , this will do the trick</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>850</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Nova Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-21">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/dby2cbv8r58cltrucinw&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Martha Bouquet</h3>
+        <p class="prod-desc">Show your favorite flowers to your loved ones with these beautiful flowers! Martha Bouquet is a beautiful gift for your loved ones</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>280</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Martha Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-22">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/pnkckcnnw2cuahpbyzpp&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Pink Tulips Bouquet</h3>
+        <p class="prod-desc">Enjoy this stunning arrangement of pink tulips that warmth and excitement. The best presnt to include in a cheerful décor the bouquet is great for a special event or to fill a happy household with warmth and enthusiasm.</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>650</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Pink Tulips Bouquet')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="hand-tied-bouquets" data-apid="u-hand-tied-bouquets-23">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/tqtdiybe3zl42f5unh8g&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Hand-Tied Bouquets</span>
+        <h3>Rosalie red</h3>
+        <p class="prod-desc">A Beautiful Bouquet Of  40 Red Roses In All Sizes, This Beautiful Gift Will Remain In Their Hearts Forever</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>400</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Rosalie red')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div></div><!-- /products-grid -->
   </section>
 
   <!-- Cart Toast -->
@@ -5191,36 +5988,19 @@
       <button class="cart-ph-close" onclick="closeCart()">✕</button>
     </div>
     <div class="cart-items" id="cartItemsList">
-      <div class="cart-empty" id="cartEmptyState" style="display: none;">
+      <div class="cart-empty" id="cartEmptyState" style="display: flex;">
         <span class="cart-empty-icon">🛍</span>
         <p>Your gift bag is empty</p>
         <span>Add something beautiful</span>
       </div>
-      <div id="cartItemsContainer">
-      <div class="cart-item" id="ci-1778965358759">
-        <div class="cart-item-img pi-1" style=""></div>
-        <div class="cart-item-info">
-          <span class="cart-item-cat">Bella Roses</span>
-          <div class="cart-item-name">The Eternal Red</div>
-          <div class="cart-item-variants">+Chocolates · +Balloon</div>
-          <div class="cart-item-controls">
-            <button class="qty-btn" onclick="changeQty(1778965358759, -1)">−</button>
-            <span class="qty-num">1</span>
-            <button class="qty-btn" onclick="changeQty(1778965358759, 1)">+</button>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-          <div class="cart-item-price"><span class="ci-cur">QR</span>389</div>
-          <button class="cart-item-del" onclick="removeItem(1778965358759)" title="Remove">🗑</button>
-        </div>
-      </div></div>
+      <div id="cartItemsContainer"></div>
     </div>
-    <div class="cart-footer" id="cartFooter" style="display: block;">
+    <div class="cart-footer" id="cartFooter" style="display: none;">
 
       <!-- Subtotal / discount / total -->
       <div class="cart-subtotal-row" id="cartSubtotalRow" style="display:none;">
         <span class="cart-subtotal-label">Subtotal</span>
-        <span class="cart-subtotal-val"><span style="font-size:9px;color:var(--gold);font-weight:700;margin-right:2px;">QR</span><span id="cartSubtotalVal">389</span></span>
+        <span class="cart-subtotal-val"><span style="font-size:9px;color:var(--gold);font-weight:700;margin-right:2px;">QR</span><span id="cartSubtotalVal">0</span></span>
       </div>
       <div class="cart-discount-row" id="cartDiscountRow" style="display:none;">
         <span class="cart-discount-label">Discount</span>
@@ -5230,7 +6010,7 @@
 
       <div class="cart-total-row">
         <span class="cart-total-label">Order Total</span>
-        <div class="cart-total-val"><span>QR</span><span id="cartTotalVal">389</span></div>
+        <div class="cart-total-val"><span>QR</span><span id="cartTotalVal">0</span></div>
       </div>
 
       <!-- Checkout CTA -->
@@ -6593,7 +7373,7 @@
 
   <!-- HTML -->
   <input type="file" id="apFileIn" accept="image/*">
-  <div id="apToast" class="">✓ Welcome back, Yousef! 👋</div>
+  <div id="apToast" class="">✓ "Rosalie red" saved!</div>
 
   <!-- Login trigger: tiny gold dot top-right -->
   
@@ -6620,7 +7400,7 @@
   </div>
 
   <!-- Admin Top Bar (visible after login) -->
-  <div id="adminBar" class="show">
+  <div id="adminBar" class="">
     <div class="ab-left">
       <span class="ab-logo">ROSE<span>BELLA</span></span>
       <span class="ab-badge">Admin Mode</span>
@@ -6637,8 +7417,8 @@
   </div>
 
   <!-- Side Panel -->
-  <div id="apOverlay" onclick="closePanel()"></div>
-  <div id="apPanel">
+  <div id="apOverlay" onclick="closePanel()" class=""></div>
+  <div id="apPanel" class="">
     <div class="ap-ph">
       <h2>Manage <em>Collections &amp; Products</em></h2>
       <div class="ap-ph-btns">
@@ -6647,15 +7427,528 @@
       </div>
     </div>
     <div class="ap-body">
-      <div class="ap-sb" id="apSb">
-        <div class="ap-sb-title">Collections</div>
-      </div>
+      <div class="ap-sb" id="apSb"><div class="ap-sb-title">Collections</div><div class="ap-ci " onclick="selectCol('bella-roses','Bella Roses')">
+        <span>Bella Roses</span><span class="ap-ci-count">3</span></div><div class="ap-ci active" onclick="selectCol('hand-tied-bouquets','Hand-Tied Bouquets')">
+        <span>Hand-Tied Bouquets</span><span class="ap-ci-count">24</span></div><div class="ap-ci " onclick="selectCol('luxury-box-arrangements','Luxury Box Arrangements')">
+        <span>Luxury Box Arrangements</span><span class="ap-ci-count">3</span></div><div class="ap-ci " onclick="selectCol('anniversary-bouquet','Anniversary Bouquet')">
+        <span>Anniversary Bouquet</span><span class="ap-ci-count">2</span></div><div class="ap-ci " onclick="selectCol('floral-arrangements','Floral Arrangements')">
+        <span>Floral Arrangements</span><span class="ap-ci-count">2</span></div><div class="ap-ci " onclick="selectCol('vase-collection','Vase Collection')">
+        <span>Vase Collection</span><span class="ap-ci-count">1</span></div><div class="ap-ci " onclick="selectCol('al-haj-collection','Al Haj Collection')">
+        <span>Al Haj Collection</span><span class="ap-ci-count">7</span></div><div class="ap-ci " onclick="selectCol('eid-collections','Eid Collections')">
+        <span>Eid Collections</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('birthday-arrangments','Birthday Arrangements')">
+        <span>Birthday Arrangements</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('bridal-bouquet','Bridal Bouquet')">
+        <span>Bridal Bouquet</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('new-collection','New Collection')">
+        <span>New Collection</span><span class="ap-ci-count">1</span></div><div class="ap-ci " onclick="selectCol('mother-day','Mother's Day')">
+        <span>Mother's Day</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('graduation-2025','Graduation 2025')">
+        <span>Graduation 2025</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('get-well-soon','Get Well Soon')">
+        <span>Get Well Soon</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('congratulations','Congratulations')">
+        <span>Congratulations</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('letters-of-love','Letters of Love')">
+        <span>Letters of Love</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('lily-arrangement','Lily Arrangement')">
+        <span>Lily Arrangement</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('special-bouquet','Special Bouquet')">
+        <span>Special Bouquet</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('ramadan-collection','Ramadan Collection')">
+        <span>Ramadan Collection</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('rosebella-valentine-menu','Valentine's Day')">
+        <span>Valentine's Day</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('basket','Basket')">
+        <span>Basket</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('balloons','Balloons')">
+        <span>Balloons</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('fruit-arrangment','Fruit Arrangement')">
+        <span>Fruit Arrangement</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('welcome-baby','Welcome Baby')">
+        <span>Welcome Baby</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('teacher-day','Teacher's Day')">
+        <span>Teacher's Day</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('garangao-2025','Garangao 2025')">
+        <span>Garangao 2025</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('qatar-national-day','Qatar National Day')">
+        <span>Qatar National Day</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('i-love-you','I Love You')">
+        <span>I Love You</span><span class="ap-ci-count">0</span></div><button class="ap-add-col-btn" onclick="addCollection()">＋ Add Collection</button></div>
       <div class="ap-mc" id="apMc">
-        <div class="ap-empty">
-          <span class="ap-flower">🌸</span>
-          Select a collection from the left to manage its products
-        </div>
+      <div class="ap-rename-bar">
+        <label>Collection Name</label>
+        <input class="ap-rename-inp" id="renInp" value="Hand-Tied Bouquets">
+        <button class="ap-rename-btn" onclick="renameCol('hand-tied-bouquets')">Rename</button>
+        <button class="ap-rename-btn" style="background:rgba(192,57,43,0.85);" onclick="deleteCollection('hand-tied-bouquets','Hand-Tied Bouquets')">🗑 Delete</button>
       </div>
+      <div class="ap-pg" id="apPg">
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-0">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-0')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-0')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-0" value="alexandra bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-0">This Bouquet Is Distinguished By Its Delicate, Peaceful Appearance, Which Is Compose Of White Carnation, Peach Baby Rose And Accent Flowers, Its Perfect Present For Brightening.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-0" value="480"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo " data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-0')">None</span><span class="ap-bo sel" data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-0')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-0')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-0')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-0" onclick="saveCard('u-hand-tied-bouquets-0')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-0','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-1">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-1')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-1')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-1" value="Amazing bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-1">Pastle Color Of Flower Bouquet Shows A Mild And Sweet Care, This Pastle Color Flowers Comes With A Gerbera Calla Lily, Spray Roses, Carnation, And A Accent Flowers With Greens, Wrapp In A White Wrapping And Tie In A Brown Tred</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-1" value="490"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo " data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-1')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-1')">Bestseller</span><span class="ap-bo sel" data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-1')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-1')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-1" onclick="saveCard('u-hand-tied-bouquets-1')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-1','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-2">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-2')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-2')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-2" value="Astera bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-2">This Hand Bouquet Contains 20 pink Roses with carnation and eucalyptus. pink is considered as the hue of peace, positivity, inspiration, and optimism, A one-of-a kind best-selling beauty who interprets the true meaning of floral power.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-2" value="380"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-2')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-2')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-2')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-2')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-2" onclick="saveCard('u-hand-tied-bouquets-2')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-2','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-3">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-3')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-3')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-3" value="Joey Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-3">Love for your soulmate is limitless, a single rose will not suffice to justify your feelings. You'd need this arrangement of 25 red roses hand-tied with affection,</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-3" value="300"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-3')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-3')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-3')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-3')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-3" onclick="saveCard('u-hand-tied-bouquets-3')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-3','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-4">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-4')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-4')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-4" value="Elena Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-4">A banch of wax flower bouquet in a white news paper wrapping its fit in all occasionn.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-4" value="330"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-4')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-4')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-4')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-4')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-4" onclick="saveCard('u-hand-tied-bouquets-4')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-4','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-5">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-5')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-5')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-5" value="Butterfly Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-5">the beauty of long stemmed fresh red roses combining in a black and white wrapped in a buttefly way. This bouquet instantly makes its way to someone's heart</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-5" value="300"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-5')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-5')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-5')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-5')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-5" onclick="saveCard('u-hand-tied-bouquets-5')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-5','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-6">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-6')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-6')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-6" value="Vera Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-6">yellow baby roses with sunflower in a beautifull round bouquet with a eucaliptus in a white big wrapped. You can create a endless love joy and happiness in the lives of your loved one's</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-6" value="550"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-6')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-6')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-6')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-6')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-6" onclick="saveCard('u-hand-tied-bouquets-6')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-6','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-7">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-7')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-7')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-7" value="Mía Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-7">Modern big bouquet of pink tulip in a purple wrapped around a simple and elegant creation. You can show your care and love for some one you love.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-7" value="800"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-7')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-7')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-7')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-7')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-7" onclick="saveCard('u-hand-tied-bouquets-7')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-7','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-8">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-8')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-8')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-8" value="Daniela Bag"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-8">yellow rose with solidago in a beaitfull paper bag it will be a nice gift</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-8" value="350"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-8')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-8')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-8')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-8')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-8" onclick="saveCard('u-hand-tied-bouquets-8')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-8','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-9">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-9')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-9')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-9" value="Classic Tulips"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-9">A classic arrangment Contain 40 stem tulips You can choose any color</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-9" value="500"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-9')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-9')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-9')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-9')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-9" onclick="saveCard('u-hand-tied-bouquets-9')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-9','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-10">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-10')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-10')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-10" value="Isabella Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-10">make the season an extravaganza of smiles! Our truly original arrangement of pastel color carnaion,lily, hydrengea with mix limonium and eucaliptus</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-10" value="530"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-10')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-10')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-10')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-10')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-10" onclick="saveCard('u-hand-tied-bouquets-10')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-10','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-11">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-11')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-11')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-11" value="Patricia Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-11">Orange and pink baby rose. mix with purple limonium and greens,, for the special person,</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-11" value="600"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-11')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-11')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-11')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-11')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-11" onclick="saveCard('u-hand-tied-bouquets-11')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-11','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-12">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-12')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-12')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-12" value="Spring bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-12">The glorious hand-tied bouquet is wonderfully feminine and exudes and sense of timeless elegance and beauty. We love the array of  texture plus shades of soft pink , fresh white and greens, in a irresistable gift.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-12" value="450"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-12')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-12')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-12')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-12')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-12" onclick="saveCard('u-hand-tied-bouquets-12')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-12','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-13">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-13')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-13')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-13" value="Alexandra Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-13">This bouquet is distinguished by its delicate, peaceul appearance, which is compse of white carnatin, peach baby rose and accent flowers, its perfect present for brightening.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-13" value="480"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-13')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-13')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-13')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-13')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-13" onclick="saveCard('u-hand-tied-bouquets-13')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-13','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-14">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-14')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-14')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-14" value="Paula bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-14">this arrangement is fit for any occation even in a simple day, its good to show to your love one special,  this bouquet of pastel color of tulip carnation spray rose with acent flowers.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-14" value="700"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-14')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-14')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-14')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-14')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-14" onclick="saveCard('u-hand-tied-bouquets-14')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-14','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-15">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-15')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-15')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-15" value="Toba bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-15">It isn't just the beauty of this toba buquet that will empress, but the skill and care that’s gone into creating it, toba bouquet of 50 stem of red roses in a black and gold wrapping</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-15" value="550"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-15')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-15')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-15')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-15')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-15" onclick="saveCard('u-hand-tied-bouquets-15')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-15','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-16">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-16')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-16')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-16" value="Sandy Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-16">A wonderful bouquet that contains lily and wax flower with a touch of aluminum</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-16" value="500"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-16')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-16')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-16')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-16')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-16" onclick="saveCard('u-hand-tied-bouquets-16')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-16','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-17">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-17')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-17')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-17" value="White Dream Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-17">high spirits hand bouquet of rose with gypsu  and ruscus greens. Is a good gift for some one  you love</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-17" value="500"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-17')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-17')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-17')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-17')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-17" onclick="saveCard('u-hand-tied-bouquets-17')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-17','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-18">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-18')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-18')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-18" value="Gabriela Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-18">simple purple tulip and purple wax flower in a simple purple wrapping for special love one This stunning flower arrangement has</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-18" value="400"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-18')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-18')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-18')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-18')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-18" onclick="saveCard('u-hand-tied-bouquets-18')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-18','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-19">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-19')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-19')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-19" value="Aurora Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-19">we've chosen beautiful roses and astoma and lillium, this stunning gift is a large version of our popular pink radiance hand -tied bouquet and has chic, contemporary feel-perfect for any occasion.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-19" value="550"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-19')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-19')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-19')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-19')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-19" onclick="saveCard('u-hand-tied-bouquets-19')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-19','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-20">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-20')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-20')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-20" value="Nova Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-20">what else is there to say about love. romance?
+ Isn't that the case with gifting? this stunning bouquet of 100 rose is sure to make an impression on you loved ones. if it's anniversary , a friend's , or you want to express yout thoughts to someone special , this will do the trick</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-20" value="850"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-20')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-20')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-20')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-20')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-20" onclick="saveCard('u-hand-tied-bouquets-20')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-20','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-21">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-21')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-21')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-21" value="Martha Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-21">Show your favorite flowers to your loved ones with these beautiful flowers! Martha Bouquet is a beautiful gift for your loved ones</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-21" value="280"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-21')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-21')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-21')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-21')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-21" onclick="saveCard('u-hand-tied-bouquets-21')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-21','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-22">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-22')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-22')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-22" value="Pink Tulips Bouquet"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-22">Enjoy this stunning arrangement of pink tulips that warmth and excitement. The best presnt to include in a cheerful décor the bouquet is great for a special event or to fill a happy household with warmth and enthusiasm.</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-22" value="650"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-22')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-22')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-22')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-22')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-22" onclick="saveCard('u-hand-tied-bouquets-22')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-22','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-hand-tied-bouquets-23">
+          <div class="ap-pi" onclick="trigImg('u-hand-tied-bouquets-23')"><img id="apim-u-hand-tied-bouquets-23" src="https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/tqtdiybe3zl42f5unh8g" alt="">
+            
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-hand-tied-bouquets-23')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-hand-tied-bouquets-23" value="New Product"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-hand-tied-bouquets-23">Add a description</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-hand-tied-bouquets-23" value="0"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-hand-tied-bouquets-23')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-hand-tied-bouquets-23')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-hand-tied-bouquets-23')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-hand-tied-bouquets-23')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-hand-tied-bouquets-23" onclick="saveCard('u-hand-tied-bouquets-23')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-hand-tied-bouquets-23','hand-tied-bouquets')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-add-tile" onclick="addProduct('hand-tied-bouquets','Hand-Tied Bouquets')">
+          <span class="ap-plus">＋</span><span>Add New Product</span>
+        </div>
+      </div></div>
     </div>
   </div>
 
@@ -9680,10 +10973,15 @@
   // Close mobile nav on Escape key
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
 
-  // ── Scroll reveal (CSS fallback — Motion takes over below) ──
+  // ── Scroll reveal ─────────────────────────────
+  document.querySelectorAll('.reveal').forEach(el => {
+    new IntersectionObserver(entries=>{
+      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+    },{threshold:0.05}).observe(el);
+  });
   setTimeout(() => {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
-  }, 600);
+  }, 800);
 
 </script>
 
@@ -10186,88 +11484,4 @@
 })();
 </script>
 
-<!-- ══════════════════════════════════════════════
-     MOTION ANIMATIONS
-══════════════════════════════════════════════ -->
-<script type="module">
-import { animate, inView, stagger } from 'https://cdn.jsdelivr.net/npm/motion@latest/+esm';
-
-const ease  = [0.22, 1, 0.36, 1];
-const spring = [0.34, 1.56, 0.64, 1];
-
-// ── Strip baked-in 'visible' so Motion controls reveals ──
-document.querySelectorAll('.reveal').forEach(el => el.classList.remove('visible'));
-
-// ── Section labels + titles ───────────────────
-document.querySelectorAll('.section-label, .section-title').forEach(el => {
-  inView(el, () => {
-    animate(el, { opacity: [0, 1], y: [22, 0] }, { duration: 0.65, easing: ease });
-  }, { margin: '-8% 0px' });
-});
-
-// ── Generic .reveal elements ─────────────────
-document.querySelectorAll('.reveal').forEach(el => {
-  inView(el, () => {
-    animate(el, { opacity: [0, 1], y: [20, 0] }, { duration: 0.6, easing: ease });
-  }, { margin: '-6% 0px' });
-});
-
-// ── Collection cards — staggered ─────────────
-inView('.coll-scroll-outer', ({ target }) => {
-  const cards = Array.from(target.querySelectorAll('.coll-card'));
-  animate(cards, { opacity: [0, 1], y: [28, 0] }, {
-    duration: 0.45, delay: stagger(0.07), easing: ease
-  });
-}, { margin: '-5% 0px' });
-
-// ── Product cards — staggered ────────────────
-inView('#productsGrid', ({ target }) => {
-  const cards = Array.from(target.querySelectorAll('.prod-card.show'));
-  animate(cards, { opacity: [0, 1], y: [32, 0] }, {
-    duration: 0.45, delay: stagger(0.055), easing: ease
-  });
-}, { margin: '-5% 0px' });
-
-// ── Testimonial cards — staggered ────────────
-inView('#testGrid', ({ target }) => {
-  const cards = Array.from(target.querySelectorAll('.test-card'));
-  animate(cards, { opacity: [0, 1], y: [24, 0] }, {
-    duration: 0.45, delay: stagger(0.09), easing: ease
-  });
-}, { margin: '-5% 0px' });
-
-// ── Product card hover spring ─────────────────
-document.querySelectorAll('.prod-card').forEach(card => {
-  card.addEventListener('mouseenter', () => {
-    animate(card, { y: -7, scale: 1.012 }, { duration: 0.35, easing: spring });
-  });
-  card.addEventListener('mouseleave', () => {
-    animate(card, { y: 0, scale: 1 }, { duration: 0.3, easing: ease });
-  });
-});
-
-// ── Collection card hover spring ──────────────
-document.querySelectorAll('.coll-card').forEach(card => {
-  const img = card.querySelector('.coll-card-img');
-  card.addEventListener('mouseenter', () => {
-    animate(card, { y: -5 }, { duration: 0.35, easing: spring });
-    if (img) animate(img, { scale: 1.06 }, { duration: 0.5, easing: ease });
-  });
-  card.addEventListener('mouseleave', () => {
-    animate(card, { y: 0 }, { duration: 0.3, easing: ease });
-    if (img) animate(img, { scale: 1 }, { duration: 0.4, easing: ease });
-  });
-});
-
-// ── Nav CTA button pulse on load ──────────────
-const cta = document.querySelector('.nav-cta');
-if (cta) animate(cta, { scale: [0.92, 1] }, { duration: 0.6, delay: 1.2, easing: spring });
-
-// ── Hero content entrance ─────────────────────
-animate('.hs-eyebrow', { opacity: [0, 1], y: [16, 0] }, { duration: 0.55, delay: 0.25, easing: ease });
-animate('.hs-h1',      { opacity: [0, 1], y: [28, 0] }, { duration: 0.65, delay: 0.4,  easing: ease });
-animate('.hs-tagline', { opacity: [0, 1], y: [16, 0] }, { duration: 0.55, delay: 0.55, easing: ease });
-animate('.hs-cta',     { opacity: [0, 1], y: [16, 0] }, { duration: 0.5,  delay: 0.68, easing: spring });
-</script>
-
-<div id="8A7381A6_5137_B900_C11D_DE24E99D0C83"></div><iframe name="__privateStripeMetricsController8330" frameborder="0" allowtransparency="true" scrolling="no" role="presentation" allow="payment *" src="https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html#url=https%3A%2F%2Frosebella-flowers.vercel.app%2Findex.html%23collections&amp;title=Rosebella%20%E2%80%94%20Luxury%20Flowers%20%26%20Chocolates&amp;referrer=https%3A%2F%2Frosebella-flowers.vercel.app%2Fstory.html&amp;muid=380c0495-1101-45e8-8a2d-940b9f4a07b9927b7f&amp;sid=9ce15d51-c2e2-44f5-b520-d803bc3aed8f221f12&amp;version=6&amp;preview=false&amp;__shared_params__[version]=v3" aria-hidden="true" tabindex="-1" style="border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; margin: 0px !important; padding: 0px !important; width: 1px !important; min-width: 100% !important; overflow: hidden !important; display: block !important; visibility: hidden !important; position: fixed !important; height: 1px !important; pointer-events: none !important; user-select: none !important;"></iframe></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
+<div id="8A7381A6_5137_B900_C11D_DE24E99D0C83"></div><iframe name="__privateStripeMetricsController8330" frameborder="0" allowtransparency="true" scrolling="no" role="presentation" allow="payment *" src="https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html#url=https%3A%2F%2Frosebella-flowers.vercel.app%2Findex.html%23collections&amp;title=Rosebella%20%E2%80%94%20Luxury%20Flowers%20%26%20Chocolates&amp;referrer=https%3A%2F%2Frosebella-flowers.vercel.app%2Fstory.html&amp;muid=380c0495-1101-45e8-8a2d-940b9f4a07b9927b7f&amp;sid=9ce15d51-c2e2-44f5-b520-d803bc3aed8f221f12&amp;version=6&amp;preview=false&amp;__shared_params__[version]=v3" aria-hidden="true" tabindex="-1" style="border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; margin: 0px !important; padding: 0px !important; width: 1px !important; min-width: 100% !important; overflow: hidden !important; display: block !important; visibility: hidden !important; position: fixed !important; height: 1px !important; pointer-events: none !important; user-select: none !important;"></iframe><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration><iframe name="__privateStripeMetricsController9130" frameborder="0" allowtransparency="true" scrolling="no" role="presentation" allow="payment *" src="https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html#url=https%3A%2F%2Frosebella.qa%2F&amp;title=Rosebella%20%E2%80%94%20Luxury%20Flowers%20%26%20Chocolates&amp;referrer=&amp;muid=380c0495-1101-45e8-8a2d-940b9f4a07b9927b7f&amp;sid=9ce15d51-c2e2-44f5-b520-d803bc3aed8f221f12&amp;version=6&amp;preview=false&amp;__shared_params__[version]=v3" aria-hidden="true" tabindex="-1" style="border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; margin: 0px !important; padding: 0px !important; width: 1px !important; min-width: 100% !important; overflow: hidden !important; display: block !important; visibility: hidden !important; position: fixed !important; height: 1px !important; pointer-events: none !important; user-select: none !important;"></iframe><iframe name="__privateStripeMetricsController9140" frameborder="0" allowtransparency="true" scrolling="no" role="presentation" allow="payment *" src="https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html#url=https%3A%2F%2Frosebella.qa%2F%23collections&amp;title=Rosebella%20%E2%80%94%20Luxury%20Flowers%20%26%20Chocolates&amp;referrer=&amp;muid=380c0495-1101-45e8-8a2d-940b9f4a07b9927b7f&amp;sid=9ce15d51-c2e2-44f5-b520-d803bc3aed8f221f12&amp;version=6&amp;preview=false&amp;__shared_params__[version]=v3" aria-hidden="true" tabindex="-1" style="border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; margin: 0px !important; padding: 0px !important; width: 1px !important; min-width: 100% !important; overflow: hidden !important; display: block !important; visibility: hidden !important; position: fixed !important; height: 1px !important; pointer-events: none !important; user-select: none !important;"></iframe></body><wordtune-app-toolbar data-wxt-shadow-root="" style="direction: ltr;"></wordtune-app-toolbar><wordtune-spices-nudge data-wxt-shadow-root="" style="direction: ltr;"></wordtune-spices-nudge><wordtune-read-toolbar data-wxt-shadow-root="" style="position: fixed; z-index: 2147483647; display: block; top: 100px; right: 20px; left: auto; pointer-events: auto; width: auto; height: auto;"></wordtune-read-toolbar><wordtune-cards data-wxt-shadow-root="" style="direction: ltr;"></wordtune-cards></html>
