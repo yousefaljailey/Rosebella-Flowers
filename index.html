@@ -11595,7 +11595,7 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
       if (tabColl)   { tabColl.style.borderBottomColor = 'var(--gold)'; tabColl.style.color = 'var(--gold)'; }
       if (addBtn)    { addBtn.textContent = '+ Add Collection'; addBtn.style.display = ''; addBtn.onclick = hsAddCollCard; }
       if (title)     title.innerHTML = 'Collection <em>Card Images</em>';
-      renderCollMgr();
+      setTimeout(renderCollMgr, 0);
     }
   };
 
@@ -11610,7 +11610,13 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
       return;
     }
 
-    // Collect metadata without touching localStorage images yet (avoids giant inline strings)
+    // Key-scan only — never call localStorage.getItem() here (base64 blobs freeze the browser)
+    const slugsWithImages = new Set();
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('rosebella_coll_bg_')) slugsWithImages.add(k.slice('rosebella_coll_bg_'.length));
+    }
+
     const cardData = [];
     cards.forEach(card => {
       let slug = card.dataset.slug || '';
@@ -11619,11 +11625,8 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
       }
       const nameEl = card.querySelector('.coll-name');
       const name   = nameEl ? nameEl.textContent.trim() : slug;
-      const imgEl  = card.querySelector('.coll-card-img');
-      const hasImg = !!(slug && localStorage.getItem('rosebella_coll_bg_' + slug));
-      // Gradient-only style from the card's inline attribute (safe — never a data URL)
-      const gradStyle = (!hasImg && imgEl) ? (imgEl.getAttribute('style') || 'background:#2a2010;') : 'background:#2a2010;';
-      cardData.push({ slug, name, hasImg, gradStyle });
+      const hasImg = !!(slug && slugsWithImages.has(slug));
+      cardData.push({ slug, name, hasImg });
     });
 
     let html = `
@@ -11632,16 +11635,16 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">`;
 
-    cardData.forEach(({ slug, name, hasImg, gradStyle }) => {
+    cardData.forEach(({ slug, name, hasImg }) => {
       html += `
         <div onclick="collMgrUpload('${slug}')" id="collmgr-${slug}"
           style="cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;transition:border-color 0.2s;background:#1e1a10;"
           onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <div id="collmgr-thumb-${slug}" style="height:90px;${gradStyle}position:relative;">
+          <div id="collmgr-thumb-${slug}" style="height:90px;background:#2a2010;position:relative;">
             <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
             ${hasImg
               ? `<div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>`
-              : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0.4;">📷</div>`}
+              : ``}
           </div>
           <div style="padding:8px 10px;">
             <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
