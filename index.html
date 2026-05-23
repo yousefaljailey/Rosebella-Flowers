@@ -6442,11 +6442,17 @@
     }
 
     const cat = catEl ? catEl.textContent.trim() : '';
+    const bgEl2  = card?.querySelector('.prod-img-bg');
+    const imgEl2 = card?.querySelector('.prod-img img');
+    const img = imgEl2?.src
+      || (bgEl2?.style?.backgroundImage && bgEl2.style.backgroundImage !== 'none'
+          ? bgEl2.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '')
+          : '');
     const existing = cart.find(i => i.name === name);
     if (existing) {
       existing.qty++;
     } else {
-      cart.push({ id: Date.now(), name, cat, price, qty: 1 });
+      cart.push({ id: Date.now(), name, cat, price, qty: 1, img });
     }
 
     saveCart();
@@ -6614,9 +6620,14 @@
       const bgEl     = matchCard?.querySelector('.prod-img-bg');
       const imgEl    = matchCard?.querySelector('.prod-img img');
       const thumbCls = bgEl ? (bgEl.className.match(/pi-\d+/) || [''])[0] : '';
-      const thumbSty = imgEl?.src
-        ? `background-image:url(${imgEl.src});background-size:cover;background-position:center top;`
-        : '';
+      let thumbSty = '';
+      if (imgEl?.src) {
+        thumbSty = `background-image:url(${imgEl.src});background-size:cover;background-position:center top;`;
+      } else if (bgEl?.style?.backgroundImage && bgEl.style.backgroundImage !== 'none') {
+        thumbSty = `background-image:${bgEl.style.backgroundImage};background-size:cover;background-position:center top;`;
+      } else if (item.img) {
+        thumbSty = `background-image:url(${item.img});background-size:cover;background-position:center top;`;
+      }
       return `
       <div class="cart-item" id="ci-${item.id}">
         <div class="cart-item-img ${thumbCls}" style="${thumbSty}"></div>
@@ -6738,7 +6749,13 @@
       basePrice = parseFloat(cl.textContent.trim()) || 0;
     }
 
-    activeVariant = { cardEl:card, name, cat: catEl ? catEl.textContent.trim() : '', basePrice, addons:[] };
+    // Resolve the product image URL (Cloudinary bg-image or <img> src)
+    const resolvedImg = (imgEl?.src)
+      || (bgEl?.style?.backgroundImage && bgEl.style.backgroundImage !== 'none'
+          ? bgEl.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '')
+          : '');
+
+    activeVariant = { cardEl:card, name, cat: catEl ? catEl.textContent.trim() : '', basePrice, addons:[], img: resolvedImg };
 
     // Populate header
     document.getElementById('vmCat').textContent       = activeVariant.cat;
@@ -6748,10 +6765,12 @@
     // Thumbnail
     const thumb = document.getElementById('vmThumb');
     thumb.style.backgroundImage = '';
+    thumb.style.backgroundSize  = '';
     thumb.className = 'vm-thumb';
-    if (imgEl && imgEl.src) {
-      thumb.style.backgroundImage = `url(${imgEl.src})`;
+    if (resolvedImg) {
+      thumb.style.backgroundImage = `url(${resolvedImg})`;
       thumb.style.backgroundSize  = 'cover';
+      thumb.style.backgroundPosition = 'center';
     } else if (bgEl) {
       const cls = (bgEl.className.match(/pi-\d+/) || [''])[0];
       if (cls) thumb.classList.add(cls);
@@ -6835,7 +6854,7 @@
     if (existing) {
       existing.qty++;
     } else {
-      cart.push({ id: Date.now(), name: activeVariant.name, cat: activeVariant.cat, price, basePrice: activeVariant.basePrice, qty: 1, variantKey: vKey, variants });
+      cart.push({ id: Date.now(), name: activeVariant.name, cat: activeVariant.cat, price, basePrice: activeVariant.basePrice, qty: 1, variantKey: vKey, variants, img: activeVariant.img || '' });
     }
 
     saveCart();
