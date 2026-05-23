@@ -219,7 +219,7 @@
     /* Admin Slide Manager Modal */
     #hsMgrBg {
       display: none; position: fixed; inset: 0; z-index: 99998;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
       align-items: center; justify-content: center; padding: 20px;
     }
     #hsMgrBg.show { display: flex; }
@@ -227,7 +227,6 @@
       background: #18160f; border: 1px solid rgba(198,146,42,0.25);
       border-radius: 14px; width: 680px; max-width: 96vw; max-height: 90vh;
       display: flex; flex-direction: column; overflow: hidden;
-      contain: layout style; isolation: isolate;
     }
     .hs-mgr-hd {
       display: flex; align-items: center; justify-content: space-between;
@@ -4925,18 +4924,26 @@
   let _pendingCollCard = null;
 
   function _initCollCards() {
-    // Phase 1 (sync, fast): assign slugs + inject admin buttons — no localStorage reads
-    const cardList = [];
     document.querySelectorAll('.coll-card').forEach(card => {
+      // Derive slug from href
       try {
         const u = new URL(card.href, location.href);
         card.dataset.slug = u.searchParams.get('cat') || '';
       } catch(e) {}
 
-      const slug  = card.dataset.slug;
+      const slug = card.dataset.slug;
       const imgEl = card.querySelector('.coll-card-img');
-      if (slug && imgEl) cardList.push({ slug, card, imgEl });
 
+      // Apply saved image if any
+      const saved = slug && localStorage.getItem('rosebella_coll_bg_' + slug);
+      if (saved && imgEl) {
+        imgEl.style.background    = 'none';
+        imgEl.style.backgroundImage    = 'url(' + saved + ')';
+        imgEl.style.backgroundSize     = 'cover';
+        imgEl.style.backgroundPosition = 'center';
+      }
+
+      // Inject admin edit overlay (always in DOM, shown via CSS only for admin)
       if (!card.querySelector('.coll-edit-btn')) {
         const btn = document.createElement('button');
         btn.className   = 'coll-edit-btn';
@@ -4952,35 +4959,6 @@
         card.appendChild(btn);
       }
     });
-
-    // Phase 2: key-scan only (no value reads), then schedule ONE read per card with 100ms gaps
-    // Each read is isolated in its own setTimeout so no single operation blocks the browser
-    setTimeout(function scheduleCollImages() {
-      const keysToLoad = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('rosebella_coll_bg_')) {
-          keysToLoad.push(k.slice('rosebella_coll_bg_'.length));
-        }
-      }
-      // Schedule each card's read independently — 100ms apart, never blocking
-      keysToLoad.forEach((slug, i) => {
-        setTimeout(function() {
-          const entry = cardList.find(c => c.slug === slug);
-          if (!entry) return;
-          const saved = localStorage.getItem('rosebella_coll_bg_' + slug);
-          if (!saved) return;
-          if (saved.startsWith('data:')) {
-            localStorage.removeItem('rosebella_coll_bg_' + slug);
-            return;
-          }
-          entry.imgEl.style.background         = 'none';
-          entry.imgEl.style.backgroundImage    = 'url(' + saved + ')';
-          entry.imgEl.style.backgroundSize     = 'cover';
-          entry.imgEl.style.backgroundPosition = 'center';
-        }, 500 + i * 100);
-      });
-    }, 300);
   }
 
   /* File chosen → upload to Cloudinary → store URL → apply to card */
@@ -5081,9 +5059,11 @@
       transform: translateY(-8px);
       box-shadow: 0 22px 56px rgba(0,0,0,0.26);
     }
+    .coll-card:hover .coll-card-img { transform: scale(1.06); }
     .coll-card-img {
       position: absolute; inset: 0;
       background-size: cover; background-position: center;
+      transition: transform 0.5s ease;
     }
     .coll-card::after {
       content: ''; position: absolute; inset: 0;
@@ -6159,6 +6139,59 @@ A stunning white three-tiered acrylic stand topped with a Ramadan Mubarak mosque
         <div class="prod-footer">
           <div class="prod-price"><span class="currency">QAR</span>1100</div>
           <button class="prod-add" onclick="openVariantModal(this,'Eid Collection 2')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="eid-collections" data-apid="u-eid-collections-2">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/q7blxitxxg3ouzkzcgjx&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Eid Collections</span>
+        <h3>Eid Collection 3</h3>
+        <p class="prod-desc">Eid Mubarak White Floral &amp; Chocolate Set
+A white acrylic panel bearing عيدكم مبارك in gold, flanked by a refined arrangement of white hydrangea, protea, white roses, and green chrysanthemums, with a  chocolate tray 500 gm</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>650</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Eid Collection 3')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="eid-collections" data-apid="u-eid-collections-3">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/zdxutzgcbrij2cgdv4ce&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Eid Collections</span>
+        <h3>Eid Collection 4</h3>
+        <p class="prod-desc">Eidkom Mubarak Black &amp; Gold Floral Chocolate Stand
+
+A sleek black panel bearing عيدكم مبارك in gold, framed by soft pink roses, white chrysanthemums, and golden fillers, with a chocolate tray 400 gm at the base — elegant and festive.
+
+Dimensions:
+Height: 35 cm
+Width: 25 cm</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>350</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Eid Collection 4')">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
+          </button>
+        </div>
+      </div></div><div class="prod-card show" data-cat="eid-collections" data-apid="u-eid-collections-4">
+      <div class="prod-img" style="position:relative;">
+        <div class="prod-img-bg" style="background-image: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/d1avrg2ltsshnowcpni7&quot;); background-size: cover; background-position: center center;"></div>
+        <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
+      </div>
+      <div class="prod-body">
+        <span class="prod-cat">Eid Collections</span>
+        <h3>Eid Collection 5</h3>
+        <p class="prod-desc">Eidkom Mubarak Cream Floral &amp; Chocolate Set
+A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with a fresh arrangement of white anthuriums, chrysanthemums, green anthurium, and purple lavender, alongside a round chocolate box.740 gm</p>
+        <div class="prod-footer">
+          <div class="prod-price"><span class="currency">QAR</span>800</div>
+          <button class="prod-add" onclick="openVariantModal(this,'Eid Collection 5')">
             <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>Add
           </button>
         </div>
@@ -8116,7 +8149,7 @@ A stunning white three-tiered acrylic stand topped with a Ramadan Mubarak mosque
 
   <!-- HTML -->
   <input type="file" id="apFileIn" accept="image/*">
-  <div id="apToast" class="">✓ "Eid Collection 2" saved!</div>
+  <div id="apToast" class="show">✓ Product deleted.</div>
 
   <!-- Login trigger: tiny gold dot top-right -->
   
@@ -8178,7 +8211,7 @@ A stunning white three-tiered acrylic stand topped with a Ramadan Mubarak mosque
         <span>Floral Arrangements</span><span class="ap-ci-count">2</span></div><div class="ap-ci " onclick="selectCol('vase-collection','Vase Collection')">
         <span>Vase Collection</span><span class="ap-ci-count">1</span></div><div class="ap-ci " onclick="selectCol('al-haj-collection','Al Haj Collection')">
         <span>Al Haj Collection</span><span class="ap-ci-count">7</span></div><div class="ap-ci active" onclick="selectCol('eid-collections','Eid Collections')">
-        <span>Eid Collections</span><span class="ap-ci-count">2</span></div><div class="ap-ci " onclick="selectCol('birthday-arrangments','Birthday Arrangements')">
+        <span>Eid Collections</span><span class="ap-ci-count">5</span></div><div class="ap-ci " onclick="selectCol('birthday-arrangments','Birthday Arrangements')">
         <span>Birthday Arrangements</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('bridal-bouquet','Bridal Bouquet')">
         <span>Bridal Bouquet</span><span class="ap-ci-count">0</span></div><div class="ap-ci " onclick="selectCol('new-collection','New Collection')">
         <span>New Collection</span><span class="ap-ci-count">1</span></div><div class="ap-ci " onclick="selectCol('mother-day','Mother's Day')">
@@ -8229,17 +8262,18 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
           </div>
         </div>
         <div class="ap-pc" id="apc-u-eid-collections-1">
-          <div class="ap-pi" onclick="trigImg('u-eid-collections-1')"><img id="apim-u-eid-collections-1" src="https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200/rosebella/products/ag6fi1dpuxsqnvcp4uyq" alt="">
-            
+          <div class="ap-pi" onclick="trigImg('u-eid-collections-1')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
             <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-eid-collections-1')"><span>📷 Change Photo</span></div>
           </div>
           <div class="ap-pb">
             <div><span class="ap-fl">Name</span>
-              <input class="ap-fi" id="apn-u-eid-collections-1" value="New Product"></div>
+              <input class="ap-fi" id="apn-u-eid-collections-1" value="Eid Collection 2"></div>
             <div><span class="ap-fl">Description</span>
-              <textarea class="ap-fi ap-fi-desc" id="apd-u-eid-collections-1">Add a description</textarea></div>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-eid-collections-1">Eid Mubarak Three-Tier Chocolate &amp; Flower Stand
+A stunning white three-tiered acrylic stand topped with a Ramadan Mubarak mosque silhouette, filled with chocolates, dates, and gold-wrapped sweets, accompanied by a lush arrangement of white anthuriums, chrysanthemums, and roses.</textarea></div>
             <div><span class="ap-fl">Price (QAR)</span>
-              <input class="ap-fi ap-fi-price" id="app-u-eid-collections-1" value="0"></div>
+              <input class="ap-fi ap-fi-price" id="app-u-eid-collections-1" value="1100"></div>
             <div><span class="ap-fl">Badge</span>
               <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-eid-collections-1')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-eid-collections-1')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-eid-collections-1')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-eid-collections-1')">Sale</span></div></div>
           </div>
@@ -8248,6 +8282,75 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
             <button class="ap-del-btn" onclick="delCard('u-eid-collections-1','eid-collections')">🗑</button>
           </div>
         </div>
+        <div class="ap-pc" id="apc-u-eid-collections-2">
+          <div class="ap-pi" onclick="trigImg('u-eid-collections-2')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-eid-collections-2')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-eid-collections-2" value="Eid Collection 3"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-eid-collections-2">Eid Mubarak White Floral &amp; Chocolate Set
+A white acrylic panel bearing عيدكم مبارك in gold, flanked by a refined arrangement of white hydrangea, protea, white roses, and green chrysanthemums, with a  chocolate tray 500 gm</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-eid-collections-2" value="650"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-eid-collections-2')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-eid-collections-2')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-eid-collections-2')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-eid-collections-2')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-eid-collections-2" onclick="saveCard('u-eid-collections-2')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-eid-collections-2','eid-collections')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-eid-collections-3">
+          <div class="ap-pi" onclick="trigImg('u-eid-collections-3')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-eid-collections-3')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-eid-collections-3" value="Eid Collection 4"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-eid-collections-3">Eidkom Mubarak Black &amp; Gold Floral Chocolate Stand
+
+A sleek black panel bearing عيدكم مبارك in gold, framed by soft pink roses, white chrysanthemums, and golden fillers, with a chocolate tray 400 gm at the base — elegant and festive.
+
+Dimensions:
+Height: 35 cm
+Width: 25 cm</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-eid-collections-3" value="350"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-eid-collections-3')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-eid-collections-3')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-eid-collections-3')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-eid-collections-3')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-eid-collections-3" onclick="saveCard('u-eid-collections-3')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-eid-collections-3','eid-collections')">🗑</button>
+          </div>
+        </div>
+        <div class="ap-pc" id="apc-u-eid-collections-4">
+          <div class="ap-pi" onclick="trigImg('u-eid-collections-4')">
+            <div class="ap-pi-placeholder"><span>🌸</span><span>No photo yet</span></div>
+            <div class="ap-pi-overlay" onclick="event.stopPropagation();trigImg('u-eid-collections-4')"><span>📷 Change Photo</span></div>
+          </div>
+          <div class="ap-pb">
+            <div><span class="ap-fl">Name</span>
+              <input class="ap-fi" id="apn-u-eid-collections-4" value="Eid Collection 5"></div>
+            <div><span class="ap-fl">Description</span>
+              <textarea class="ap-fi ap-fi-desc" id="apd-u-eid-collections-4">Eidkom Mubarak Cream Floral &amp; Chocolate Set
+A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with a fresh arrangement of white anthuriums, chrysanthemums, green anthurium, and purple lavender, alongside a round chocolate box.740 gm</textarea></div>
+            <div><span class="ap-fl">Price (QAR)</span>
+              <input class="ap-fi ap-fi-price" id="app-u-eid-collections-4" value="800"></div>
+            <div><span class="ap-fl">Badge</span>
+              <div class="ap-badge-row"><span class="ap-bo sel" data-b="" onclick="selBadge(this,'u-eid-collections-4')">None</span><span class="ap-bo " data-b="badge-popular" onclick="selBadge(this,'u-eid-collections-4')">Bestseller</span><span class="ap-bo " data-b="badge-new" onclick="selBadge(this,'u-eid-collections-4')">New</span><span class="ap-bo " data-b="badge-sale" onclick="selBadge(this,'u-eid-collections-4')">Sale</span></div></div>
+          </div>
+          <div class="ap-ca">
+            <button class="ap-save-btn" id="apsb-u-eid-collections-4" onclick="saveCard('u-eid-collections-4')">Save</button>
+            <button class="ap-del-btn" onclick="delCard('u-eid-collections-4','eid-collections')">🗑</button>
+          </div>
+        </div>
+        
         <div class="ap-add-tile" onclick="addProduct('eid-collections','Eid Collections')">
           <span class="ap-plus">＋</span><span>Add New Product</span>
         </div>
@@ -8489,7 +8592,7 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
   //  ROSEBELLA ADMIN SYSTEM
   // ═══════════════════════════════════════════════
   const ADMIN_EMAIL = 'yousefaljailey@gmail.com';
-  const ADMIN_PASS  = '1122';
+  const ADMIN_PASS  = 'Yy12345678!';
   let isAdmin = false;
   let curSlug = null;
   let pendingImgUid = null;
@@ -11480,21 +11583,18 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
     const addBtn    = document.getElementById('hsMgrAddBtn');
     const title     = document.getElementById('hsMgrTitle');
 
-    const body = document.getElementById('hsMgrBody');
     if (tab === 'slides') {
       if (tabSlides) { tabSlides.style.borderBottomColor = 'var(--gold)'; tabSlides.style.color = 'var(--gold)'; }
       if (tabColl)   { tabColl.style.borderBottomColor = 'transparent'; tabColl.style.color = 'rgba(255,255,255,0.35)'; }
       if (addBtn)    { addBtn.textContent = '+ Add Slide'; addBtn.style.display = ''; addBtn.onclick = hsAddSlide; }
       if (title)     title.innerHTML = 'Hero <em>Slides</em>';
-      if (body)      body.innerHTML = '';
-      setTimeout(renderMgr, 0);
+      renderMgr();
     } else {
       if (tabSlides) { tabSlides.style.borderBottomColor = 'transparent'; tabSlides.style.color = 'rgba(255,255,255,0.35)'; }
       if (tabColl)   { tabColl.style.borderBottomColor = 'var(--gold)'; tabColl.style.color = 'var(--gold)'; }
       if (addBtn)    { addBtn.textContent = '+ Add Collection'; addBtn.style.display = ''; addBtn.onclick = hsAddCollCard; }
       if (title)     title.innerHTML = 'Collection <em>Card Images</em>';
-      if (body)      body.innerHTML = '';
-      setTimeout(renderCollMgr, 0);
+      renderCollMgr();
     }
   };
 
@@ -11509,16 +11609,7 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
       return;
     }
 
-    // Key-scan only — never read localStorage values (base64 blobs freeze the browser)
-    const slugsWithImages = new Set();
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('rosebella_coll_bg_')) {
-        slugsWithImages.add(k.slice('rosebella_coll_bg_'.length));
-      }
-    }
-
-    // Read only text content from DOM — no style, no backgroundImage, no getAttribute
+    // Collect metadata without touching localStorage images yet (avoids giant inline strings)
     const cardData = [];
     cards.forEach(card => {
       let slug = card.dataset.slug || '';
@@ -11527,35 +11618,52 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
       }
       const nameEl = card.querySelector('.coll-name');
       const name   = nameEl ? nameEl.textContent.trim() : slug;
-      const hasImg = !!(slug && slugsWithImages.has(slug));
-      cardData.push({ slug, name, hasImg });
+      const imgEl  = card.querySelector('.coll-card-img');
+      const hasImg = !!(slug && localStorage.getItem('rosebella_coll_bg_' + slug));
+      // Gradient-only style from the card's inline attribute (safe — never a data URL)
+      const gradStyle = (!hasImg && imgEl) ? (imgEl.getAttribute('style') || 'background:#2a2010;') : 'background:#2a2010;';
+      cardData.push({ slug, name, hasImg, gradStyle });
     });
 
     let html = `
       <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.06em;margin-bottom:16px;line-height:1.6;">
-        Click any card to upload or replace a photo.
+        Click any card to upload a photo. Images are saved and shown immediately on the page.
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">`;
 
-    cardData.forEach(({ slug, name, hasImg }) => {
-      const safeName = name.replace(/[<>"'&]/g, '');
-      const safeSlug = slug.replace(/[^a-z0-9_-]/gi, '');
+    cardData.forEach(({ slug, name, hasImg, gradStyle }) => {
       html += `
-        <div onclick="collMgrUpload('${safeSlug}')" id="collmgr-${safeSlug}"
-          style="cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;"
+        <div onclick="collMgrUpload('${slug}')" id="collmgr-${slug}"
+          style="cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;transition:border-color 0.2s;background:#1e1a10;"
           onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <div style="height:72px;background:${hasImg ? 'rgba(76,175,125,0.12)' : '#141008'};display:flex;align-items:center;justify-content:center;font-size:${hasImg ? '26px' : '22px'};">
-            ${hasImg ? '✅' : '📷'}
+          <div id="collmgr-thumb-${slug}" style="height:90px;${gradStyle}position:relative;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
+            ${hasImg
+              ? `<div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>`
+              : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0.4;">📷</div>`}
           </div>
           <div style="padding:8px 10px;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeName}</div>
-            <div style="font-family:var(--sans);font-size:8px;color:${hasImg ? 'rgba(76,175,125,0.8)' : 'rgba(255,255,255,0.25)'};margin-top:3px;">${hasImg ? '✓ Has photo — tap to replace' : 'Tap to add photo'}</div>
+            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div id="collmgr-status-${slug}" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">${hasImg ? 'Tap to replace' : 'Tap to add photo'}</div>
           </div>
         </div>`;
     });
 
     html += '</div>';
     body.innerHTML = html;
+
+    // Apply saved images via JS after innerHTML (keeps HTML string small — no inline base64)
+    // Only load Cloudinary URLs (short) in the tiny thumbnails; skip base64 to avoid slowness
+    cardData.forEach(({ slug, hasImg }) => {
+      if (!hasImg) return;
+      const saved = localStorage.getItem('rosebella_coll_bg_' + slug);
+      if (!saved || !saved.startsWith('http')) return; // skip base64 in thumbnails
+      const thumb = document.getElementById('collmgr-thumb-' + slug);
+      if (!thumb) return;
+      thumb.style.backgroundImage = `url('${saved}')`;
+      thumb.style.backgroundSize = 'cover';
+      thumb.style.backgroundPosition = 'center';
+    });
   };
 
   // ── Add new collection card ───────────────────
@@ -11722,19 +11830,14 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
     const body = document.getElementById('hsMgrBody');
     if (!body) return;
 
-    const listHtml = slides.map((s, i) => {
-      // Never embed base64 src inline — causes multi-MB innerHTML and freezes the browser
-      const srcIsBase64 = s.src && s.src.startsWith('data:');
-      const thumbHtml = srcIsBase64
-        ? `<span class="hs-slide-thumb-icon">${s.type === 'video' ? '🎬' : '🖼'}</span>`
-        : s.type === 'video'
-          ? `<video src="${s.src}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;"></video>`
-          : (s.src ? `<img src="${s.src}" style="width:100%;height:100%;object-fit:cover;" />` : `<span class="hs-slide-thumb-icon">🖼</span>`);
-      return `
+    const listHtml = slides.map((s, i) => `
       <div class="hs-slide-row" id="hsRow${s.id}">
         <div class="hs-slide-num">${i + 1}</div>
         <div class="hs-slide-thumb">
-          ${thumbHtml}
+          ${s.type === 'video'
+            ? `<video src="${s.src}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;"></video>`
+            : (s.src ? `<img src="${s.src}" style="width:100%;height:100%;object-fit:cover;" />` : `<span class="hs-slide-thumb-icon">🖼</span>`)
+          }
         </div>
         <div class="hs-slide-info">
           <div class="hs-slide-type">${s.type === 'video' ? '🎬 Video' : '🖼 Image'}</div>
@@ -11748,8 +11851,7 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
         </div>
       </div>
       ${editing === s.id ? editForm(s) : ''}
-    `;
-    }).join('');
+    `).join('');
 
     body.innerHTML = listHtml || '<div style="font-family:var(--serif);font-style:italic;color:rgba(255,255,255,0.2);text-align:center;padding:30px;">No slides yet.</div>';
   }
@@ -11757,15 +11859,12 @@ A white Rosebella stand with عيدكم مبارك in gold, adorned with strikin
   function editForm(s) {
     const hasMedia = !!s.src;
     const isVid    = s.type === 'video';
-    const srcIsBase64 = s.src && s.src.startsWith('data:');
     const previewHtml = hasMedia ? `
       <div class="hs-dz-preview">
-        ${srcIsBase64
-          ? `<span class="hs-slide-thumb-icon" style="font-size:32px;">${isVid ? '🎬' : '🖼'}</span>`
-          : isVid
-            ? `<video class="hs-dz-preview-thumb" src="${s.src}" muted preload="metadata"></video>`
-            : `<img  class="hs-dz-preview-thumb" src="${s.src}" />`}
-        <span class="hs-dz-preview-name">${srcIsBase64 ? '(local file — re-upload to use on live site)' : (s.src.length > 60 ? s.src.slice(0,57)+'…' : s.src)}</span>
+        ${isVid
+          ? `<video class="hs-dz-preview-thumb" src="${s.src}" muted preload="metadata"></video>`
+          : `<img  class="hs-dz-preview-thumb" src="${s.src}" />`}
+        <span class="hs-dz-preview-name">${s.src.length > 60 ? s.src.slice(0,57)+'…' : s.src}</span>
         <button class="hs-dz-preview-clear" onclick="hsDzClear(${s.id})" title="Remove">✕</button>
       </div>` : '';
 
