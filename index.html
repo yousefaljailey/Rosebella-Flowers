@@ -9512,6 +9512,17 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
         throw new Error(e.message || 'Push failed');
       }
 
+      // Also push hero-slides.json so slides persist across code deployments
+      try {
+        const slidesApiUrl = 'https://api.github.com/repos/' + _GH_OWNER + '/' + _GH_REPO + '/contents/hero-slides.json';
+        const slidesShaRes = await fetch(slidesApiUrl, { headers });
+        const slidesShaData = await slidesShaRes.json();
+        const slidesContent = btoa(unescape(encodeURIComponent(JSON.stringify(window._hsSlides || [], null, 2))));
+        const slidesBody = { message: 'Update hero slides', content: slidesContent };
+        if (slidesShaData.sha) slidesBody.sha = slidesShaData.sha;
+        await fetch(slidesApiUrl, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(slidesBody) });
+      } catch(e) {}
+
       setLabel('✓ Saved!');
       apToast('Pushed to GitHub — Vercel deploying now!');
       setTimeout(() => setLabel('🚀 Save & Publish'), 3000);
@@ -11885,10 +11896,9 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
 
   function save() {
     localStorage.setItem(HS_KEY, JSON.stringify(slides));
-    // Persist to Firestore so hero survives code deployments and works on all devices
-    try {
-      firebase.firestore().collection('config').doc('heroSlides').set({ slides: slides });
-    } catch(e) {}
+    window._hsSlides = slides; // expose for pushToGitHub to include in hero-slides.json
+    // Also persist to Firestore as secondary backup
+    try { firebase.firestore().collection('config').doc('heroSlides').set({ slides: slides }); } catch(e) {}
   }
 
   // ── Render track ────────────────────────────
@@ -12022,18 +12032,33 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
     if (_logout) window.doLogout = function() { _logout.apply(this, arguments); syncAdminFab(); };
     syncAdminFab();
 
-    // Load from Firestore first — this survives deployments and works across all devices
+    // Load hero slides from hero-slides.json (served from the site, survives all code deployments)
     try {
-      const doc = await firebase.firestore().collection('config').doc('heroSlides').get();
-      if (doc.exists) {
-        const data = doc.data();
-        if (Array.isArray(data.slides) && data.slides.length) {
-          slides = data.slides;
+      const res = await fetch('/hero-slides.json?v=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) {
+          slides = data;
           localStorage.setItem(HS_KEY, JSON.stringify(slides));
         }
       }
     } catch(e) {}
 
+    // Fallback: Firestore (may require auth rules — secondary backup)
+    if (slides === defaultSlides() || (slides.length === 1 && slides[0].src === 'AdobeStock_437011671.mp4')) {
+      try {
+        const doc = await firebase.firestore().collection('config').doc('heroSlides').get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (Array.isArray(data.slides) && data.slides.length) {
+            slides = data.slides;
+            localStorage.setItem(HS_KEY, JSON.stringify(slides));
+          }
+        }
+      } catch(e) {}
+    }
+
+    window._hsSlides = slides;
     render();
     startTimer();
   });
