@@ -11586,13 +11586,13 @@
     if (tab === 'slides') {
       if (tabSlides) { tabSlides.style.borderBottomColor = 'var(--gold)'; tabSlides.style.color = 'var(--gold)'; }
       if (tabColl)   { tabColl.style.borderBottomColor = 'transparent'; tabColl.style.color = 'rgba(255,255,255,0.35)'; }
-      if (addBtn)    { addBtn.style.display = ''; }
+      if (addBtn)    { addBtn.textContent = '+ Add Slide'; addBtn.style.display = ''; addBtn.onclick = hsAddSlide; }
       if (title)     title.innerHTML = 'Hero <em>Slides</em>';
       renderMgr();
     } else {
       if (tabSlides) { tabSlides.style.borderBottomColor = 'transparent'; tabSlides.style.color = 'rgba(255,255,255,0.35)'; }
       if (tabColl)   { tabColl.style.borderBottomColor = 'var(--gold)'; tabColl.style.color = 'var(--gold)'; }
-      if (addBtn)    { addBtn.style.display = 'none'; }
+      if (addBtn)    { addBtn.textContent = '+ Add Collection'; addBtn.style.display = ''; addBtn.onclick = hsAddCollCard; }
       if (title)     title.innerHTML = 'Collection <em>Card Images</em>';
       renderCollMgr();
     }
@@ -11654,6 +11654,149 @@
 
     html += '</div>';
     body.innerHTML = html;
+  };
+
+  // ── Add new collection card ───────────────────
+  window.hsAddCollCard = function() {
+    const body = document.getElementById('hsMgrBody');
+    if (!body) return;
+
+    // If form already open, just scroll to it
+    if (document.getElementById('newCollForm')) {
+      document.getElementById('newCollForm').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    const formHtml = `
+      <div id="newCollForm" style="background:#1e1a10;border:1px solid rgba(198,146,42,0.3);border-radius:10px;padding:20px;margin-bottom:20px;">
+        <div style="font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">New Collection Card</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-family:var(--sans);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:6px;">Collection Name *</label>
+            <input id="newCollName" type="text" placeholder="e.g. Luxury Orchids"
+              style="width:100%;background:#13110a;border:1px solid rgba(198,146,42,0.25);color:#fff;font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;" />
+          </div>
+          <div>
+            <label style="font-family:var(--sans);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:6px;">Icon (emoji)</label>
+            <input id="newCollIcon" type="text" placeholder="🌸" maxlength="4"
+              style="width:100%;background:#13110a;border:1px solid rgba(198,146,42,0.25);color:#fff;font-family:var(--sans);font-size:20px;padding:6px 10px;outline:none;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-family:var(--sans);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:6px;">Photo (optional — you can add it later)</label>
+          <div id="newCollImgPreview" style="height:90px;background:#13110a;border:1px dashed rgba(198,146,42,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:24px;color:rgba(255,255,255,0.2);" onclick="document.getElementById('newCollFileIn').click()">📷 Click to upload</div>
+          <input type="file" id="newCollFileIn" accept="image/*" style="display:none">
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <button onclick="saveNewCollCard()"
+            style="flex:1;background:var(--gold);color:#fff;border:none;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:10px 20px;cursor:pointer;">
+            Add Collection
+          </button>
+          <button onclick="document.getElementById('newCollForm').remove()"
+            style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:none;font-family:var(--sans);font-size:10px;font-weight:600;padding:10px 16px;cursor:pointer;">
+            Cancel
+          </button>
+        </div>
+      </div>`;
+
+    body.insertAdjacentHTML('afterbegin', formHtml);
+    document.getElementById('newCollForm').scrollIntoView({ behavior: 'smooth' });
+
+    // Preview selected image
+    let _newCollImgUrl = '';
+    document.getElementById('newCollFileIn').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const preview = document.getElementById('newCollImgPreview');
+      preview.innerHTML = '⏳ Uploading…';
+      try {
+        const url = await cloudinaryUpload(file, 'rosebella/collections', 'f_auto,q_auto,w_1200,h_700,c_fill');
+        _newCollImgUrl = url;
+        preview.style.backgroundImage = `url('${url}')`;
+        preview.style.backgroundSize = 'cover';
+        preview.style.backgroundPosition = 'center';
+        preview.innerHTML = '';
+      } catch(err) {
+        // Fallback to base64
+        const reader = new FileReader();
+        reader.onload = ev => {
+          _newCollImgUrl = ev.target.result;
+          preview.style.backgroundImage = `url('${ev.target.result}')`;
+          preview.style.backgroundSize = 'cover';
+          preview.style.backgroundPosition = 'center';
+          preview.innerHTML = '';
+        };
+        reader.readAsDataURL(file);
+      }
+      // Expose url to saveNewCollCard via closure-friendly global
+      window._newCollImgUrl = _newCollImgUrl;
+    });
+  };
+
+  window.saveNewCollCard = function() {
+    const nameEl = document.getElementById('newCollName');
+    const iconEl = document.getElementById('newCollIcon');
+    const name   = nameEl ? nameEl.value.trim() : '';
+    const icon   = iconEl ? (iconEl.value.trim() || '🌸') : '🌸';
+    const imgUrl = window._newCollImgUrl || '';
+
+    if (!name) { alert('Please enter a collection name.'); nameEl && nameEl.focus(); return; }
+
+    // Generate a URL-safe slug from the name
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+    // Check for duplicates
+    if (document.querySelector(`.coll-card[data-slug="${slug}"]`)) {
+      alert('A collection with that name already exists.'); return;
+    }
+
+    // Build the gradient background (placeholder until image is uploaded)
+    const gradients = [
+      'linear-gradient(150deg,#c04060 0%,#8b1a35 100%)',
+      'linear-gradient(150deg,#d46a3a 0%,#8c3210 100%)',
+      'linear-gradient(150deg,#7a3a8a 0%,#3a1050 100%)',
+      'linear-gradient(150deg,#4a8a5a 0%,#1a4a2a 100%)',
+      'linear-gradient(150deg,#c0a030 0%,#806010 100%)',
+      'linear-gradient(150deg,#5070c0 0%,#102060 100%)',
+    ];
+    const grad = gradients[Math.floor(Math.random() * gradients.length)];
+
+    const imgStyle = imgUrl
+      ? `background-image:url('${imgUrl}');background-size:cover;background-position:center;`
+      : `background:${grad}`;
+
+    // Inject the new card into the scroll track
+    const track = document.getElementById('collScrollTrack');
+    if (!track) { alert('Could not find the collection scroll track.'); return; }
+
+    const collName = name.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    const encodedName = encodeURIComponent(name);
+
+    const newCard = document.createElement('a');
+    newCard.className = 'coll-card';
+    newCard.href = `collection.html?cat=${slug}&name=${encodedName}`;
+    newCard.dataset.slug = slug;
+    newCard.innerHTML = `
+      <div class="coll-card-img" style="${imgStyle}"></div>
+      <div class="coll-card-body"><span class="coll-icon">${icon}</span><span class="coll-name">${collName}</span></div>
+      <button class="coll-edit-btn" style="display:none;">📷 Change Image</button>`;
+
+    // Save image URL to localStorage if provided
+    if (imgUrl) localStorage.setItem('rosebella_coll_bg_' + slug, imgUrl);
+
+    track.appendChild(newCard);
+
+    // Re-init collection card admin handlers for the new card
+    if (typeof _initCollCards === 'function') _initCollCards();
+
+    // Clean up and refresh manager view
+    window._newCollImgUrl = '';
+    document.getElementById('newCollForm')?.remove();
+    renderCollMgr();
+    apToast('✓ Collection "' + name + '" added! Save & Publish to keep it.');
   };
 
   window.collMgrUpload = function(slug) {
