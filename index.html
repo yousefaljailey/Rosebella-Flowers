@@ -9680,15 +9680,10 @@
   // Close mobile nav on Escape key
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
 
-  // ── Scroll reveal ─────────────────────────────
-  document.querySelectorAll('.reveal').forEach(el => {
-    new IntersectionObserver(entries=>{
-      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
-    },{threshold:0.05}).observe(el);
-  });
+  // ── Scroll reveal (CSS fallback — Motion takes over below) ──
   setTimeout(() => {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
-  }, 800);
+  }, 600);
 
 </script>
 
@@ -10189,6 +10184,90 @@
   };
 
 })();
+</script>
+
+<!-- ══════════════════════════════════════════════
+     MOTION ANIMATIONS
+══════════════════════════════════════════════ -->
+<script type="module">
+import { animate, inView, stagger } from 'https://cdn.jsdelivr.net/npm/motion@latest/+esm';
+
+const ease  = [0.22, 1, 0.36, 1];
+const spring = [0.34, 1.56, 0.64, 1];
+
+// ── Strip baked-in 'visible' so Motion controls reveals ──
+document.querySelectorAll('.reveal').forEach(el => el.classList.remove('visible'));
+
+// ── Section labels + titles ───────────────────
+document.querySelectorAll('.section-label, .section-title').forEach(el => {
+  inView(el, () => {
+    animate(el, { opacity: [0, 1], y: [22, 0] }, { duration: 0.65, easing: ease });
+  }, { margin: '-8% 0px' });
+});
+
+// ── Generic .reveal elements ─────────────────
+document.querySelectorAll('.reveal').forEach(el => {
+  inView(el, () => {
+    animate(el, { opacity: [0, 1], y: [20, 0] }, { duration: 0.6, easing: ease });
+  }, { margin: '-6% 0px' });
+});
+
+// ── Collection cards — staggered ─────────────
+inView('.coll-scroll-outer', ({ target }) => {
+  const cards = Array.from(target.querySelectorAll('.coll-card'));
+  animate(cards, { opacity: [0, 1], y: [28, 0] }, {
+    duration: 0.45, delay: stagger(0.07), easing: ease
+  });
+}, { margin: '-5% 0px' });
+
+// ── Product cards — staggered ────────────────
+inView('#productsGrid', ({ target }) => {
+  const cards = Array.from(target.querySelectorAll('.prod-card.show'));
+  animate(cards, { opacity: [0, 1], y: [32, 0] }, {
+    duration: 0.45, delay: stagger(0.055), easing: ease
+  });
+}, { margin: '-5% 0px' });
+
+// ── Testimonial cards — staggered ────────────
+inView('#testGrid', ({ target }) => {
+  const cards = Array.from(target.querySelectorAll('.test-card'));
+  animate(cards, { opacity: [0, 1], y: [24, 0] }, {
+    duration: 0.45, delay: stagger(0.09), easing: ease
+  });
+}, { margin: '-5% 0px' });
+
+// ── Product card hover spring ─────────────────
+document.querySelectorAll('.prod-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    animate(card, { y: -7, scale: 1.012 }, { duration: 0.35, easing: spring });
+  });
+  card.addEventListener('mouseleave', () => {
+    animate(card, { y: 0, scale: 1 }, { duration: 0.3, easing: ease });
+  });
+});
+
+// ── Collection card hover spring ──────────────
+document.querySelectorAll('.coll-card').forEach(card => {
+  const img = card.querySelector('.coll-card-img');
+  card.addEventListener('mouseenter', () => {
+    animate(card, { y: -5 }, { duration: 0.35, easing: spring });
+    if (img) animate(img, { scale: 1.06 }, { duration: 0.5, easing: ease });
+  });
+  card.addEventListener('mouseleave', () => {
+    animate(card, { y: 0 }, { duration: 0.3, easing: ease });
+    if (img) animate(img, { scale: 1 }, { duration: 0.4, easing: ease });
+  });
+});
+
+// ── Nav CTA button pulse on load ──────────────
+const cta = document.querySelector('.nav-cta');
+if (cta) animate(cta, { scale: [0.92, 1] }, { duration: 0.6, delay: 1.2, easing: spring });
+
+// ── Hero content entrance ─────────────────────
+animate('.hs-eyebrow', { opacity: [0, 1], y: [16, 0] }, { duration: 0.55, delay: 0.25, easing: ease });
+animate('.hs-h1',      { opacity: [0, 1], y: [28, 0] }, { duration: 0.65, delay: 0.4,  easing: ease });
+animate('.hs-tagline', { opacity: [0, 1], y: [16, 0] }, { duration: 0.55, delay: 0.55, easing: ease });
+animate('.hs-cta',     { opacity: [0, 1], y: [16, 0] }, { duration: 0.5,  delay: 0.68, easing: spring });
 </script>
 
 <div id="8A7381A6_5137_B900_C11D_DE24E99D0C83"></div><iframe name="__privateStripeMetricsController8330" frameborder="0" allowtransparency="true" scrolling="no" role="presentation" allow="payment *" src="https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html#url=https%3A%2F%2Frosebella-flowers.vercel.app%2Findex.html%23collections&amp;title=Rosebella%20%E2%80%94%20Luxury%20Flowers%20%26%20Chocolates&amp;referrer=https%3A%2F%2Frosebella-flowers.vercel.app%2Fstory.html&amp;muid=380c0495-1101-45e8-8a2d-940b9f4a07b9927b7f&amp;sid=9ce15d51-c2e2-44f5-b520-d803bc3aed8f221f12&amp;version=6&amp;preview=false&amp;__shared_params__[version]=v3" aria-hidden="true" tabindex="-1" style="border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; margin: 0px !important; padding: 0px !important; width: 1px !important; min-width: 100% !important; overflow: hidden !important; display: block !important; visibility: hidden !important; position: fixed !important; height: 1px !important; pointer-events: none !important; user-select: none !important;"></iframe></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
