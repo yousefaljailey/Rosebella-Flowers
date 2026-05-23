@@ -632,9 +632,9 @@
       background: var(--white); overflow: hidden;
       cursor: pointer; position: relative;
       transition: box-shadow 0.35s, transform 0.35s;
-      display: none;
+      display: none; flex-direction: column;
     }
-    .prod-card.show { display: block; }
+    .prod-card.show { display: flex; }
 
     .search-empty-state {
       display: none; text-align: center; padding: 60px 20px;
@@ -718,7 +718,7 @@
     .badge-sale    { background: #e05060; color: var(--white); }
     .badge-popular { background: var(--charcoal); color: var(--white); }
 
-    .prod-body { padding: 16px 16px 18px; }
+    .prod-body { padding: 16px 16px 18px; flex: 1; display: flex; flex-direction: column; }
     .prod-body .prod-cat {
       font-family: var(--sans); font-size: 9px; font-weight: 500;
       letter-spacing: 0.15em; text-transform: uppercase;
@@ -735,6 +735,7 @@
     .prod-footer {
       display: flex; align-items: center; justify-content: space-between;
       padding-top: 12px; border-top: 1px solid #f0ece4;
+      margin-top: auto;
     }
     .prod-price {
       font-family: var(--sans); font-size: 15px; font-weight: 600;
