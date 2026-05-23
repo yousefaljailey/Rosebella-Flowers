@@ -6620,13 +6620,17 @@
       const bgEl     = matchCard?.querySelector('.prod-img-bg');
       const imgEl    = matchCard?.querySelector('.prod-img img');
       const thumbCls = bgEl ? (bgEl.className.match(/pi-\d+/) || [''])[0] : '';
+      // Extract a clean URL (strips any quotes from browser-returned backgroundImage)
+      function extractUrl(bgImgVal) {
+        const m = bgImgVal && bgImgVal.match(/url\(['"]?([^'")\s]+)['"]?\)/);
+        return m ? m[1] : '';
+      }
       let thumbSty = '';
       if (imgEl?.src) {
-        thumbSty = `background-image:url(${imgEl.src});background-size:cover;background-position:center top;`;
-      } else if (bgEl?.style?.backgroundImage && bgEl.style.backgroundImage !== 'none') {
-        thumbSty = `background-image:${bgEl.style.backgroundImage};background-size:cover;background-position:center top;`;
-      } else if (item.img) {
-        thumbSty = `background-image:url(${item.img});background-size:cover;background-position:center top;`;
+        thumbSty = `background-image:url('${imgEl.src}');background-size:cover;background-position:center top;`;
+      } else {
+        const url = extractUrl(bgEl?.style?.backgroundImage) || item.img || '';
+        if (url) thumbSty = `background-image:url('${url}');background-size:cover;background-position:center top;`;
       }
       return `
       <div class="cart-item" id="ci-${item.id}">
