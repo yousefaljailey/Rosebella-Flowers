@@ -11808,19 +11808,45 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
 
   window.collMgrUpload = function(slug) {
     if (!window.isAdmin) return;
-    // Find the matching card
     let card = document.querySelector(`.coll-card[data-slug="${slug}"]`);
     if (!card) {
       document.querySelectorAll('.coll-card').forEach(c => {
         try { const u = new URL(c.href, location.href); if (u.searchParams.get('cat') === slug) card = c; } catch(e) {}
       });
     }
-    _pendingCollSlug = slug;
-    _pendingCollCard = card;
-    // Tag the upload as coming from the manager
-    document.getElementById('collImgInput')._fromMgr = true;
-    document.getElementById('collImgInput').value = '';
-    document.getElementById('collImgInput').click();
+    // Create a fresh input each time — avoids browser blocks on programmatic clicks
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.style.cssText = 'position:fixed;top:-200px;left:-200px;opacity:0;pointer-events:none;';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', async function() {
+      document.body.removeChild(inp);
+      const file = inp.files[0];
+      if (!file) return;
+      const imgEl   = card ? card.querySelector('.coll-card-img') : null;
+      const editBtn = card ? card.querySelector('.coll-edit-btn') : null;
+      if (editBtn) { editBtn.textContent = '⏳ Uploading…'; editBtn.disabled = true; }
+      function applyCollImg(url) {
+        localStorage.setItem('rosebella_coll_bg_' + slug, url);
+        if (imgEl) {
+          imgEl.style.background = 'none';
+          imgEl.style.backgroundImage = 'url(' + url + ')';
+          imgEl.style.backgroundSize = 'cover';
+          imgEl.style.backgroundPosition = 'center';
+        }
+      }
+      try {
+        const url = await cloudinaryUpload(file, 'rosebella/collections', 'f_auto,q_auto,w_1200,h_700,c_fill');
+        applyCollImg(url);
+      } catch(err) {
+        const reader = new FileReader();
+        reader.onload = ev => applyCollImg(ev.target.result);
+        reader.readAsDataURL(file);
+      }
+      if (editBtn) { editBtn.textContent = '✓ Saved!'; setTimeout(() => { editBtn.textContent = '📷 Change Image'; editBtn.disabled = false; }, 2000); }
+      setTimeout(() => window.renderCollMgr && window.renderCollMgr(), 400);
+    });
+    inp.click();
   };
 
   function renderMgr() {
