@@ -11624,43 +11624,84 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
 
     let html = `
       <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.06em;margin-bottom:16px;line-height:1.6;">
-        Click any card to upload a photo. Images are saved and shown immediately on the page.
+        Tap any card to upload a photo.
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">`;
 
     cardData.forEach(({ slug, name, hasImg }) => {
       html += `
-        <div onclick="collMgrUpload('${slug}')" id="collmgr-${slug}"
-          style="cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;transition:border-color 0.2s;background:#1e1a10;"
+        <label id="collmgr-${slug}"
+          style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;"
           onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <div id="collmgr-thumb-${slug}" style="height:90px;background:#2a2010;position:relative;">
+          <input type="file" accept="image/*"
+            style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;"
+            onchange="collMgrHandleFile(event,'${slug}')">
+          <div id="collmgr-thumb-${slug}" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
             <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
             ${hasImg
               ? `<div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>`
               : ``}
           </div>
-          <div style="padding:8px 10px;">
+          <div style="padding:8px 10px;pointer-events:none;">
             <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div id="collmgr-status-${slug}" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">${hasImg ? 'Tap to replace' : 'Tap to add photo'}</div>
           </div>
-        </div>`;
+        </label>`;
     });
 
     html += '</div>';
     body.innerHTML = html;
 
-    // Apply saved images via JS after innerHTML (keeps HTML string small — no inline base64)
-    // Only load Cloudinary URLs (short) in the tiny thumbnails; skip base64 to avoid slowness
+    // Apply saved Cloudinary URLs to thumbnails (skip base64 — too slow)
     cardData.forEach(({ slug, hasImg }) => {
       if (!hasImg) return;
       const saved = localStorage.getItem('rosebella_coll_bg_' + slug);
-      if (!saved || !saved.startsWith('http')) return; // skip base64 in thumbnails
+      if (!saved || !saved.startsWith('http')) return;
       const thumb = document.getElementById('collmgr-thumb-' + slug);
       if (!thumb) return;
       thumb.style.backgroundImage = `url('${saved}')`;
       thumb.style.backgroundSize = 'cover';
       thumb.style.backgroundPosition = 'center';
     });
+  };
+
+  window.collMgrHandleFile = async function(e, slug) {
+    const file = e.target.files[0];
+    if (!file || !slug) return;
+    const statusEl = document.getElementById('collmgr-status-' + slug);
+    if (statusEl) statusEl.textContent = '⏳ Uploading…';
+    function applyCollImg(url) {
+      localStorage.setItem('rosebella_coll_bg_' + slug, url);
+      const thumb = document.getElementById('collmgr-thumb-' + slug);
+      if (thumb && url.startsWith('http')) {
+        thumb.style.backgroundImage = `url('${url}')`;
+        thumb.style.backgroundSize = 'cover';
+        thumb.style.backgroundPosition = 'center';
+      }
+      // Also apply to the live card on the page
+      let card = document.querySelector(`.coll-card[data-slug="${slug}"]`);
+      if (!card) {
+        document.querySelectorAll('.coll-card').forEach(c => {
+          try { const u = new URL(c.href, location.href); if (u.searchParams.get('cat') === slug) card = c; } catch(ex) {}
+        });
+      }
+      const imgEl = card ? card.querySelector('.coll-card-img') : null;
+      if (imgEl) {
+        imgEl.style.background = 'none';
+        imgEl.style.backgroundImage = 'url(' + url + ')';
+        imgEl.style.backgroundSize = 'cover';
+        imgEl.style.backgroundPosition = 'center';
+      }
+    }
+    try {
+      const url = await cloudinaryUpload(file, 'rosebella/collections', 'f_auto,q_auto,w_1200,h_700,c_fill');
+      applyCollImg(url);
+      if (statusEl) statusEl.textContent = '✓ Photo saved!';
+    } catch(err) {
+      const reader = new FileReader();
+      reader.onload = ev => { applyCollImg(ev.target.result); if (statusEl) statusEl.textContent = '✓ Saved locally'; };
+      reader.readAsDataURL(file);
+    }
   };
 
   // ── Add new collection card ───────────────────
@@ -11806,48 +11847,6 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
     apToast('✓ Collection "' + name + '" added! Save & Publish to keep it.');
   };
 
-  window.collMgrUpload = function(slug) {
-    if (!window.isAdmin) return;
-    let card = document.querySelector(`.coll-card[data-slug="${slug}"]`);
-    if (!card) {
-      document.querySelectorAll('.coll-card').forEach(c => {
-        try { const u = new URL(c.href, location.href); if (u.searchParams.get('cat') === slug) card = c; } catch(e) {}
-      });
-    }
-    // Create a fresh input each time — avoids browser blocks on programmatic clicks
-    const inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = 'image/*';
-    inp.style.cssText = 'position:fixed;top:-200px;left:-200px;opacity:0;pointer-events:none;';
-    document.body.appendChild(inp);
-    inp.addEventListener('change', async function() {
-      document.body.removeChild(inp);
-      const file = inp.files[0];
-      if (!file) return;
-      const imgEl   = card ? card.querySelector('.coll-card-img') : null;
-      const editBtn = card ? card.querySelector('.coll-edit-btn') : null;
-      if (editBtn) { editBtn.textContent = '⏳ Uploading…'; editBtn.disabled = true; }
-      function applyCollImg(url) {
-        localStorage.setItem('rosebella_coll_bg_' + slug, url);
-        if (imgEl) {
-          imgEl.style.background = 'none';
-          imgEl.style.backgroundImage = 'url(' + url + ')';
-          imgEl.style.backgroundSize = 'cover';
-          imgEl.style.backgroundPosition = 'center';
-        }
-      }
-      try {
-        const url = await cloudinaryUpload(file, 'rosebella/collections', 'f_auto,q_auto,w_1200,h_700,c_fill');
-        applyCollImg(url);
-      } catch(err) {
-        const reader = new FileReader();
-        reader.onload = ev => applyCollImg(ev.target.result);
-        reader.readAsDataURL(file);
-      }
-      if (editBtn) { editBtn.textContent = '✓ Saved!'; setTimeout(() => { editBtn.textContent = '📷 Change Image'; editBtn.disabled = false; }, 2000); }
-      setTimeout(() => window.renderCollMgr && window.renderCollMgr(), 400);
-    });
-    inp.click();
-  };
 
   function renderMgr() {
     const body = document.getElementById('hsMgrBody');
