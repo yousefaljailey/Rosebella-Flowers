@@ -11883,7 +11883,13 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
   let editing  = null; // id of slide being edited
   const DELAY  = 6000;
 
-  function save() { localStorage.setItem(HS_KEY, JSON.stringify(slides)); }
+  function save() {
+    localStorage.setItem(HS_KEY, JSON.stringify(slides));
+    // Persist to Firestore so hero survives code deployments and works on all devices
+    try {
+      firebase.firestore().collection('config').doc('heroSlides').set({ slides: slides });
+    } catch(e) {}
+  }
 
   // ── Render track ────────────────────────────
   function render() {
@@ -12009,12 +12015,25 @@ A cream-toned Rosebella stand inscribed with عيدكم مبارك, paired with 
   }
 
   // Patch doLogin / doLogout to show/hide FAB
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     const _login  = window.doLogin;
     const _logout = window.doLogout;
     if (_login)  window.doLogin  = function() { _login.apply(this, arguments);  syncAdminFab(); };
     if (_logout) window.doLogout = function() { _logout.apply(this, arguments); syncAdminFab(); };
     syncAdminFab();
+
+    // Load from Firestore first — this survives deployments and works across all devices
+    try {
+      const doc = await firebase.firestore().collection('config').doc('heroSlides').get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (Array.isArray(data.slides) && data.slides.length) {
+          slides = data.slides;
+          localStorage.setItem(HS_KEY, JSON.stringify(slides));
+        }
+      }
+    } catch(e) {}
+
     render();
     startTimer();
   });
