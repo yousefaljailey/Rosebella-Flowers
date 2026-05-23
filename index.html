@@ -4965,12 +4965,12 @@
   /* File chosen → upload to Cloudinary → store URL → apply to card */
   document.getElementById('collImgInput').addEventListener('change', async function(e) {
     const file = e.target.files[0];
-    if (!file || !_pendingCollSlug || !_pendingCollCard) return;
+    if (!file || !_pendingCollSlug) return;
 
     const slug    = _pendingCollSlug;
-    const card    = _pendingCollCard;
-    const imgEl   = card.querySelector('.coll-card-img');
-    const editBtn = card.querySelector('.coll-edit-btn');
+    const card    = _pendingCollCard; // may be null when called from manager grid
+    const imgEl   = card ? card.querySelector('.coll-card-img') : null;
+    const editBtn = card ? card.querySelector('.coll-edit-btn') : null;
 
     if (editBtn) { editBtn.textContent = '⏳ Uploading…'; editBtn.disabled = true; }
 
@@ -4998,14 +4998,7 @@
     // Refresh the manager grid if upload came from there
     if (document.getElementById('collImgInput')._fromMgr) {
       document.getElementById('collImgInput')._fromMgr = false;
-      // Update the mini-preview card in the manager
-      const mgr = document.getElementById('collmgr-' + slug);
-      if (mgr) {
-        const statusEl = document.getElementById('collmgr-status-' + slug);
-        if (statusEl) statusEl.textContent = '✓ Photo saved!';
-        // Refresh the full manager to show updated preview
-        setTimeout(() => window.renderCollMgr && window.renderCollMgr(), 400);
-      }
+      setTimeout(() => window.renderCollMgr && window.renderCollMgr(), 400);
     }
   });
 
