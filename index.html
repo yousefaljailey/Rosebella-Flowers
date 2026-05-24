@@ -5178,334 +5178,40 @@
   <div id="hsMgrBg" class="">
     <div id="hsMgrPanel">
       <div class="hs-mgr-hd">
-        <span class="hs-mgr-title" id="hsMgrTitle">Collection <em>Card Images</em></span>
+        <span class="hs-mgr-title" id="hsMgrTitle">Hero <em>Slides</em></span>
         <div style="display:flex;gap:8px;">
-          <button class="hs-fab-btn" id="hsMgrAddBtn" onclick="hsAddSlide()">+ Add Collection</button>
+          <button class="hs-fab-btn" id="hsMgrAddBtn" onclick="hsAddSlide()">+ Add Slide</button>
           <button class="pos-hst-close" onclick="hsMgrClose()">✕</button>
         </div>
       </div>
       <!-- Tab bar -->
       <div style="display:flex;gap:0;background:#0f0e09;border-bottom:1px solid rgba(198,146,42,0.15);flex-shrink:0;">
-        <button id="hsMgrTabSlides" onclick="hsMgrSwitchTab('slides')" style="flex: 1 1 0%; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: none; border-top: medium; border-color: currentcolor currentcolor transparent; border-right: medium; border-left: medium; border-image: none; color: rgba(255, 255, 255, 0.35); padding: 11px 16px; cursor: pointer; transition: 0.2s;">
+        <button id="hsMgrTabSlides" onclick="hsMgrSwitchTab('slides')" style="flex: 1 1 0%; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: none; border-top: medium; border-right: medium; border-left: medium; border-bottom-color: var(--gold); border-image: none; color: var(--gold); padding: 11px 16px; cursor: pointer; transition: 0.2s;">
           🎬 Hero Slides
         </button>
-        <button id="hsMgrTabColl" onclick="hsMgrSwitchTab('collections')" style="flex: 1 1 0%; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: none; border-width: medium medium 2px; border-style: none none solid; border-top: medium; border-right: medium; border-bottom-color: var(--gold); border-left: medium; border-image: none; color: var(--gold); padding: 11px 16px; cursor: pointer; transition: 0.2s;">
+        <button id="hsMgrTabColl" onclick="hsMgrSwitchTab('collections')" style="flex: 1 1 0%; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: none; border-width: medium medium 2px; border-style: none none solid; border-color: currentcolor currentcolor transparent; border-image: none; color: rgba(255, 255, 255, 0.35); padding: 11px 16px; cursor: pointer; transition: 0.2s;">
           🌸 Collection Cards
         </button>
       </div>
       <div class="hs-mgr-body" id="hsMgrBody">
-      <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.06em;margin-bottom:16px;line-height:1.6;">
-        Tap any card to upload a photo.
+      <div class="hs-slide-row" id="hsRow1779539424185">
+        <div class="hs-slide-num">1</div>
+        <div class="hs-slide-thumb">
+          <span class="hs-slide-thumb-icon">🖼</span>
+        </div>
+        <div class="hs-slide-info">
+          <div class="hs-slide-type">🖼 Image</div>
+          <div class="hs-slide-title-preview">New Slide</div>
+        </div>
+        <div class="hs-slide-actions">
+          <button class="hs-row-btn" onclick="hsEditSlide(1779539424185)">Edit</button>
+          
+          
+          
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
-        <label id="collmgr-bella-roses" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'bella-roses')">
-          <div id="collmgr-thumb-bella-roses" style="height: 90px; background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/mkigkyepiilnr3fcvmsp&quot;) center center / cover rgb(42, 32, 16); position: relative; pointer-events: none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            <div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Bella Roses</div>
-            <div id="collmgr-status-bella-roses" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to replace</div>
-          </div>
-        </label>
-        <label id="collmgr-hand-tied-bouquets" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'hand-tied-bouquets')">
-          <div id="collmgr-thumb-hand-tied-bouquets" style="height: 90px; background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/hndtrwvq9u1crw954lub&quot;) center center / cover rgb(42, 32, 16); position: relative; pointer-events: none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            <div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Hand-Tied Bouquets</div>
-            <div id="collmgr-status-hand-tied-bouquets" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to replace</div>
-          </div>
-        </label>
-        <label id="collmgr-luxury-box-arrangements" style="display: block; cursor: pointer; border: 1px solid rgba(198, 146, 42, 0.15); border-radius: 8px; overflow: hidden; background: rgb(30, 26, 16); position: relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'luxury-box-arrangements')">
-          <div id="collmgr-thumb-luxury-box-arrangements" style="height: 90px; background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/ktznsy394lbnzjkm30a3&quot;) center center / cover rgb(42, 32, 16); position: relative; pointer-events: none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            <div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Luxury Box Arrangements</div>
-            <div id="collmgr-status-luxury-box-arrangements" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to replace</div>
-          </div>
-        </label>
-        <label id="collmgr-anniversary-bouquet" style="display: block; cursor: pointer; border: 1px solid rgba(198, 146, 42, 0.15); border-radius: 8px; overflow: hidden; background: rgb(30, 26, 16); position: relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'anniversary-bouquet')">
-          <div id="collmgr-thumb-anniversary-bouquet" style="height: 90px; background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/vtqxcttgxzlgydvm0nmc&quot;) center center / cover rgb(42, 32, 16); position: relative; pointer-events: none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            <div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Anniversary Bouquet</div>
-            <div id="collmgr-status-anniversary-bouquet" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to replace</div>
-          </div>
-        </label>
-        <label id="collmgr-floral-arrangements" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'floral-arrangements')">
-          <div id="collmgr-thumb-floral-arrangements" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Floral Arrangements</div>
-            <div id="collmgr-status-floral-arrangements" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-vase-collection" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'vase-collection')">
-          <div id="collmgr-thumb-vase-collection" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Vase Collection</div>
-            <div id="collmgr-status-vase-collection" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-al-haj-collection" style="display: block; cursor: pointer; border: 1px solid rgba(198, 146, 42, 0.15); border-radius: 8px; overflow: hidden; background: rgb(30, 26, 16); position: relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'al-haj-collection')">
-          <div id="collmgr-thumb-al-haj-collection" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Al Haj Collection</div>
-            <div id="collmgr-status-al-haj-collection" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-eid-collections" style="display: block; cursor: pointer; border: 1px solid rgba(198, 146, 42, 0.15); border-radius: 8px; overflow: hidden; background: rgb(30, 26, 16); position: relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'eid-collections')">
-          <div id="collmgr-thumb-eid-collections" style="height: 90px; background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/jrz7wnci2c5ef9nlm8bo&quot;) center center / cover rgb(42, 32, 16); position: relative; pointer-events: none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            <div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Eid Collections</div>
-            <div id="collmgr-status-eid-collections" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to replace</div>
-          </div>
-        </label>
-        <label id="collmgr-birthday-arrangments" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'birthday-arrangments')">
-          <div id="collmgr-thumb-birthday-arrangments" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Birthday Arrangements</div>
-            <div id="collmgr-status-birthday-arrangments" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-bridal-bouquet" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'bridal-bouquet')">
-          <div id="collmgr-thumb-bridal-bouquet" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Bridal Bouquet</div>
-            <div id="collmgr-status-bridal-bouquet" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-new-collection" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'new-collection')">
-          <div id="collmgr-thumb-new-collection" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">New Collection</div>
-            <div id="collmgr-status-new-collection" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-i-love-you" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'i-love-you')">
-          <div id="collmgr-thumb-i-love-you" style="height: 90px; background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/esvksieuqnl2wahtnkxe&quot;) center center / cover rgb(42, 32, 16); position: relative; pointer-events: none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            <div style="position:absolute;top:6px;right:6px;background:rgba(76,175,125,0.9);color:#fff;font-family:var(--sans);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">✓ Photo</div>
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">I Love You</div>
-            <div id="collmgr-status-i-love-you" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to replace</div>
-          </div>
-        </label>
-        <label id="collmgr-mother-day" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'mother-day')">
-          <div id="collmgr-thumb-mother-day" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mother's Day</div>
-            <div id="collmgr-status-mother-day" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-graduation-2025" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'graduation-2025')">
-          <div id="collmgr-thumb-graduation-2025" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Graduation 2025</div>
-            <div id="collmgr-status-graduation-2025" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-get-well-soon" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'get-well-soon')">
-          <div id="collmgr-thumb-get-well-soon" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Get Well Soon</div>
-            <div id="collmgr-status-get-well-soon" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-congratulations" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'congratulations')">
-          <div id="collmgr-thumb-congratulations" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Congratulations</div>
-            <div id="collmgr-status-congratulations" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-letters-of-love" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'letters-of-love')">
-          <div id="collmgr-thumb-letters-of-love" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Letters of Love</div>
-            <div id="collmgr-status-letters-of-love" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-lily-arrangement" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'lily-arrangement')">
-          <div id="collmgr-thumb-lily-arrangement" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Lily Arrangement</div>
-            <div id="collmgr-status-lily-arrangement" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-special-bouquet" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'special-bouquet')">
-          <div id="collmgr-thumb-special-bouquet" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Special Bouquet</div>
-            <div id="collmgr-status-special-bouquet" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-ramadan-collection" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'ramadan-collection')">
-          <div id="collmgr-thumb-ramadan-collection" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ramadan Collection</div>
-            <div id="collmgr-status-ramadan-collection" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-rosebella-valentine-menu" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'rosebella-valentine-menu')">
-          <div id="collmgr-thumb-rosebella-valentine-menu" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Valentine's Day</div>
-            <div id="collmgr-status-rosebella-valentine-menu" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-basket" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'basket')">
-          <div id="collmgr-thumb-basket" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Basket</div>
-            <div id="collmgr-status-basket" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-balloons" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'balloons')">
-          <div id="collmgr-thumb-balloons" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Balloons</div>
-            <div id="collmgr-status-balloons" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-fruit-arrangment" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'fruit-arrangment')">
-          <div id="collmgr-thumb-fruit-arrangment" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Fruit Arrangement</div>
-            <div id="collmgr-status-fruit-arrangment" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-welcome-baby" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'welcome-baby')">
-          <div id="collmgr-thumb-welcome-baby" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Welcome Baby</div>
-            <div id="collmgr-status-welcome-baby" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-teacher-day" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'teacher-day')">
-          <div id="collmgr-thumb-teacher-day" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Teacher's Day</div>
-            <div id="collmgr-status-teacher-day" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-garangao-2025" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'garangao-2025')">
-          <div id="collmgr-thumb-garangao-2025" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Garangao 2025</div>
-            <div id="collmgr-status-garangao-2025" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label>
-        <label id="collmgr-qatar-national-day" style="display:block;cursor:pointer;border:1px solid rgba(198,146,42,0.15);border-radius:8px;overflow:hidden;background:#1e1a10;position:relative;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(198,146,42,0.15)'">
-          <input type="file" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="collMgrHandleFile(event,'qatar-national-day')">
-          <div id="collmgr-thumb-qatar-national-day" style="height:90px;background:#2a2010;position:relative;pointer-events:none;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%);"></div>
-            
-          </div>
-          <div style="padding:8px 10px;pointer-events:none;">
-            <div style="font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Qatar National Day</div>
-            <div id="collmgr-status-qatar-national-day" style="font-family:var(--sans);font-size:8px;color:rgba(255,255,255,0.25);margin-top:3px;">Tap to add photo</div>
-          </div>
-        </label></div></div>
+      
+    </div>
     </div>
   </div>
 
@@ -5549,7 +5255,7 @@
           <button class="coll-edit-btn" style="display: none;">📷 Change Image</button></a>
 
           <a class="coll-card" href="collection.html?cat=anniversary-bouquet&amp;name=Anniversary+Bouquet" data-slug="anniversary-bouquet">
-            <div class="coll-card-img" style="background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/vtqxcttgxzlgydvm0nmc&quot;) center center / cover;"></div>
+            <div class="coll-card-img" style="background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/iiwo3gasvdxu9dcs1ir6&quot;) center center / cover;"></div>
             <div class="coll-card-body"><span class="coll-icon">💕</span><span class="coll-name">Anniversary Bouquet</span></div>
           <button class="coll-edit-btn" style="display: none;">📷 Change Image</button></a>
 
@@ -5673,7 +5379,10 @@
             <div class="coll-card-body"><span class="coll-icon">🇶🇦</span><span class="coll-name">Qatar National Day</span></div>
           <button class="coll-edit-btn" style="display: none;">📷 Change Image</button></a>
 
-        </div><!-- /coll-scroll-wrap (the scroll container) -->
+        <a class="coll-card" href="collection.html?cat=chocolate&amp;name=Chocolate" data-slug="chocolate">
+      <div class="coll-card-img" style="background: url(&quot;https://res.cloudinary.com/dp6x1cfmj/image/upload/f_auto,q_auto,w_1200,h_700,c_fill/rosebella/collections/patenrpxcsc6sgtzwuud&quot;) center center / cover;"></div>
+      <div class="coll-card-body"><span class="coll-icon">🍫</span><span class="coll-name">Chocolate</span></div>
+      <button class="coll-edit-btn" style="display:none;">📷 Change Image</button></a></div><!-- /coll-scroll-wrap (the scroll container) -->
 
         <!-- Scroll arrows sit outside the scroll container so they're never clipped -->
         <button class="coll-arrow coll-arrow-l" onclick="scrollCollections(-1)" aria-label="Scroll left">‹</button>
@@ -9383,7 +9092,7 @@
 
   <!-- HTML -->
   <input type="file" id="apFileIn" accept="image/*">
-  <div id="apToast" class="">✓ Welcome back, Yousef! 👋</div>
+  <div id="apToast" class="">✓ ✓ Collection "Chocolate" added! Save &amp; Publish to keep it.</div>
 
   <!-- Login trigger: tiny gold dot top-right -->
   
