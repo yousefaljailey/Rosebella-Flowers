@@ -283,6 +283,20 @@
     .hs-dz-preview-clear:hover { color: #e05060; }
     .hs-dz-warning { font-family: var(--sans); font-size: 10px; color: #e8c870; margin-top: 6px; line-height: 1.5; }
 
+    /* Hero image position picker (admin) */
+    .hs-pos-box {
+      position: relative; width: 100%; aspect-ratio: 16/7; border-radius: 8px;
+      overflow: hidden; cursor: crosshair; border: 1px solid rgba(198,146,42,0.25);
+      background: #000; touch-action: none; user-select: none;
+    }
+    .hs-pos-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    .hs-pos-marker {
+      position: absolute; width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid #fff; background: rgba(198,146,42,0.9);
+      transform: translate(-50%,-50%); box-shadow: 0 0 0 2px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+
     /* Keep btn-primary/ghost for use elsewhere */
     .btn-primary {
       font-family: var(--sans); font-size: 10px; font-weight: 600;
@@ -13979,7 +13993,7 @@
         ? `<video class="hs-media" id="hsVid${s.id}" autoplay muted loop playsinline preload="auto"${s.poster ? ` poster="${s.poster}"` : ''}>
              <source src="${s.src}" type="video/mp4">
            </video>`
-        : `<img class="hs-media" src="${s.src}" alt="${s.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" />`;
+        : `<img class="hs-media" src="${s.src}" alt="${s.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" style="object-position:${s.posX ?? 50}% ${s.posY ?? 50}%;" />`;
 
       return `<div class="hs-slide${i === index ? ' hs-active' : ''}" data-idx="${i}">
         ${mediaHtml}
@@ -14472,6 +14486,15 @@
           <div id="hsDzWarn${s.id}" class="hs-dz-warning" style="display:none;"></div>
         </div>
 
+        ${(hasMedia && !isVid) ? `
+        <div class="hs-field">
+          <label>Image position <span style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(255,255,255,0.25);">— drag to adjust crop focus</span></label>
+          <div class="hs-pos-box" id="hsPosBox${s.id}" onmousedown="hsPosStart(event,${s.id})" ontouchstart="hsPosStart(event,${s.id})">
+            <img src="${s.src}" style="object-position:${s.posX ?? 50}% ${s.posY ?? 50}%;" />
+            <div class="hs-pos-marker" id="hsPosMarker${s.id}" style="left:${s.posX ?? 50}%;top:${s.posY ?? 50}%;"></div>
+          </div>
+        </div>` : ''}
+
         <div class="hs-field-row">
           <div class="hs-field">
             <label>Heading</label>
@@ -14552,10 +14575,48 @@
         if (warnEl) { warnEl.style.display=''; warnEl.textContent=`⚠ Image is ${MB.toFixed(1)} MB. Large images may slow the page. Consider resizing to under 1 MB.`; }
       }
       const reader = new FileReader();
-      reader.onload = e => { s.type='image'; s.src=e.target.result; save(); renderMgr(); };
+      reader.onload = e => { s.type='image'; s.src=e.target.result; s.posX=50; s.posY=50; save(); renderMgr(); };
       reader.readAsDataURL(file);
     }
   }
+
+  // ── Image position picker (drag to set crop focal point) ──
+  let hsPosDragId = null;
+  function hsPosMove(e, id) {
+    const box = document.getElementById('hsPosBox'+id);
+    const s   = slides.find(x => x.id === id);
+    if (!box || !s) return;
+    const rect = box.getBoundingClientRect();
+    const pt = e.touches ? e.touches[0] : e;
+    let x = ((pt.clientX - rect.left) / rect.width)  * 100;
+    let y = ((pt.clientY - rect.top)  / rect.height) * 100;
+    x = Math.max(0, Math.min(100, Math.round(x)));
+    y = Math.max(0, Math.min(100, Math.round(y)));
+    s.posX = x; s.posY = y;
+    const marker = document.getElementById('hsPosMarker'+id);
+    if (marker) { marker.style.left = x+'%'; marker.style.top = y+'%'; }
+    const img = box.querySelector('img');
+    if (img) img.style.objectPosition = x+'% '+y+'%';
+    render(); // live-update the actual hero behind the modal
+  }
+  function hsPosDragMove(e) { if (hsPosDragId != null) { e.preventDefault(); hsPosMove(e, hsPosDragId); } }
+  function hsPosDragEnd() {
+    hsPosDragId = null;
+    window.removeEventListener('mousemove', hsPosDragMove);
+    window.removeEventListener('mouseup', hsPosDragEnd);
+    window.removeEventListener('touchmove', hsPosDragMove);
+    window.removeEventListener('touchend', hsPosDragEnd);
+    save();
+  }
+  window.hsPosStart = function(e, id) {
+    e.preventDefault();
+    hsPosDragId = id;
+    hsPosMove(e, id);
+    window.addEventListener('mousemove', hsPosDragMove);
+    window.addEventListener('mouseup', hsPosDragEnd);
+    window.addEventListener('touchmove', hsPosDragMove, { passive: false });
+    window.addEventListener('touchend', hsPosDragEnd);
+  };
 
   window.hsEditSlide = function(id) {
     editing = id;
