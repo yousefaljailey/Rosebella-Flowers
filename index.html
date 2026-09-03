@@ -5570,7 +5570,7 @@
        overflow-x:auto forces overflow-y:auto, but since height =
        card height + padding there is zero vertical overflow — nothing clips. */
     .coll-scroll-wrap {
-      display: flex; gap: 28px;
+      display: flex; gap: 32px;
       overflow-x: auto; scroll-snap-type: x mandatory;
       scrollbar-width: none; padding-bottom: 24px;
       -webkit-overflow-scrolling: touch;
@@ -5580,13 +5580,13 @@
 
     /* ── Small circular collection avatars ── */
     .coll-card {
-      flex-shrink: 0; width: 128px;
+      flex-shrink: 0; width: 160px;
       position: relative;
       text-decoration: none; scroll-snap-align: start;
-      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
     }
     .coll-card-img {
-      width: 128px; height: 128px; border-radius: 50%;
+      width: 160px; height: 160px; border-radius: 50%;
       background-size: cover; background-position: center;
       box-shadow:
         0 10px 26px -10px rgba(15,13,7,0.35),
@@ -5609,7 +5609,7 @@
     /* Hide emojis */
     .coll-icon { display: none; }
     .coll-name {
-      font-family: var(--sans); font-size: 13px; font-weight: 600;
+      font-family: var(--sans); font-size: 15px; font-weight: 600;
       letter-spacing: 0; text-transform: none;
       color: var(--charcoal); line-height: 1.4;
       transition: color 0.2s;
@@ -5648,15 +5648,15 @@
     .coll-arrow-r { right: -24px; }
 
     @media (max-width: 900px) {
-      .coll-card { width: 108px; }
-      .coll-card-img { width: 108px; height: 108px; }
+      .coll-card { width: 132px; }
+      .coll-card-img { width: 132px; height: 132px; }
       .coll-arrow { display: none; }
     }
     @media (max-width: 600px) {
-      .coll-card { width: 84px; }
-      .coll-card-img { width: 84px; height: 84px; }
-      .coll-name { font-size: 11px; }
-      .coll-scroll-wrap { gap: 20px; }
+      .coll-card { width: 100px; }
+      .coll-card-img { width: 100px; height: 100px; }
+      .coll-name { font-size: 12px; }
+      .coll-scroll-wrap { gap: 22px; }
     }
   </style>
 
