@@ -3028,7 +3028,7 @@
       left: 0 !important;
       right: 0 !important;
       transform: none !important;
-      max-width: 620px !important;
+      max-width: 780px !important;
       width: 100% !important;
       height: 100% !important;
       margin: 0 0 0 auto !important;
@@ -3037,7 +3037,8 @@
       justify-content: center !important;
       align-items: flex-end !important;
       text-align: right !important;
-      padding: 0 8% !important;
+      padding: 24px 8% !important;
+      overflow: hidden !important;
       opacity: 0;
       transition: opacity 0.7s 0.3s ease !important;
     }
@@ -3069,8 +3070,9 @@
       background: rgba(198,146,42,0.10) !important;
       backdrop-filter: blur(6px);
       border-radius: 999px !important;
-      padding: 9px 20px !important;
-      margin-bottom: 26px !important;
+      padding: 7px 18px !important;
+      margin-bottom: 16px !important;
+      flex-shrink: 0 !important;
       color: var(--gold-light) !important;
     }
     .hs-eyebrow::before {
@@ -3087,27 +3089,31 @@
       100% { box-shadow: 0 0 0 0 rgba(198,146,42,0); }
     }
 
-    /* Larger, bolder, centered headline */
+    /* Headline sized to stay within the card even for longer slide titles */
     .hs-h1 {
-      font-size: clamp(40px, 5vw, 78px) !important;
-      margin-bottom: 14px !important;
-      line-height: 1.05 !important;
+      font-size: clamp(28px, 3.4vw + 1vh, 58px) !important;
+      margin-bottom: 10px !important;
+      line-height: 1.1 !important;
+      flex-shrink: 0 !important;
     }
 
     .hs-tagline {
-      max-width: 560px !important;
+      max-width: 480px !important;
       margin-left: auto !important;
-      margin-right: auto !important;
+      margin-right: 0 !important;
+      margin-bottom: 20px !important;
+      flex-shrink: 0 !important;
     }
 
     /* Rounded pill CTA with hover lift + ring */
     .hs-cta {
       border-radius: 999px !important;
-      padding: 16px 46px !important;
+      padding: 15px 42px !important;
       font-size: 11px !important;
       letter-spacing: 0.18em !important;
       box-shadow: 0 6px 24px rgba(198,146,42,0.28) !important;
       transition: background 0.3s, transform 0.25s, box-shadow 0.3s !important;
+      flex-shrink: 0 !important;
     }
     .hs-cta:hover {
       transform: translateY(-2px) scale(1.03) !important;
@@ -3145,11 +3151,20 @@
       }
       /* Keep flex centering, just tighten padding */
       .hs-content {
-        padding: 0 5% !important;
+        padding: 14px 5% !important;
       }
       .hs-eyebrow {
         padding: 7px 16px !important;
-        margin-bottom: 18px !important;
+        margin-bottom: 12px !important;
+      }
+      .hs-h1 {
+        margin-bottom: 6px !important;
+      }
+      .hs-tagline {
+        margin-bottom: 12px !important;
+      }
+      .hs-cta {
+        padding: 12px 32px !important;
       }
       .rb-announce-bar { padding: 8px 48px 8px 16px; }
       .rb-ann-sep { display: none; }
