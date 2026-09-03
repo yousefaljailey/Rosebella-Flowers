@@ -3021,22 +3021,22 @@
         0 10px 30px -14px rgba(198,146,42,0.20) !important;
     }
 
-    /* Content: vertically + horizontally centered */
+    /* Content: vertically centered, right-aligned */
     .hs-content {
       bottom: auto !important;
       top: 0 !important;
       left: 0 !important;
       right: 0 !important;
       transform: none !important;
-      max-width: 760px !important;
+      max-width: 620px !important;
       width: 100% !important;
       height: 100% !important;
-      margin: 0 auto !important;
+      margin: 0 0 0 auto !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
-      align-items: center !important;
-      text-align: center !important;
+      align-items: flex-end !important;
+      text-align: right !important;
       padding: 0 8% !important;
       opacity: 0;
       transition: opacity 0.7s 0.3s ease !important;
@@ -3046,12 +3046,12 @@
       transform: none !important;
     }
 
-    /* Softer center-weighted overlay so the badge/headline stay legible against any media */
+    /* Right-weighted overlay so the badge/headline stay legible against any media */
     .hs-overlay {
       background:
-        radial-gradient(ellipse 70% 55% at 50% 45%, rgba(5,4,2,0.32) 0%, rgba(5,4,2,0.62) 100%),
-        radial-gradient(ellipse 55% 45% at 22% 18%, rgba(198,146,42,0.20), transparent 60%),
-        radial-gradient(ellipse 50% 40% at 80% 82%, rgba(198,146,42,0.16), transparent 65%) !important;
+        linear-gradient(to left, rgba(5,4,2,0.62) 0%, rgba(5,4,2,0.32) 45%, rgba(5,4,2,0.06) 78%),
+        radial-gradient(ellipse 55% 45% at 78% 22%, rgba(198,146,42,0.18), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 82%, rgba(198,146,42,0.14), transparent 65%) !important;
       background-size: 100% 100%, 220% 220%, 220% 220% !important;
       animation: heroDither 16s ease-in-out infinite !important;
     }
