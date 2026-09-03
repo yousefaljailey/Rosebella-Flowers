@@ -358,6 +358,14 @@
     .occasions { background: var(--ivory2); padding: 100px 64px; }
     .occ-inner { max-width: 1240px; margin: 0 auto; }
     .occ-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 56px; }
+    .occ-header-link {
+      display: block; text-decoration: none; color: inherit;
+      width: fit-content;
+    }
+    .occ-header-link:hover .section-title,
+    .occ-header-link:focus-visible .section-title { color: var(--gold); }
+    .occ-header-link .section-title { transition: color 0.25s ease; }
+    .occ-header-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
     .occ-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; }
     .occ-item {
       aspect-ratio: 3/4; position: relative; overflow: hidden; cursor: pointer;
@@ -5282,10 +5290,10 @@
   <section class="occasions" id="occasions">
     <div class="occ-inner">
       <div class="occ-header reveal visible">
-        <div>
+        <a href="collection.html" class="occ-header-link">
           <div class="section-label">Shop by Collection</div>
           <h2 class="section-title">Every <em>moment</em><br>deserves flowers</h2>
-        </div>
+        </a>
       </div>
 
       <!-- Horizontally scrollable collection cards -->
