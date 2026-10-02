@@ -6077,17 +6077,16 @@
   let coMap = null, coMarker = null, mapsScriptLoaded = false;
 
   const DOHA = { lat: 25.2854, lng: 51.5310 };
+  let osmWanted = false;   // shopper has asked for the map (so a fallback map should appear)
   let mapsFailed = !!window.__mapsError;
 
   // Google calls this when the key is rejected (e.g. billing not enabled)
+  // Google calls this when the key is rejected (e.g. billing not enabled).
+  // Switch to the OpenStreetMap fallback; if the map isn't open yet, it's used once it is.
   window.gm_authFailure = function() {
     mapsFailed = true;
-    const overlay = document.getElementById('coMapOverlay');
-    if (overlay) {
-      overlay.style.display = '';
-      overlay.innerHTML = `<span class="co-map-api-note" style="max-width:300px;font-size:11px;">
-        The map isn’t available right now. Please type the full delivery address below.</span>`;
-    }
+    coMap = null;
+    if (osmWanted) osmInit();
   };
 
   // Callback must be on window BEFORE the script tag is appended
@@ -6151,7 +6150,9 @@
   }
 
   function initCoMap() {
-    if (window.__mapsError) { window.gm_authFailure(); return; }
+    osmWanted = true;
+    if (osmMap) return Promise.resolve();
+    if (window.__mapsError || mapsFailed) return osmInit();
     if (window.google?.maps) return window.onMapsReady();
     loadMapsScript();
   }
@@ -6173,6 +6174,8 @@
     if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
     navigator.geolocation.getCurrentPosition(async pos => {
       const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      try { await initCoMap(); } catch (e) {}
+      if (osmMap) { osmMap.setView([latLng.lat, latLng.lng], 16); osmPlacePin(latLng.lat, latLng.lng); osmReverse(latLng.lat, latLng.lng); return; }
       try { await ensureMaps(); await initCoMap(); } catch (e) { return; }
       if (coMap) { coMap.setCenter(latLng); coMap.setZoom(16); dropPin(new google.maps.LatLng(latLng)); }
     }, () => alert('Unable to get your location. Please search for the address or pin it on the map.'));
@@ -6228,6 +6231,7 @@
 
   async function coFetchSuggestions(q) {
     const box = document.getElementById('coAddrSuggest');
+    if (mapsFailed || window.__mapsError) return osmSuggest(q);
     try {
       await ensureMaps();
       const { AutocompleteSuggestion, AutocompleteSessionToken } = await google.maps.importLibrary('places');
@@ -6236,10 +6240,10 @@
         input: q, sessionToken: coSearchToken, includedRegionCodes: ['qa'], language: 'en',
       });
       if (document.getElementById('coAddrSearch').value.trim() !== q) return; // a newer search is running
-      coSuggestions = (suggestions || []).filter(s => s.placePrediction).slice(0, 6);
+      coSuggestions = (suggestions || []).filter(s => s.placePrediction).slice(0, 6).map(s => ({ kind: 'google', s }));
       coSuggestIdx = -1;
       box.innerHTML = coSuggestions.length
-        ? coSuggestions.map((s, i) => {
+        ? coSuggestions.map(({ s }, i) => {
             const p = s.placePrediction;
             const main = p.mainText ? p.mainText.toString() : p.text.toString();
             const sub  = p.secondaryText ? p.secondaryText.toString() : '';
@@ -6249,10 +6253,9 @@
         : '<div class="co-addr-msg">No matches — try a building name, street or area, or drop a pin on the map.</div>';
       box.hidden = false;
     } catch (e) {
-      console.warn('Address search unavailable:', e);
-      if (/permission|billing|denied/i.test(String(e && e.message))) window.gm_authFailure();
-      box.innerHTML = '<div class="co-addr-msg">Address search isn’t available right now — please type the full address below.</div>';
-      box.hidden = false;
+      console.warn('Google address search unavailable, using OpenStreetMap:', e);
+      mapsFailed = true;
+      return osmSuggest(q);
     }
   }
 
@@ -6272,8 +6275,10 @@
   }
 
   async function coPickSuggestion(i) {
-    const s = coSuggestions[i];
-    if (!s) return;
+    const pick = coSuggestions[i];
+    if (!pick) return;
+    if (pick.kind === 'osm') return osmPick(pick);
+    const s = pick.s;
     const input = document.getElementById('coAddrSearch');
     input.value = s.placePrediction.text.toString();
     coHideSuggest();
@@ -6286,7 +6291,7 @@
       coSetAddress(name && !full.startsWith(name) ? `${name}, ${full}` : full);
       coMatchArea((place.addressComponents || [])
         .filter(c => c.types.some(t => ['neighborhood','sublocality','sublocality_level_1','locality'].includes(t)))
-        .map(c => c.longText));
+        .map(c => c.longText).concat([name, full]));
       await initCoMap();
       if (coMap && place.location) {
         coMap.setCenter(place.location);
@@ -6301,6 +6306,112 @@
   document.addEventListener('click', e => {
     if (!e.target.closest('.co-addr-search')) coHideSuggest();
   });
+
+  // ── OpenStreetMap fallback (used while Google Maps is unavailable) ──
+  // Map: Leaflet + OpenStreetMap tiles · Search/addresses: Photon (komoot), Qatar only
+  const QATAR_BBOX = '50.7,24.4,51.7,26.2';
+  let osmMap = null, osmMarker = null, osmLoading = null;
+
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve();
+    if (osmLoading) return osmLoading;
+    osmLoading = new Promise((resolve, reject) => {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      document.head.appendChild(css);
+      const js = document.createElement('script');
+      js.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      js.onload = resolve; js.onerror = reject;
+      document.head.appendChild(js);
+    });
+    return osmLoading;
+  }
+
+  async function osmInit() {
+    if (osmMap) return;
+    const overlay = document.getElementById('coMapOverlay');
+    try { await loadLeaflet(); } catch (e) {
+      if (overlay) { overlay.style.display = ''; overlay.innerHTML = '<span class="co-map-api-note" style="font-size:11px;">The map isn’t available right now. Please type the full delivery address below.</span>'; }
+      return;
+    }
+    if (osmMap) return;
+    // Start from a clean container (Google may have drawn into the old one)
+    const old = document.getElementById('coDeliveryMap');
+    const el = document.createElement('div');
+    el.id = 'coDeliveryMap';
+    old.replaceWith(el);
+    coMap = null;
+    if (overlay) overlay.style.display = 'none';
+    osmMap = L.map(el, { zoomControl: true, attributionControl: true }).setView([DOHA.lat, DOHA.lng], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(osmMap);
+    osmMap.on('click', e => { osmPlacePin(e.latlng.lat, e.latlng.lng); osmReverse(e.latlng.lat, e.latlng.lng); });
+    setTimeout(() => osmMap.invalidateSize(), 50);
+  }
+
+  function osmPlacePin(lat, lng) {
+    const icon = L.divIcon({ className: '', iconSize: [22, 22], iconAnchor: [11, 11],
+      html: '<div style="width:22px;height:22px;border-radius:50%;background:#C6922A;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>' });
+    if (osmMarker) osmMarker.setLatLng([lat, lng]);
+    else {
+      osmMarker = L.marker([lat, lng], { draggable: true, icon }).addTo(osmMap);
+      osmMarker.on('dragend', () => { const p = osmMarker.getLatLng(); osmReverse(p.lat, p.lng); });
+    }
+  }
+
+  function osmFormat(p, withName) {
+    const street = [p.housenumber, p.street].filter(Boolean).join(' ');
+    const parts = [withName ? p.name : '', street, p.district || p.locality, p.city || p.state, 'Qatar'];
+    return parts.filter((v, i, a) => v && a.indexOf(v) === i).join(', ');
+  }
+
+  async function osmReverse(lat, lng) {
+    try {
+      const r = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=en`).then(r => r.json());
+      const p = r.features?.[0]?.properties;
+      if (!p) return;
+      coSetAddress(osmFormat(p, !p.street));
+      coMatchArea([p.district, p.locality, p.name, p.street, osmFormat(p, true)]);
+    } catch (e) { console.warn('Reverse geocoding failed:', e); }
+  }
+
+  async function osmSuggest(q) {
+    const box = document.getElementById('coAddrSuggest');
+    try {
+      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en&bbox=${QATAR_BBOX}`).then(r => r.json());
+      if (document.getElementById('coAddrSearch').value.trim() !== q) return;
+      coSuggestions = (r.features || []).filter(f => f.properties?.countrycode === 'QA' || f.properties?.country === 'Qatar')
+        .map(f => ({ kind: 'osm', f }));
+      coSuggestIdx = -1;
+      const esc = t => String(t || '').replace(/</g, '&lt;');
+      box.innerHTML = coSuggestions.length
+        ? coSuggestions.map(({ f }, i) => {
+            const p = f.properties;
+            const main = p.name || [p.housenumber, p.street].filter(Boolean).join(' ') || p.city;
+            const sub = osmFormat({ ...p, name: '' }, false);
+            return `<button type="button" class="co-addr-opt" data-i="${i}" onmousedown="event.preventDefault();coPickSuggestion(${i})">
+              <span class="co-addr-main">${esc(main)}</span><span class="co-addr-sub">${esc(sub)}</span></button>`;
+          }).join('')
+        : '<div class="co-addr-msg">No matches — try a building name, street or area, or drop a pin on the map.</div>';
+      box.hidden = false;
+    } catch (e) {
+      box.innerHTML = '<div class="co-addr-msg">Address search isn’t available right now — please type the full address below.</div>';
+      box.hidden = false;
+    }
+  }
+
+  async function osmPick({ f }) {
+    const p = f.properties;
+    const [lng, lat] = f.geometry.coordinates;
+    document.getElementById('coAddrSearch').value = p.name || osmFormat(p, false);
+    coHideSuggest();
+    coSetAddress(osmFormat(p, true));
+    coMatchArea([p.district, p.locality, p.name, p.street, osmFormat(p, true)]);
+    await initCoMap();
+    if (osmMap) { osmMap.setView([lat, lng], 17); osmPlacePin(lat, lng); }
+  }
 
 
   // ── Mobile nav ────────────────────────────────
