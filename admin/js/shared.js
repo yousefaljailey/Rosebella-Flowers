@@ -66,6 +66,7 @@ function friendlyAuthError(e) {
   const c = e && e.code || '';
   if (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found')) return 'Incorrect email or password.';
   if (c.includes('popup-closed')) return '';
+  if (c.includes('popup-blocked')) return 'Chrome blocked the Google sign-in window. Click the blocked-pop-up icon at the right of the address bar, choose “Always allow pop-ups” for this site, then try again.';
   if (c.includes('unauthorized-domain')) return 'This domain is not authorised in Firebase → Authentication → Settings → Authorised domains.';
   if (c.includes('too-many-requests')) return 'Too many attempts. Try again in a few minutes.';
   return e.message || 'Sign-in failed.';
