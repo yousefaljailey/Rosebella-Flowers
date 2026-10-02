@@ -67,7 +67,7 @@ function subscribe() {
   db.doc('config/settings').onSnapshot(snap => {
     state.settings = snap.exists ? snap.data() : null;
     state.settingsLoaded = true;
-    refresh('slots', 'store', 'promos');
+    refresh('slots', 'store', 'promos', 'extras');
   }, e => toast(firestoreError(e), true));
 
   db.doc('config/heroSlides').onSnapshot(snap => {
@@ -823,4 +823,85 @@ function promoRowHTML(p) {
     <td><label class="switch"><input type="checkbox" name="active" ${p.active !== false ? 'checked' : ''}></label></td>
     <td><button class="btn btn-sm btn-danger" data-del title="Remove">✕</button></td>
   </tr>`;
+}
+
+// ── Gift extras ("Complete your gift" in the product popup) ──
+const DEFAULT_EXTRAS = [
+  { id: 'balloon',   label: 'Balloon',    icon: '🎈', price: 35, image: '', active: true, bg: 'radial-gradient(circle at 50% 35%, #fce4f0 0%, #f07898 50%, #b03060 100%)' },
+  { id: 'chocolate', label: 'Chocolates', icon: '🍫', price: 55, image: '', active: true, bg: 'radial-gradient(circle at 50% 35%, #c8a078 0%, #8c5030 50%, #3e1008 100%)' },
+  { id: 'vase',      label: 'Vase',       icon: '🏺', price: 45, image: '', active: true, bg: 'radial-gradient(circle at 50% 35%, #c8e8e0 0%, #60a890 50%, #1e6050 100%)' },
+  { id: 'candle',    label: 'Candle',     icon: '🕯', price: 30, image: '', active: true, bg: 'radial-gradient(circle at 50% 35%, #fff0c0 0%, #e8c050 50%, #987010 100%)' },
+  { id: 'perfume',   label: 'Perfume',    icon: '✨', price: 65, image: '', active: true, bg: 'radial-gradient(circle at 50% 35%, #ead0f8 0%, #9860c8 50%, #4a1080 100%)' },
+];
+function currentExtras() {
+  return Array.isArray(state.settings?.addons) ? state.settings.addons.map(a => ({ ...a })) : DEFAULT_EXTRAS.map(a => ({ ...a }));
+}
+function extraThumbStyle(a) {
+  return a.image
+    ? `background:#2a2520 url('${esc(a.image)}') ${esc(a.imagePos || 'center')} / cover no-repeat`
+    : `background:${esc(a.bg || '#c6922a')}`;
+}
+
+PAGES.extras = {
+  html() {
+    if (!state.settingsLoaded) return loadingHTML();
+    const list = currentExtras();
+    return pageHd('Gift <em>Extras</em>', 'The “Complete your gift” add-ons shown when a customer adds a product. Upload a photo for each.',
+      '<button class="btn btn-gold" onclick="editExtra(null)">＋ Add extra</button>') + `
+      <div class="card">${list.length ? list.map((a, i) => `<div class="slide-row">
+        <div class="slide-thumb" style="${extraThumbStyle(a)};display:flex;align-items:center;justify-content:center;font-size:28px">${a.image ? '' : esc(a.icon || '')}</div>
+        <div><b>${esc(a.label)}</b> <span class="order-meta">+QR ${esc(a.price)}</span>
+          <div class="order-meta">${a.active === false ? 'Hidden from customers' : 'Shown to customers'}${a.image ? '' : ' · no photo yet'}</div></div>
+        <div class="row">
+          <button class="btn btn-sm" onclick="moveExtra(${i},-1)" title="Move earlier">↑</button>
+          <button class="btn btn-sm" onclick="moveExtra(${i},1)" title="Move later">↓</button>
+          <button class="btn btn-sm" onclick="editExtra(${i})">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteExtra(${i})">Delete</button>
+        </div></div>`).join('')
+        : '<div class="empty">No extras — customers won’t see the “Complete your gift” section.</div>'}</div>`;
+  },
+};
+
+function saveExtras(list, msg) { return saveSettings({ addons: list }, msg); }
+function moveExtra(i, dir) {
+  const l = currentExtras(), j = i + dir;
+  if (j < 0 || j >= l.length) return;
+  [l[i], l[j]] = [l[j], l[i]];
+  saveExtras(l, 'Order saved');
+}
+function deleteExtra(i) {
+  const l = currentExtras();
+  if (!confirm(`Delete “${l[i].label}”?`)) return;
+  l.splice(i, 1);
+  saveExtras(l, 'Extra deleted');
+}
+
+function editExtra(i) {
+  const isNew = i === null;
+  const list = currentExtras();
+  const a = isNew ? { id: 'x' + Date.now().toString(36), label: '', price: '', icon: '🎁', image: '', active: true,
+    bg: 'radial-gradient(circle at 50% 35%, #f5e6c8 0%, #c6922a 55%, #7a5410 100%)' } : list[i];
+  openModal(`<h3>${isNew ? 'New gift extra' : 'Edit gift extra'}</h3>
+    <form class="stack" id="extraForm">
+      <div class="grid-3">
+        <label class="field" style="grid-column:span 2"><span>Name</span><input name="label" required value="${esc(a.label)}" placeholder="e.g. Teddy Bear"></label>
+        <label class="field"><span>Price (QR)</span><input name="price" type="number" min="0" step="1" required value="${esc(a.price)}"></label>
+      </div>
+      <div class="field"><span>Photo</span>${mediaPickerHTML({ url: a.image, pos: a.imagePos, wide: true })}</div>
+      <label class="field" style="max-width:200px"><span>Emoji (shown if there’s no photo)</span><input name="icon" value="${esc(a.icon || '')}" maxlength="8"></label>
+      <label class="switch"><input type="checkbox" name="active" ${a.active !== false ? 'checked' : ''}> Show to customers</label>
+      <div class="modal-foot"><div></div><div class="row">
+        <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-gold" type="submit">Save extra</button></div></div>
+    </form>`, m => {
+    const media = bindMediaPicker(m, { folder: 'rosebella/extras' });
+    m.querySelector('#extraForm').onsubmit = async e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const next = { ...a, label: f.get('label').trim(), price: Number(f.get('price')) || 0,
+        icon: f.get('icon').trim(), image: media.url(), imagePos: media.pos(), active: !!f.get('active') };
+      if (isNew) list.push(next); else list[i] = next;
+      if (await saveExtras(list)) closeModal();
+    };
+  });
 }

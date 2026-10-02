@@ -100,5 +100,52 @@
    "value": 100,
    "active": true
   }
+ ],
+ "addons": [
+  {
+   "id": "balloon",
+   "label": "Balloon",
+   "icon": "🎈",
+   "price": 35,
+   "image": "",
+   "active": true,
+   "bg": "radial-gradient(circle at 50% 35%, #fce4f0 0%, #f07898 50%, #b03060 100%)"
+  },
+  {
+   "id": "chocolate",
+   "label": "Chocolates",
+   "icon": "🍫",
+   "price": 55,
+   "image": "",
+   "active": true,
+   "bg": "radial-gradient(circle at 50% 35%, #c8a078 0%, #8c5030 50%, #3e1008 100%)"
+  },
+  {
+   "id": "vase",
+   "label": "Vase",
+   "icon": "🏺",
+   "price": 45,
+   "image": "",
+   "active": true,
+   "bg": "radial-gradient(circle at 50% 35%, #c8e8e0 0%, #60a890 50%, #1e6050 100%)"
+  },
+  {
+   "id": "candle",
+   "label": "Candle",
+   "icon": "🕯",
+   "price": 30,
+   "image": "",
+   "active": true,
+   "bg": "radial-gradient(circle at 50% 35%, #fff0c0 0%, #e8c050 50%, #987010 100%)"
+  },
+  {
+   "id": "perfume",
+   "label": "Perfume",
+   "icon": "✨",
+   "price": 65,
+   "image": "",
+   "active": true,
+   "bg": "radial-gradient(circle at 50% 35%, #ead0f8 0%, #9860c8 50%, #4a1080 100%)"
+  }
  ]
 }

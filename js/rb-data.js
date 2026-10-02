@@ -186,8 +186,43 @@
     };
   }
 
+  // ── Gift extras ("Complete your gift") ─────────
+  // Managed in the admin portal (config/settings → addons); these are the defaults.
+  const DEFAULT_ADDONS = [
+    { id: 'balloon',   label: 'Balloon',    icon: '🎈', price: 35, image: '', active: true,
+      bg: 'radial-gradient(circle at 50% 35%, #fce4f0 0%, #f07898 50%, #b03060 100%)' },
+    { id: 'chocolate', label: 'Chocolates', icon: '🍫', price: 55, image: '', active: true,
+      bg: 'radial-gradient(circle at 50% 35%, #c8a078 0%, #8c5030 50%, #3e1008 100%)' },
+    { id: 'vase',      label: 'Vase',       icon: '🏺', price: 45, image: '', active: true,
+      bg: 'radial-gradient(circle at 50% 35%, #c8e8e0 0%, #60a890 50%, #1e6050 100%)' },
+    { id: 'candle',    label: 'Candle',     icon: '🕯', price: 30, image: '', active: true,
+      bg: 'radial-gradient(circle at 50% 35%, #fff0c0 0%, #e8c050 50%, #987010 100%)' },
+    { id: 'perfume',   label: 'Perfume',    icon: '✨', price: 65, image: '', active: true,
+      bg: 'radial-gradient(circle at 50% 35%, #ead0f8 0%, #9860c8 50%, #4a1080 100%)' },
+  ];
+
+  function activeAddons(settings) {
+    const list = Array.isArray(settings?.addons) ? settings.addons : DEFAULT_ADDONS;
+    return list.filter(a => a && a.active !== false && a.label)
+      .map(a => ({ ...a, price: Number(a.price) || 0 }));
+  }
+
+  // Style + inner markup for an extra's picture area (photo if set, else colour + emoji)
+  function addonVisual(a) {
+    if (a.image) {
+      return {
+        style: `background:#2a2520 url(&quot;${esc(cssUrl(a.image))}&quot;) ${esc(a.imagePos || 'center center')} / cover no-repeat;`,
+        inner: '',
+      };
+    }
+    return {
+      style: `background:${esc(a.bg || 'linear-gradient(150deg,#c6922a,#7a5410)')};`,
+      inner: a.icon ? `<span class="vm-addon-icon">${esc(a.icon)}</span>` : '',
+    };
+  }
+
   window.RB = {
-    load, esc,
+    load, esc, DEFAULT_ADDONS, activeAddons, addonVisual,
     visibleCollections, visibleProducts, collectionName,
     productCardHTML, collCardHTML, applyStore,
   };

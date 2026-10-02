@@ -4901,20 +4901,8 @@
   // ══════════════════════════════════════════════
   //  VARIANT SYSTEM
   // ══════════════════════════════════════════════
-  const VARIANTS = {
-    addons: [
-      { id: 'balloon',   label: 'Balloon',    icon: '🎈', price: 35,
-        bg: 'radial-gradient(circle at 50% 35%, #fce4f0 0%, #f07898 50%, #b03060 100%)' },
-      { id: 'chocolate', label: 'Chocolates', icon: '🍫', price: 55,
-        bg: 'radial-gradient(circle at 50% 35%, #c8a078 0%, #8c5030 50%, #3e1008 100%)' },
-      { id: 'vase',      label: 'Vase',       icon: '🏺', price: 45,
-        bg: 'radial-gradient(circle at 50% 35%, #c8e8e0 0%, #60a890 50%, #1e6050 100%)' },
-      { id: 'candle',    label: 'Candle',     icon: '🕯', price: 30,
-        bg: 'radial-gradient(circle at 50% 35%, #fff0c0 0%, #e8c050 50%, #987010 100%)' },
-      { id: 'perfume',   label: 'Perfume',    icon: '✨', price: 65,
-        bg: 'radial-gradient(circle at 50% 35%, #ead0f8 0%, #9860c8 50%, #4a1080 100%)' },
-    ]
-  };
+  // Gift extras are managed in the admin portal (config/settings → addons)
+  const VARIANTS = { addons: RB.activeAddons(null) };
 
   let activeVariant = { cardEl:null, name:'', cat:'', basePrice:0, size:'medium', packaging:'standard', addons:[] };
 
@@ -4993,12 +4981,12 @@
       const on = activeVariant.addons.includes(a.id);
       return `
         <button class="vm-addon${on ? ' active' : ''}" onclick="vmToggleAddon('${a.id}')" type="button">
-          <div class="vm-addon-visual" style="background:${a.bg}">
-            <span class="vm-addon-icon">${a.icon}</span>
+          <div class="vm-addon-visual" style="${RB.addonVisual(a).style}">
+            ${RB.addonVisual(a).inner}
             ${on ? '<span class="vm-addon-tick">✓</span>' : ''}
           </div>
           <div class="vm-addon-foot">
-            <span class="vm-addon-label">${a.label}</span>
+            <span class="vm-addon-label">${RB.esc(a.label)}</span>
             <span class="vm-addon-price">+QR ${a.price}</span>
           </div>
         </button>`;
@@ -5925,6 +5913,7 @@
       appliedPromo = null; savePromo();
       try { updateCartUI(); } catch (e) {}
     }
+    VARIANTS.addons = RB.activeAddons(siteSettings);
     RB.applyStore(siteSettings);
   }
   RB.load('settings', applySettings);
