@@ -428,6 +428,7 @@
     @media (max-width: 480px) { .products-grid { grid-template-columns: 1fr; } }
   </style>
   <script src="js/rb-data.js"></script>
+  <script src="js/rb-cart.js"></script>
 </head>
 <body>
 
@@ -500,7 +501,7 @@
     <li><a href="contact.html">Contact</a></li>
   </ul>
   <div class="nav-right">
-    <button id="cartNavBtn" onclick="openCart()" title="Gift Bag">
+    <button id="cartNavBtn" onclick="goToReview()" title="Gift Bag">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <span id="cartCount">0</span>
     </button>
@@ -569,6 +570,7 @@ try { cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch(e) {}
 function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 
 function updateCartUI() {
+  try { RB.cartUI.sync(); } catch (e) {}
   const count   = cart.reduce((s,i) => s + i.qty, 0);
   const total   = cart.reduce((s,i) => s + i.price * i.qty, 0);
   const badge   = document.getElementById('cartCount');
@@ -583,9 +585,9 @@ function updateCartUI() {
   if (!container) return;
   const items = cart.map(item => `
     <div class="cart-item">
-      <div class="cart-item-img ${item.piClass||''}"></div>
+      <div class="cart-item-img ${item.piClass||''}" style="${item.img ? `background-image:url('${String(item.img).replace(/'/g,'%27')}');background-size:cover;background-position:center` : ''}"></div>
       <div class="cart-item-info">
-        <span class="cart-item-cat">${item.cat}</span>
+        <span class="cart-item-cat">${item.cat||''}</span>
         <div class="cart-item-name">${item.name}</div>
         <div class="cart-item-controls">
           <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
@@ -613,6 +615,23 @@ function clearCart()   { if (!confirm('Clear your gift bag?')) return; cart = []
 function openCart()    { document.getElementById('cartPanel').classList.add('show'); document.getElementById('cartOverlay').classList.add('show'); document.body.style.overflow='hidden'; }
 function closeCart()   { document.getElementById('cartPanel').classList.remove('show'); document.getElementById('cartOverlay').classList.remove('show'); document.body.style.overflow=''; }
 function addToCart(btn, name) { openVariantModal(btn, name); }
+
+// Bag icon / "Review order" → the review page on the homepage
+function goToReview() {
+  if (cart.length) location.href = 'index.html#checkout'; else openCart();
+}
+
+RB.cartUI.init({
+  card:   '.prod-card',
+  name:   card => (card.querySelector('.prod-body h3')?.textContent || '').trim(),
+  addBtn: card => card.querySelector('.prod-add'),
+  getCart: () => cart,
+  changeQty: (name, delta) => {
+    if (!RB.cartUI.changeLastLine(cart, name, delta)) return;
+    saveCart(); updateCartUI();
+  },
+  review: () => goToReview(),
+});
 
 // ── Variant modal ───────────────────────────────
 const VARIANTS = { addons: [
@@ -690,9 +709,10 @@ function variantAddToCart() {
   if (existing) { existing.qty++; } else {
     const bgEl = activeVariant.cardEl?.querySelector('.prod-img-bg');
     const piClass = bgEl ? (bgEl.className.match(/pi-\d+/)||[''])[0] : '';
-    cart.push({ id:Date.now(), name:activeVariant.name, cat:activeVariant.cat, price, basePrice:activeVariant.basePrice, qty:1, variantKey:vKey, variants:{addons:addonLabels}, piClass });
+    const img = (bgEl?.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+    cart.push({ id:Date.now(), name:activeVariant.name, cat:activeVariant.cat, price, basePrice:activeVariant.basePrice, qty:1, variantKey:vKey, variants:{addons:addonLabels}, piClass, img });
   }
-  saveCart(); updateCartUI(); closeVariantModal(); openCart();
+  saveCart(); updateCartUI(); closeVariantModal(); RB.cartUI.toast();
   const addBtn = activeVariant.cardEl?.querySelector('.prod-add');
   if (addBtn) { const orig=addBtn.innerHTML; addBtn.innerHTML='✓ Added'; addBtn.style.background='#4a8c4a'; setTimeout(()=>{addBtn.innerHTML=orig;addBtn.style.background='';},1400); }
 }
@@ -717,6 +737,7 @@ function loadProducts() {
 
     document.getElementById('heroCount').textContent = `${items.length} item${items.length===1?'':'s'}`;
     grid.innerHTML = items.map((p, i) => RB.productCardHTML(p, RB.collectionName(catalog, p.cat), i)).join('');
+    RB.cartUI.sync();
   }).then(data => {
     if (data) return;
     grid.innerHTML = `<div class="col-empty">

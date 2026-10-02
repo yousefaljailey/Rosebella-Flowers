@@ -350,6 +350,7 @@
     }
   </style>
   <script src="js/rb-data.js"></script>
+  <script src="js/rb-cart.js"></script>
 </head>
 <body>
 
@@ -518,9 +519,26 @@
         badge.textContent = count;
         badge.classList.toggle('hidden', count === 0);
       } catch(e) {}
+      try { RB.cartUI.sync(); } catch(e) {}
     }
-    function goToCart() { window.location.href = 'index.html#cart'; }
+    function readCart() { try { return JSON.parse(localStorage.getItem('rosebella_cart')) || []; } catch (e) { return []; } }
+    // Bag icon / "Review order" → the review page on the homepage
+    function goToCart() { window.location.href = 'index.html#checkout'; }
     updateCartBadge();
+
+    RB.cartUI.init({
+      card:   '.sp-card',
+      name:   card => (card.querySelector('.sp-name')?.textContent || '').trim(),
+      addBtn: card => card.querySelector('.sp-add'),
+      getCart: readCart,
+      changeQty: (name, delta) => {
+        const cart = readCart();
+        if (!RB.cartUI.changeLastLine(cart, name, delta)) return;
+        localStorage.setItem('rosebella_cart', JSON.stringify(cart));
+        updateCartBadge();
+      },
+      review: goToCart,
+    });
 
     /* ─── TOAST ─────────────────────────── */
     function showToast(msg) {
@@ -530,12 +548,12 @@
     }
 
     /* ─── ADD TO CART ─────────────────────── */
-    function addToCart(name, price, currency, imgSrc) {
+    function addToCart(name, price, currency, imgSrc, cat) {
       try {
-        const cart = JSON.parse(localStorage.getItem('rosebella_cart')) || [];
-        const existing = cart.find(i => i.name === name);
+        const cart = readCart();
+        const existing = cart.find(i => i.name === name && !i.variants?.addons?.length);
         if (existing) { existing.qty = (existing.qty || 1) + 1; }
-        else { cart.push({ name, price, currency, img: imgSrc, qty: 1 }); }
+        else { cart.push({ id: Date.now(), name, cat: cat || '', price, currency, img: imgSrc, qty: 1 }); }
         localStorage.setItem('rosebella_cart', JSON.stringify(cart));
         updateCartBadge();
         showToast('✦ Added to your gift bag');
@@ -683,7 +701,7 @@
             <div class="sp-desc">${escHTML(p.desc)}</div>
             <div class="sp-footer">
               <div class="sp-price"><span class="currency">${escHTML(p.currency)}</span>${p.price}</div>
-              <button class="sp-add" onclick="addToCart('${escAttr(p.name)}',${p.price},'${escAttr(p.currency)}','${escAttr(p.imgSrc)}')">
+              <button class="sp-add" onclick="addToCart('${escAttr(p.name)}',${p.price},'${escAttr(p.currency)}','${escAttr(p.imgSrc)}','${escAttr(p.catName)}')">
                 <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>
                 Add
               </button>
@@ -691,6 +709,7 @@
           </div>
         </div>`;
       }).join('');
+      RB.cartUI.sync();
     }
 
     function getBadgeClass(badge) {

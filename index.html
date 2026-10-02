@@ -2045,7 +2045,9 @@
     .co-sum-cat { font-family: var(--sans); font-size: 8px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 2px; }
     .co-sum-name { font-family: var(--serif); font-size: 14px; color: var(--charcoal); line-height: 1.3; }
     .co-sum-variants { font-family: var(--sans); font-size: 9px; color: var(--taupe); margin-top: 2px; letter-spacing: 0.04em; }
-    .co-sum-qty { font-family: var(--sans); font-size: 9px; color: var(--taupe); margin-top: 3px; }
+    .co-sum-qty { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--charcoal); margin-top: 6px; display: inline-flex; align-items: center; gap: 10px; }
+    .co-qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(198,146,42,0.5); background: none; color: var(--gold); font-size: 15px; line-height: 1; cursor: pointer; }
+    .co-qty-btn:hover { background: rgba(198,146,42,0.1); }
     .co-sum-price { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--charcoal); white-space: nowrap; flex-shrink: 0; }
 
     /* Totals */
@@ -2905,6 +2907,7 @@
 
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII&amp;loading=async&amp;callback=__mapsForReviews"></script>
 <script src="js/rb-data.js"></script>
+<script src="js/rb-cart.js"></script>
 </head>
 <body>
 
@@ -3502,7 +3505,7 @@
       <button class="rb-search-btn" onclick="document.getElementById('collections').scrollIntoView({behavior:'smooth'})" title="Search" aria-label="Search">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </button>
-      <button id="cartNavBtn" onclick="openCart()" title="Gift Bag">
+      <button id="cartNavBtn" onclick="goToReview()" title="Gift Bag">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 01-8 0"></path></svg>
         <span id="cartCount" class="visible">4</span>
       </button>
@@ -4406,6 +4409,7 @@
   function saveRecipient() { localStorage.setItem(RECIPIENT_KEY, JSON.stringify(recipient));     }
 
   let cart         = loadCart();
+  cart.forEach((i, n) => { if (i.id == null) i.id = Date.now() + n; if (!i.cat) i.cat = ''; if (!i.qty) i.qty = 1; });
   let appliedPromo = loadPromo();
   let giftMessage  = loadGiftMsg();
   let deliverySlot = loadDelivery();
@@ -4537,6 +4541,34 @@
     document.body.classList.add('cart-open');
   }
 
+  // Bag icon / "Review order": straight to the review page when there is something to review
+  function goToReview() {
+    if (cart.length) openCartOrAuth(); else openCart();
+  }
+
+  // −/+ on product cards and in the review page
+  RB.cartUI.init({
+    card:   '.prod-card',
+    name:   card => (card.querySelector('.prod-body h3')?.textContent || '').trim(),
+    addBtn: card => card.querySelector('.prod-add'),
+    getCart: () => cart,
+    changeQty: (name, delta) => {
+      if (!RB.cartUI.changeLastLine(cart, name, delta)) return;
+      saveCart(); updateCartUI();
+    },
+    review: () => goToReview(),
+  });
+
+  function coChangeQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+    saveCart(); updateCartUI();
+    if (!cart.length) { closeCheckout(); openCart(); return; }
+    coRenderSummary();
+  }
+
   function closeCart() {
     document.getElementById('cartPanel').classList.remove('show');
     document.getElementById('cartOverlay').classList.remove('show');
@@ -4574,7 +4606,7 @@
 
     saveCart();
     updateCartUI();
-    openCart();
+    RB.cartUI.toast();
 
     const orig = btn.innerHTML;
     btn.innerHTML = '✓ Added';
@@ -4631,6 +4663,7 @@
 
   // ── Update UI ─────────────────────────────────
   function updateCartUI() {
+    try { RB.cartUI.sync(); } catch (e) {}
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const count    = cart.reduce((s, i) => s + i.qty, 0);
 
@@ -4980,7 +5013,7 @@
     saveCart();
     updateCartUI();
     closeVariantModal();
-    openCart();
+    RB.cartUI.toast();
 
     // Button feedback
     const addBtn = activeVariant.cardEl ? activeVariant.cardEl.querySelector('.prod-add') : null;
@@ -5182,6 +5215,7 @@
 
     initProductFiltering();
     applyFilters();
+    RB.cartUI.sync();
   }
   RB.load('catalog', renderCatalog);
 
@@ -5366,6 +5400,13 @@
     document.body.style.overflow = '';
   }
 
+  window.addEventListener('DOMContentLoaded', () => {
+    const h = location.hash;
+    if (h !== '#checkout' && h !== '#cart') return;
+    history.replaceState(null, '', location.pathname + location.search);
+    goToReview();
+  });
+
   function openCartOrAuth() {
     // Called from "Proceed to Checkout" in cart
     authUser = loadAuthUser();
@@ -5418,12 +5459,16 @@
         const vp = [];
         if (item.variants?.addons?.length) item.variants.addons.forEach(a => vp.push(a));
         return `<div class="co-sum-item">
-          <div class="co-sum-img"></div>
+          <div class="co-sum-img" style="${item.img ? `background-image:url('${String(item.img).replace(/'/g, '%27')}')` : ''}"></div>
           <div class="co-sum-info">
-            <span class="co-sum-cat">${item.cat}</span>
+            <span class="co-sum-cat">${item.cat || ''}</span>
             <div class="co-sum-name">${item.name}</div>
             ${vp.length ? `<div class="co-sum-variants">${vp.join(', ')}</div>` : ''}
-            <div class="co-sum-qty">Qty: ${item.qty}</div>
+            <div class="co-sum-qty">
+              <button type="button" class="co-qty-btn" onclick="coChangeQty(${item.id},-1)" aria-label="Remove one">−</button>
+              <span>${item.qty}</span>
+              <button type="button" class="co-qty-btn" onclick="coChangeQty(${item.id},1)" aria-label="Add one more">+</button>
+            </div>
           </div>
           <div class="co-sum-price">QR ${(item.price*item.qty).toFixed(0)}</div>
         </div>`;
