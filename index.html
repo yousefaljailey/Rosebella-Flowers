@@ -6344,6 +6344,7 @@
     coMap = null;
     if (overlay) overlay.style.display = 'none';
     osmMap = L.map(el, { zoomControl: true, attributionControl: true }).setView([DOHA.lat, DOHA.lng], 12);
+    osmMap.attributionControl.setPrefix(false);   // hide the "Leaflet" link; keep the required © OpenStreetMap credit
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '© OpenStreetMap'
     }).addTo(osmMap);
