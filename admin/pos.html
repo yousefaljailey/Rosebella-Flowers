@@ -46,7 +46,7 @@
       </div>
       <nav class="pos-nav">
         <button class="pos-nav-tab" data-panel="register" onclick="posNavTo('register',this)">🏪 Register</button>
-        <button class="pos-nav-tab active" data-panel="inventory" onclick="posNavTo('inventory',this)">📦 Inventory</button>
+        <button class="pos-nav-tab" data-panel="inventory" onclick="posNavTo('inventory',this)">📦 Inventory</button>
         <button class="pos-nav-tab" data-panel="orders" onclick="posNavTo('orders',this)">📋 Orders &amp; Delivery</button>
         <button class="pos-nav-tab" data-panel="crm" onclick="posNavTo('crm',this)">👥 CRM</button>
         <button class="pos-nav-tab" data-panel="analytics" onclick="posNavTo('analytics',this)">📊 Analytics</button>
@@ -99,7 +99,7 @@
       </div>
 
       <!-- ─ INVENTORY panel ─ -->
-      <div id="posPanel-inventory" class="pos-panel active">
+      <div id="posPanel-inventory" class="pos-panel">
         <div class="pos-mod-wrap">
           <div class="pos-mod-hd">
             <div class="pos-mod-title">📦 <em>Inventory</em> Management</div>
@@ -344,11 +344,11 @@
           </div>
           <div class="pos-filter-row" style="flex-wrap:wrap;">
             <div class="pos-ord-filters" id="posOrdFilters">
-              <button class="pos-filter-btn" data-filter="all" onclick="posOrdSetFilter('all',this)">All</button>
+              <button class="pos-filter-btn active" data-filter="all" onclick="posOrdSetFilter('all',this)">All</button>
               <button class="pos-filter-btn" data-filter="pending" onclick="posOrdSetFilter('pending',this)">Pending</button>
               <button class="pos-filter-btn" data-filter="preparing" onclick="posOrdSetFilter('preparing',this)">Preparing</button>
               <button class="pos-filter-btn" data-filter="out" onclick="posOrdSetFilter('out',this)">Out for Delivery</button>
-              <button class="pos-filter-btn active" data-filter="delivered" onclick="posOrdSetFilter('delivered',this)">Delivered</button>
+              <button class="pos-filter-btn" data-filter="delivered" onclick="posOrdSetFilter('delivered',this)">Delivered</button>
             </div>
             <input id="posOrdSearch" class="pos-mod-search" style="max-width:220px;" placeholder="🔍 Search orders…" oninput="posOrdRender()">
           </div>
