@@ -461,7 +461,7 @@ function editProduct(id) {
         </select></label>
       </div>
       <label class="field"><span>Description</span><textarea name="desc" dir="auto">${esc(p.desc)}</textarea></label>
-      <div class="field"><span>Photo</span>${mediaPickerHTML({ url: p.image, pos: p.imagePos })}</div>
+      ${galleryHTML()}
       <label class="switch"><input type="checkbox" name="visible" ${p.visible !== false ? 'checked' : ''}> Show on storefront</label>
       <div class="modal-foot">
         <div>${isNew ? '' : '<button type="button" class="btn btn-danger" id="delProd">Delete product</button>'}</div>
@@ -469,7 +469,7 @@ function editProduct(id) {
         <button class="btn btn-gold" type="submit">Save product</button></div>
       </div>
     </form>`, m => {
-    const media = bindMediaPicker(m, { folder: 'rosebella/products' });
+    const gallery = bindGallery(m, (Array.isArray(p.images) && p.images.length ? p.images : [p.image]).filter(Boolean));
     m.querySelector('#delProd')?.addEventListener('click', async () => {
       if (!confirm(`Delete “${p.name}”? This removes it from the storefront.`)) return;
       state.catalog.products = state.catalog.products.filter(x => x.id !== p.id);
@@ -478,15 +478,18 @@ function editProduct(id) {
     m.querySelector('#prodForm').onsubmit = async e => {
       e.preventDefault();
       const f = new FormData(e.target);
-      const pos = media.pos();
+      if (gallery.busy()) { toast('Wait for the photos to finish uploading', true); return; }
+      const images = gallery.images();
+      const main = images[0] || '';
       const next = {
         ...p,
         name: f.get('name').trim(), cat: f.get('cat'),
         price: Number(f.get('price')) || 0,
         badge: f.get('badge').trim(), badgeStyle: f.get('badgeStyle'),
         desc: f.get('desc').trim(),
-        image: media.url(), imagePos: pos,
-        placeholder: media.url() ? '' : (p.placeholder || ''),
+        images, image: main,
+        imagePos: main === p.image ? (p.imagePos || '') : '',
+        placeholder: main ? '' : (p.placeholder || ''),
         visible: !!f.get('visible'),
       };
       if (isNew) {
@@ -904,4 +907,64 @@ function editExtra(i) {
       if (await saveExtras(list)) closeModal();
     };
   });
+}
+
+// ── Product photo gallery (several photos; the first is the main one) ──
+function galleryHTML() {
+  return `<div class="field"><span>Photos <small style="text-transform:none;letter-spacing:0;font-weight:400">— the first photo is the main one on product cards; customers can browse and zoom all of them</small></span>
+    <div class="gal" data-role="gal"></div>
+    <div class="row" style="margin-top:8px">
+      <label class="btn btn-sm">＋ Upload photos<input type="file" accept="image/*" multiple hidden data-role="galfile"></label>
+      <input class="input" data-role="galurl" placeholder="…or paste a photo URL and press Enter" style="flex:1;min-width:180px">
+    </div>
+    <div class="upload-status" data-role="galstat"></div>
+  </div>`;
+}
+
+function bindGallery(root, initial) {
+  let images = [...initial];
+  let uploading = 0;
+  const gal = root.querySelector('[data-role=gal]');
+  const stat = root.querySelector('[data-role=galstat]');
+  function draw() {
+    gal.innerHTML = images.length ? images.map((u, i) => `<div class="gal-item" style="background-image:url('${esc(u)}')">
+        ${i === 0 ? '<span class="gal-main">Main</span>' : ''}
+        <div class="gal-acts">
+          <button type="button" data-a="left" data-i="${i}" title="Move earlier" ${i === 0 ? 'disabled' : ''}>‹</button>
+          ${i ? `<button type="button" data-a="main" data-i="${i}" title="Make main photo">★</button>` : ''}
+          <button type="button" data-a="right" data-i="${i}" title="Move later" ${i === images.length - 1 ? 'disabled' : ''}>›</button>
+          <button type="button" data-a="del" data-i="${i}" title="Remove">✕</button>
+        </div></div>`).join('')
+      : '<div class="order-meta" style="padding:14px 0">No photos yet.</div>';
+  }
+  gal.addEventListener('click', e => {
+    const b = e.target.closest('button[data-a]'); if (!b) return;
+    const i = +b.dataset.i;
+    if (b.dataset.a === 'del') images.splice(i, 1);
+    if (b.dataset.a === 'left' && i > 0) [images[i - 1], images[i]] = [images[i], images[i - 1]];
+    if (b.dataset.a === 'right' && i < images.length - 1) [images[i + 1], images[i]] = [images[i], images[i + 1]];
+    if (b.dataset.a === 'main') images.unshift(images.splice(i, 1)[0]);
+    draw();
+  });
+  root.querySelector('[data-role=galfile]').addEventListener('change', async e => {
+    const files = [...e.target.files]; e.target.value = '';
+    if (!files.length) return;
+    uploading += files.length;
+    stat.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`;
+    const results = await Promise.allSettled(files.map(f => uploadMedia(f, 'rosebella/products')));
+    uploading -= files.length;
+    results.forEach(r => { if (r.status === 'fulfilled') images.push(r.value); });
+    const failed = results.filter(r => r.status === 'rejected').length;
+    stat.textContent = failed ? `⚠ ${failed} photo${failed > 1 ? 's' : ''} failed to upload.` : 'Uploaded ✓';
+    draw();
+  });
+  const urlI = root.querySelector('[data-role=galurl]');
+  urlI.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const u = urlI.value.trim();
+    if (/^https?:\/\//.test(u)) { images.push(u); urlI.value = ''; draw(); }
+  });
+  draw();
+  return { images: () => [...images], busy: () => uploading > 0 };
 }

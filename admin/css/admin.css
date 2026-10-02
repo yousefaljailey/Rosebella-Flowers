@@ -212,3 +212,12 @@ td .input { padding: 7px 9px; }
   .slide-row { grid-template-columns: 90px 1fr; }
   .slide-row > :last-child { grid-column: 1 / -1; }
 }
+
+/* ── Product photo gallery ─────────────── */
+.gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.gal-item { position: relative; aspect-ratio: 4/5; border-radius: 8px; background: #efe9dc center/cover no-repeat; border: 1px solid var(--line); overflow: hidden; }
+.gal-main { position: absolute; top: 6px; left: 6px; background: var(--gold); color: #fff; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; }
+.gal-acts { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 4px; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,.55)); }
+.gal-acts button { width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(255,255,255,.92); cursor: pointer; font-size: 12px; line-height: 1; color: var(--ink); }
+.gal-acts button:disabled { opacity: .35; cursor: default; }
+.gal-acts button[data-a=del]:hover { color: var(--bad); }

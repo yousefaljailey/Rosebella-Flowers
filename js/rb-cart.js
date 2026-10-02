@@ -7,6 +7,7 @@
    ══════════════════════════════════════════════ */
 (function () {
   const CSS = `
+    .prod-card .prod-img, .prod-card .prod-body h3 { cursor: pointer; }
     .rb-qty { display: inline-flex; align-items: center; border: 1px solid var(--gold, #C6922A); border-radius: 999px; overflow: hidden; background: #fff; }
     .rb-qty button { width: 32px; height: 32px; border: none; background: none; color: var(--gold, #C6922A); font-size: 17px; line-height: 1; cursor: pointer; transition: background .15s; }
     .rb-qty button:hover { background: rgba(198,146,42,0.12); }

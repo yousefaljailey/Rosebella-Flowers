@@ -565,7 +565,7 @@
       return RB.load('catalog', catalog => {
         const cols = RB.visibleCollections(catalog);
         allProducts = RB.visibleProducts(catalog).map(p => ({
-          cat: p.cat, catName: RB.collectionName(catalog, p.cat), name: p.name,
+          id: p.id, cat: p.cat, catName: RB.collectionName(catalog, p.cat), name: p.name,
           desc: p.desc || '', badge: p.badge || '', imgSrc: p.image || '',
           price: Number(p.price) || 0, currency: 'QR',
         }));
@@ -689,15 +689,16 @@
           ? `<div class="sp-card-img-bg" style="background-image:url('${escHTML(p.imgSrc)}')"></div>`
           : `<div class="sp-card-img-bg" style="background:linear-gradient(135deg,#e8d09a,#c6922a)"></div>`;
 
+        const go = `onclick="if(!event.target.closest('button'))location.href='${escAttr(RB.productUrl(p))}'"`;
         return `<div class="sp-card" style="animation-delay:${i*0.04}s">
-          <div class="sp-card-img">
+          <div class="sp-card-img" ${go} style="cursor:pointer">
             ${imgHTML}
             ${badgeHTML}
             <button class="sp-wish" onclick="event.stopPropagation();this.classList.toggle('active')" aria-label="Wishlist">♡</button>
           </div>
           <div class="sp-body">
             <span class="sp-cat">${escHTML(p.catName)}</span>
-            <div class="sp-name">${escHTML(p.name)}</div>
+            <div class="sp-name" ${go} style="cursor:pointer">${escHTML(p.name)}</div>
             <div class="sp-desc">${escHTML(p.desc)}</div>
             <div class="sp-footer">
               <div class="sp-price"><span class="currency">${escHTML(p.currency)}</span>${p.price}</div>

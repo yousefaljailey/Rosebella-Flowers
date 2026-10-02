@@ -93,21 +93,24 @@
     return (catalog?.collections || []).find(c => c.slug === slug)?.name || slug;
   }
 
-  // Matches the original storefront .prod-card markup
+  function productUrl(p) { return 'product.html?id=' + encodeURIComponent(p.id); }
+
+  // Matches the original storefront .prod-card markup; photo + name open the product page
   function productCardHTML(p, catName, index) {
+    const go = `onclick="if(!event.target.closest('button'))location.href='${esc(productUrl(p))}'"`;
     const img = p.image
       ? `<div class="prod-img-bg" style="background-image:url(&quot;${esc(cssUrl(p.image))}&quot;);background-size:cover;background-position:${esc(p.imagePos || 'center center')};"></div>`
       : `<div class="prod-img-bg ${esc(p.placeholder || '')}"></div>`;
     const badge = p.badge ? `<span class="prod-badge badge-${esc(p.badgeStyle || 'new')}">${esc(p.badge)}</span>` : '';
     return `<div class="prod-card show" data-cat="${esc(p.cat)}" data-id="${esc(p.id)}" data-original-index="${index}">
-        <div class="prod-img">
+        <div class="prod-img" ${go}>
           ${img}
           ${badge}
           <button class="prod-wishlist" onclick="toggleWish(this)">♡</button>
         </div>
         <div class="prod-body">
           <span class="prod-cat">${esc(catName)}</span>
-          <h3>${esc(p.name)}</h3>
+          <h3 ${go}>${esc(p.name)}</h3>
           <p class="prod-desc">${esc(p.desc)}</p>
           <div class="prod-footer">
             <div class="prod-price"><span class="currency">QR</span>${esc(p.price)}</div>
@@ -222,7 +225,7 @@
   }
 
   window.RB = {
-    load, esc, DEFAULT_ADDONS, activeAddons, addonVisual,
+    load, esc, DEFAULT_ADDONS, activeAddons, addonVisual, productUrl,
     visibleCollections, visibleProducts, collectionName,
     productCardHTML, collCardHTML, applyStore,
   };
