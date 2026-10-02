@@ -1,0 +1,104 @@
+{
+ "version": 1,
+ "deliverySlots": [
+  {
+   "id": "s1",
+   "label": "8:00am – 11:00am",
+   "fee": 0,
+   "available": false,
+   "start": 8
+  },
+  {
+   "id": "s2",
+   "label": "12:30pm – 4:00pm",
+   "fee": 0,
+   "available": false,
+   "start": 12
+  },
+  {
+   "id": "s3",
+   "label": "3:00pm – 6:00pm",
+   "fee": 25,
+   "available": true,
+   "start": 15
+  },
+  {
+   "id": "s4",
+   "label": "5:00pm – 8:00pm",
+   "fee": 25,
+   "available": true,
+   "start": 17
+  },
+  {
+   "id": "s5",
+   "label": "7:00pm – 10:00pm",
+   "fee": 25,
+   "available": true,
+   "start": 19
+  },
+  {
+   "id": "s6",
+   "label": "9:00pm – 1:00am",
+   "fee": 25,
+   "available": true,
+   "start": 21
+  },
+  {
+   "id": "s_express",
+   "label": "Within 90 minutes",
+   "fee": 50,
+   "available": true,
+   "start": -1,
+   "fullWidth": true
+  }
+ ],
+ "delivery": {
+  "leadHours": 2
+ },
+ "store": {
+  "name": "Rosebella",
+  "whatsapp": "97433446618",
+  "phone": "+974 33 446 618",
+  "email": "Yousef@rosebella.co",
+  "instagram": "https://www.instagram.com/rosebella_co/",
+  "tiktok": "https://www.tiktok.com/@rosebella_co",
+  "facebook": "https://www.facebook.com/p/Rosebella-Flowers-100087185779382/"
+ },
+ "announcement": {
+  "enabled": false,
+  "text": "",
+  "link": ""
+ },
+ "promos": [
+  {
+   "code": "ROSEBELLA10",
+   "type": "percent",
+   "value": 10,
+   "active": true
+  },
+  {
+   "code": "WELCOME20",
+   "type": "percent",
+   "value": 20,
+   "active": true
+  },
+  {
+   "code": "LOVE15",
+   "type": "percent",
+   "value": 15,
+   "active": true
+  },
+  {
+   "code": "FLAT50",
+   "type": "fixed",
+   "value": 50,
+   "active": true
+  },
+  {
+   "code": "VIP100",
+   "type": "fixed",
+   "value": 100,
+   "active": true
+  }
+ ]
+}

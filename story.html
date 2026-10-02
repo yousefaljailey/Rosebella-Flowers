@@ -238,6 +238,7 @@
       .story-values { grid-template-columns: 1fr; }
     }
   </style>
+  <script src="js/rb-data.js"></script>
 </head>
 <body>
 
@@ -381,5 +382,6 @@
       document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
     }, 800);
   </script>
+  <script>RB.load('settings', RB.applyStore);</script>
 </body>
 </html>

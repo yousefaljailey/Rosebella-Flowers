@@ -19,3 +19,5 @@ project/tweaks-panel.jsx
 project/uploads/
 project/Date and time.jpg
 temporary screenshots/
+admin/
+firestore.rules

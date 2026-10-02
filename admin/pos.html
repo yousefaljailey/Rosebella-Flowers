@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Rosebella POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/pos.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- ── Login ── -->
+  <section id="login" hidden>
+    <div class="login-card">
+      <div class="brand">ROSE<span>BELLA</span></div>
+      <div class="login-sub">Point of Sale</div>
+      <button class="btn btn-google btn-block" id="googleBtn" type="button">Continue with Google</button>
+      <div class="login-or">OR</div>
+      <form id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="username" required>
+        <label for="loginPass">Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" required>
+        <button class="btn btn-gold btn-block" type="submit">Sign In</button>
+      </form>
+      <div class="login-err" id="loginErr"></div>
+    </div>
+  </section>
+
+  <div id="app" hidden>
+  <div id="apToast"></div>
+  <!-- POS Overlay -->
+  <div id="posOverlay" class="">
+    <div id="posHeader">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid rgba(198,146,42,0.12);flex-shrink:0;">
+        <div class="pos-logo">ROSE<em>BELLA</em> &nbsp;<span class="pos-mode-badge">POS</span></div>
+        <button class="ab-btn ab-btn-red" onclick="closePOS()">← Back to Admin</button>
+      </div>
+      <nav class="pos-nav">
+        <button class="pos-nav-tab" data-panel="register" onclick="posNavTo('register',this)">🏪 Register</button>
+        <button class="pos-nav-tab active" data-panel="inventory" onclick="posNavTo('inventory',this)">📦 Inventory</button>
+        <button class="pos-nav-tab" data-panel="orders" onclick="posNavTo('orders',this)">📋 Orders &amp; Delivery</button>
+        <button class="pos-nav-tab" data-panel="crm" onclick="posNavTo('crm',this)">👥 CRM</button>
+        <button class="pos-nav-tab" data-panel="analytics" onclick="posNavTo('analytics',this)">📊 Analytics</button>
+        <button class="pos-nav-tab" data-panel="wire" onclick="posNavTo('wire',this)">🌐 Wire Services</button>
+      </nav>
+    </div>
+    <div id="posBody">
+
+      <!-- ─ REGISTER panel ─ -->
+      <div id="posPanel-register" class="pos-panel">
+        <div id="posProducts">
+          <div style="padding:10px 14px 0;"><input type="text" id="posSearch" class="pos-mod-search" style="width:100%;box-sizing:border-box;" placeholder="🔍  Search products by name or category…" oninput="posFilterProducts(this.value)"></div>
+          <div id="posProductGrid" style="padding:10px 14px;">
+          </div>
+        </div>
+        <div id="posTicket">
+          <div class="pos-ticket-hd">
+            <span class="pos-ticket-title">Current <em>Order</em></span>
+            <span class="pos-item-badge" id="posItemBadge">0 items</span>
+          </div>
+          <div id="posOrderItems"><div class="pos-order-empty"><span>🛒</span><p>Tap a product to add it</p></div></div>
+          <div id="posOrderFooter">
+            <div class="pos-totals">
+              <div class="pos-tot-row" id="posSubRow"><span class="pos-tot-lbl">Subtotal</span><span class="pos-tot-val" id="posSubVal">QR 0</span></div>
+              <div class="pos-tot-row" id="posDiscRow" style="display:none;"><span class="pos-tot-lbl">Discount</span><span class="pos-tot-val pos-disc-val" id="posDiscAmt">−QR 0</span></div>
+              <div class="pos-grand-row"><span class="pos-grand-lbl">Total</span><span class="pos-grand-val"><sup>QR</sup><span id="posTotalVal">0</span></span></div>
+            </div>
+            <div class="pos-disc-row">
+              <span class="pos-disc-lbl">Discount</span>
+              <select id="posDiscType" class="pos-disc-sel" onchange="posDiscTypeChange(this.value)">
+                <option value="none">None</option><option value="percent">%</option><option value="fixed">QR</option>
+              </select>
+              <input type="number" id="posDiscVal" class="pos-disc-inp" min="0" value="0" placeholder="0" disabled="" oninput="posUpdateDiscount()">
+            </div>
+            <div class="pos-toggle-row">
+              <button class="pos-tgl pay-active" data-method="cash" onclick="posSetPayment('cash')">💵 Cash</button>
+              <button class="pos-tgl" data-method="card" onclick="posSetPayment('card')">💳 Card</button>
+            </div>
+            <div class="pos-toggle-row">
+              <button class="pos-tgl paid-active" data-status="paid" onclick="posSetStatus('paid')">✓ Paid</button>
+              <button class="pos-tgl" data-status="unpaid" onclick="posSetStatus('unpaid')">○ Unpaid</button>
+            </div>
+            <div class="pos-actions">
+              <button class="pos-act pos-act-print" onclick="posPrintReceipt()">🖨 Print</button>
+              <button class="pos-act pos-act-complete" onclick="posCompleteOrder()">✓ Complete Order</button>
+              <button class="pos-act pos-act-clear" onclick="posClearOrder(false)">🗑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─ INVENTORY panel ─ -->
+      <div id="posPanel-inventory" class="pos-panel active">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd">
+            <div class="pos-mod-title">📦 <em>Inventory</em> Management</div>
+            <button class="pos-mod-btn" onclick="posInvAdd()">+ Add Item</button>
+          </div>
+          <div class="pos-filter-row">
+            <input id="posInvSearch" class="pos-mod-search" placeholder="🔍 Search inventory…" oninput="posInvRender()">
+            <select id="posInvTypeFilter" class="pos-mod-select" onchange="posInvRender()">
+              <option value="">All Types</option>
+              <option>Roses</option><option>Peonies</option><option>Tulips</option><option>Orchids</option>
+              <option>Lilies</option><option>Chocolates</option><option>Accessories</option><option>Packaging</option>
+            </select>
+            <select id="posInvStockFilter" class="pos-mod-select" onchange="posInvRender()">
+              <option value="">All Stock</option><option value="crit">Critical</option><option value="low">Low</option><option value="ok">OK</option>
+            </select>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="pos-inv-table">
+              <thead><tr>
+                <th>Item</th><th>Type</th><th>In Stock</th><th>Unit</th><th>Reorder At</th><th>Season</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="posInvBody"><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Red Roses</td>
+        <td>Roses</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="120" onchange="posInvSetQty(1,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">30</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(1,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(1,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(1)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Pink Roses</td>
+        <td>Roses</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="50" onchange="posInvSetQty(2,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">20</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(2,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(2,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(2)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">White Roses</td>
+        <td>Roses</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="60" onchange="posInvSetQty(3,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">20</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(3,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(3,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(3)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Mixed Roses</td>
+        <td>Roses</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="100" onchange="posInvSetQty(4,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">25</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(4,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(4,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(4)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Peonies</td>
+        <td>Peonies</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="40" onchange="posInvSetQty(5,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">15</td>
+        <td style="color:rgba(255,255,255,0.4);">Spring</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(5,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(5,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(5)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Tulips</td>
+        <td>Tulips</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="75" onchange="posInvSetQty(6,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">20</td>
+        <td style="color:rgba(255,255,255,0.4);">Spring</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(6,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(6,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(6)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Orchids</td>
+        <td>Orchids</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="30" onchange="posInvSetQty(7,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">10</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(7,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(7,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(7)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Lilies</td>
+        <td>Lilies</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="50" onchange="posInvSetQty(8,this.value)" style="color:var(--white)"></td>
+        <td>stems</td>
+        <td style="color:rgba(255,255,255,0.4);">15</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(8,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(8,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(8)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Godiva Chocolates</td>
+        <td>Chocolates</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="24" onchange="posInvSetQty(9,this.value)" style="color:var(--white)"></td>
+        <td>boxes</td>
+        <td style="color:rgba(255,255,255,0.4);">8</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(9,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(9,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(9)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Patchi Chocolates</td>
+        <td>Chocolates</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="18" onchange="posInvSetQty(10,this.value)" style="color:var(--white)"></td>
+        <td>boxes</td>
+        <td style="color:rgba(255,255,255,0.4);">6</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(10,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(10,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(10)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Balloons</td>
+        <td>Accessories</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="50" onchange="posInvSetQty(11,this.value)" style="color:var(--white)"></td>
+        <td>units</td>
+        <td style="color:rgba(255,255,255,0.4);">15</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(11,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(11,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(11)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Glass Vases</td>
+        <td>Accessories</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="25" onchange="posInvSetQty(12,this.value)" style="color:var(--white)"></td>
+        <td>units</td>
+        <td style="color:rgba(255,255,255,0.4);">8</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(12,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(12,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(12)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Candles</td>
+        <td>Accessories</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="30" onchange="posInvSetQty(13,this.value)" style="color:var(--white)"></td>
+        <td>units</td>
+        <td style="color:rgba(255,255,255,0.4);">10</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(13,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(13,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(13)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Perfume</td>
+        <td>Accessories</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="12" onchange="posInvSetQty(14,this.value)" style="color:var(--white)"></td>
+        <td>units</td>
+        <td style="color:rgba(255,255,255,0.4);">5</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(14,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(14,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(14)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Ribbon</td>
+        <td>Packaging</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="100" onchange="posInvSetQty(15,this.value)" style="color:var(--white)"></td>
+        <td>rolls</td>
+        <td style="color:rgba(255,255,255,0.4);">30</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(15,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(15,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(15)">🗑</button>
+        </div></td>
+      </tr><tr>
+        <td style="font-family:var(--serif);font-size:13px;color:var(--white);">Gift Boxes</td>
+        <td>Packaging</td>
+        <td><input class="pos-inv-inp" type="number" min="0" value="40" onchange="posInvSetQty(16,this.value)" style="color:var(--white)"></td>
+        <td>units</td>
+        <td style="color:rgba(255,255,255,0.4);">12</td>
+        <td style="color:rgba(255,255,255,0.4);">Year-round</td>
+        <td><span class="pos-inv-badge pos-inv-badge-ok">In Stock</span></td>
+        <td><div class="pos-inv-actions">
+          <button class="pos-inv-btn" onclick="posInvAdjust(16,-1)">−</button>
+          <button class="pos-inv-btn" onclick="posInvAdjust(16,1)">+</button>
+          <button class="pos-inv-btn pos-inv-btn-del" onclick="posInvDelete(16)">🗑</button>
+        </div></td>
+      </tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─ ORDERS & DELIVERY panel ─ -->
+      <div id="posPanel-orders" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd">
+            <div class="pos-mod-title">📋 Orders &amp; <em>Delivery</em></div>
+            <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.3);" id="posOrdCount">0 orders</div>
+          </div>
+          <div class="pos-filter-row" style="flex-wrap:wrap;">
+            <div class="pos-ord-filters" id="posOrdFilters">
+              <button class="pos-filter-btn" data-filter="all" onclick="posOrdSetFilter('all',this)">All</button>
+              <button class="pos-filter-btn" data-filter="pending" onclick="posOrdSetFilter('pending',this)">Pending</button>
+              <button class="pos-filter-btn" data-filter="preparing" onclick="posOrdSetFilter('preparing',this)">Preparing</button>
+              <button class="pos-filter-btn" data-filter="out" onclick="posOrdSetFilter('out',this)">Out for Delivery</button>
+              <button class="pos-filter-btn active" data-filter="delivered" onclick="posOrdSetFilter('delivered',this)">Delivered</button>
+            </div>
+            <input id="posOrdSearch" class="pos-mod-search" style="max-width:220px;" placeholder="🔍 Search orders…" oninput="posOrdRender()">
+          </div>
+          <div id="posOrdList"><div class="pos-no-orders">No orders found</div></div>
+        </div>
+      </div>
+
+      <!-- ─ CRM panel ─ -->
+      <div id="posPanel-crm" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd">
+            <div class="pos-mod-title">👥 Customer <em>Relationships</em></div>
+            <button class="pos-mod-btn" onclick="posCrmAddNew()">+ Add Customer</button>
+          </div>
+          <div class="pos-filter-row">
+            <input id="posCrmSearch" class="pos-mod-search" placeholder="🔍 Search by name, phone, or email…" oninput="posCrmRender()">
+          </div>
+          <div id="posCrmGrid" class="pos-crm-grid"><div class="pos-no-orders" style="grid-column:1/-1;">No customers found</div></div>
+        </div>
+      </div>
+
+      <!-- ─ ANALYTICS panel ─ -->
+      <div id="posPanel-analytics" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd">
+            <div class="pos-mod-title">📊 <em>Analytics</em> &amp; Reports</div>
+            <select id="posAnalyticsPeriod" class="pos-mod-select" onchange="posAnalyticsRender()">
+              <option value="today">Today</option>
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <div id="posAnalyticsContent">
+      <!-- KPIs -->
+      <div class="pos-analytics-layout" style="margin-bottom:12px;">
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Revenue (Today)</div><div class="pos-kpi-val"><sup>QR</sup>0</div><div class="pos-kpi-sub">0 paid orders</div></div>
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Orders</div><div class="pos-kpi-val">0</div><div class="pos-kpi-sub">Online + POS</div></div>
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Avg Order Value</div><div class="pos-kpi-val"><sup>QR</sup>0</div></div>
+        <div class="pos-kpi"><div class="pos-kpi-lbl">Items Sold</div><div class="pos-kpi-val">0</div></div>
+      </div>
+      <!-- Charts row -->
+      <div class="pos-analytics-row2" style="margin-bottom:12px;">
+        <div class="pos-chart-card">
+          <div class="pos-chart-title">Top Products by Revenue</div>
+          <div style="font-family:var(--serif);font-style:italic;color:rgba(255,255,255,0.2);font-size:13px;">No data yet</div>
+        </div>
+        <div class="pos-chart-card">
+          <div class="pos-chart-title">Revenue — Last 7 Days</div>
+          <div class="pos-trend-chart">
+            <div class="pos-trend-col"><div class="pos-trend-bar" style="height:0.0%"></div><div class="pos-trend-lbl">Tue</div></div><div class="pos-trend-col"><div class="pos-trend-bar" style="height:0.0%"></div><div class="pos-trend-lbl">Wed</div></div><div class="pos-trend-col"><div class="pos-trend-bar" style="height:0.0%"></div><div class="pos-trend-lbl">Thu</div></div><div class="pos-trend-col"><div class="pos-trend-bar" style="height:0.0%"></div><div class="pos-trend-lbl">Fri</div></div><div class="pos-trend-col"><div class="pos-trend-bar" style="height:0.0%"></div><div class="pos-trend-lbl">Sat</div></div><div class="pos-trend-col"><div class="pos-trend-bar" style="height:0.0%"></div><div class="pos-trend-lbl">Sun</div></div><div class="pos-trend-col"><div class="pos-trend-bar today" style="height:0.0%"></div><div class="pos-trend-lbl">Today</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pos-analytics-row2">
+        <div class="pos-chart-card">
+          <div class="pos-chart-title">Payment Methods</div>
+          <div class="pos-pie-row">
+            <div class="pos-pie-legend">
+              <div class="pos-pie-leg-item"><div class="pos-pie-dot" style="background:#C6922A"></div><span class="pos-pie-leg-name">Cash</span><span class="pos-pie-leg-val">QR 0</span></div>
+              <div class="pos-pie-leg-item"><div class="pos-pie-dot" style="background:#2196f3"></div><span class="pos-pie-leg-name">Card / Online</span><span class="pos-pie-leg-val">QR 0</span></div>
+            </div>
+            <svg width="80" height="80" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="14" fill="rgba(255,255,255,0.06)"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="pos-chart-card">
+          <div class="pos-chart-title">Peak Hours</div>
+          
+            <div class="pos-peak-row">
+              <div class="pos-peak-lbl">9–12am</div>
+              <div class="pos-peak-bar-track"><div class="pos-peak-bar-fill" style="width:0.0%"></div></div>
+              <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.4);width:24px;text-align:right;">0</div>
+            </div>
+            <div class="pos-peak-row">
+              <div class="pos-peak-lbl">12–3pm</div>
+              <div class="pos-peak-bar-track"><div class="pos-peak-bar-fill" style="width:0.0%"></div></div>
+              <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.4);width:24px;text-align:right;">0</div>
+            </div>
+            <div class="pos-peak-row">
+              <div class="pos-peak-lbl">3–6pm</div>
+              <div class="pos-peak-bar-track"><div class="pos-peak-bar-fill" style="width:0.0%"></div></div>
+              <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.4);width:24px;text-align:right;">0</div>
+            </div>
+            <div class="pos-peak-row">
+              <div class="pos-peak-lbl">6–9pm</div>
+              <div class="pos-peak-bar-track"><div class="pos-peak-bar-fill" style="width:0.0%"></div></div>
+              <div style="font-family:var(--sans);font-size:10px;color:rgba(255,255,255,0.4);width:24px;text-align:right;">0</div>
+            </div>
+        </div>
+      </div></div>
+        </div>
+      </div>
+
+      <!-- ─ WIRE SERVICES panel ─ -->
+      <div id="posPanel-wire" class="pos-panel">
+        <div class="pos-mod-wrap">
+          <div class="pos-mod-hd">
+            <div class="pos-mod-title">🌐 Wire <em>Services</em></div>
+          </div>
+          <!-- Integrations -->
+          <div class="pos-wire-grid" id="posWireIntegrations"></div>
+          <!-- Add wire order -->
+          <div class="pos-wire-add-form">
+            <div class="pos-wire-form-title">Log Wire Order</div>
+            <div class="pos-wire-form-grid">
+              <div class="pos-wire-field"><label>Wire Service</label><select id="wireService"><option>FTD</option><option>Teleflora</option><option>1-800-Flowers</option><option>BloomNation</option></select></div>
+              <div class="pos-wire-field"><label>Order ID</label><input id="wireOrderId" placeholder="e.g. FTD-20241215-001"></div>
+              <div class="pos-wire-field"><label>Arrangement</label><input id="wireArrangement" placeholder="e.g. Premier Rose Bouquet"></div>
+              <div class="pos-wire-field"><label>Total (QR)</label><input id="wireTotal" type="number" min="0" placeholder="0"></div>
+              <div class="pos-wire-field"><label>Recipient Name</label><input id="wireRecipient" placeholder="Full name"></div>
+              <div class="pos-wire-field"><label>Delivery Date</label><input id="wireDelivDate" type="date"></div>
+            </div>
+            <div class="pos-wire-field" style="margin-bottom:12px;"><label>Delivery Notes</label><textarea id="wireNotes" rows="2" placeholder="Special instructions…"></textarea></div>
+            <button class="pos-mod-btn" onclick="posWireSubmit()">+ Log Order</button>
+          </div>
+          <!-- Wire orders list -->
+          <div>
+            <div class="pos-chart-title" style="margin-bottom:10px;">Wire Orders</div>
+            <div id="posWireList" class="pos-wire-orders-wrap"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CRM Detail Modal -->
+  <div id="posCrmModalBg">
+    <div id="posCrmModal">
+      <div class="pos-crm-modal-hd">
+        <span class="pos-crm-modal-hd-title" id="posCrmModalTitle">Customer Profile</span>
+        <div style="display:flex;gap:8px;">
+          <button class="pos-mod-btn" onclick="posCrmSave()">Save</button>
+          <button class="pos-hst-close" onclick="posCrmCloseModal()">✕</button>
+        </div>
+      </div>
+      <div class="pos-crm-modal-body">
+        <input type="hidden" id="crmEditId">
+        <div class="pos-crm-section">
+          <div class="pos-crm-sec-title">Contact Details</div>
+          <div class="pos-crm-field-row">
+            <div class="pos-crm-field"><label>Full Name</label><input id="crmName" placeholder="Full name"></div>
+            <div class="pos-crm-field"><label>Phone</label><input id="crmPhone" placeholder="+974 XXXX XXXX"></div>
+          </div>
+          <div class="pos-crm-field-row" style="margin-top:10px;">
+            <div class="pos-crm-field"><label>Email</label><input id="crmEmail" type="email" placeholder="email@example.com"></div>
+            <div class="pos-crm-field"><label>Preferred Contact</label>
+              <select id="crmContact"><option>WhatsApp</option><option>Phone Call</option><option>Email</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="pos-crm-section">
+          <div class="pos-crm-sec-title">Important Dates</div>
+          <div id="crmDatesList" class="pos-crm-dates-list"></div>
+          <button class="pos-mod-btn pos-mod-btn-ghost" style="margin-top:8px;font-size:10px;" onclick="posCrmAddDate()">+ Add Date</button>
+        </div>
+        <div class="pos-crm-section">
+          <div class="pos-crm-sec-title">Preferences &amp; Notes</div>
+          <div class="pos-crm-field"><label>Favourite Flowers / Preferences</label><textarea id="crmPrefs" rows="2" placeholder="e.g. Loves pink roses, allergic to lilies…"></textarea></div>
+          <div class="pos-crm-field" style="margin-top:10px;"><label>Notes</label><textarea id="crmNotes" rows="2" placeholder="Any additional notes…"></textarea></div>
+        </div>
+        <div class="pos-crm-section" id="crmHistorySection" style="display:none;">
+          <div class="pos-crm-sec-title">Order History</div>
+          <div id="crmHistoryList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POS History Modal -->
+  <div id="posHistoryBg">
+    <div id="posHistoryPanel">
+      <div class="pos-hst-hd">
+        <span class="pos-hst-title">Order <em>History</em></span>
+        <button class="pos-hst-close" onclick="closePosHistory()">✕</button>
+      </div>
+      <div id="posHistoryBody"></div>
+    </div>
+  </div>
+  </div>
+
+  <script src="js/shared.js"></script>
+  <script src="js/pos-sync.js"></script>
+</body>
+</html>

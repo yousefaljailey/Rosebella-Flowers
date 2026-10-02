@@ -349,6 +349,7 @@
       .shop-title { font-size: 22px; }
     }
   </style>
+  <script src="js/rb-data.js"></script>
 </head>
 <body>
 
@@ -541,89 +542,26 @@
       } catch(e) {}
     }
 
-    /* ─── FETCH & PARSE PRODUCTS ────────────── */
-    async function loadProducts() {
-      try {
-        const res = await fetch('index.html?t=' + Date.now());
-        const html = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-
-        /* Parse products */
-        const cards = doc.querySelectorAll('.prod-card');
-        const products = [];
-        cards.forEach(card => {
-          const cat = card.dataset.cat || '';
-          const catNameEl = card.querySelector('.prod-cat');
-          const catName = catNameEl ? catNameEl.textContent.trim() : cat;
-          const nameEl = card.querySelector('h3');
-          const name = nameEl ? nameEl.textContent.trim() : '';
-          const descEl = card.querySelector('.prod-desc');
-          const desc = descEl ? descEl.textContent.trim() : '';
-          const badgeEl = card.querySelector('.prod-badge');
-          const badge = badgeEl ? badgeEl.textContent.trim() : '';
-
-          /* Extract image */
-          let imgSrc = '';
-          const imgEl = card.querySelector('.prod-img-bg');
-          if (imgEl) {
-            const bgImg = imgEl.style.backgroundImage;
-            if (bgImg && bgImg !== 'none') {
-              imgSrc = bgImg.replace(/url\(["']?/, '').replace(/["']?\)$/, '');
-            }
-          }
-          if (!imgSrc) {
-            const realImg = card.querySelector('.prod-img img');
-            if (realImg) imgSrc = realImg.src || realImg.dataset.src || '';
-          }
-
-          /* Extract price */
-          const priceEl = card.querySelector('.prod-price');
-          let price = 0; let currency = 'QAR';
-          if (priceEl) {
-            const currEl = priceEl.querySelector('.currency');
-            if (currEl) { currency = currEl.textContent.trim(); }
-            const raw = priceEl.textContent.replace(/[^\d.]/g, '');
-            price = parseFloat(raw) || 0;
-          }
-
-          if (name) {
-            products.push({ cat, catName, name, desc, badge, imgSrc, price, currency });
-          }
-        });
-
-        /* Parse collections */
-        const collCards = doc.querySelectorAll('.coll-card');
-        const collections = [{ slug: 'all', name: 'All Collections', icon: '✦' }];
-        const seenSlugs = new Set(['all']);
-        collCards.forEach(card => {
-          try {
-            const u = new URL(card.href, location.href);
-            const slug = u.searchParams.get('cat') || '';
-            if (slug && !seenSlugs.has(slug)) {
-              seenSlugs.add(slug);
-              const nameEl = card.querySelector('.coll-name');
-              const iconEl = card.querySelector('.coll-icon');
-              collections.push({
-                slug,
-                name: nameEl ? nameEl.textContent.trim() : slug,
-                icon: iconEl ? iconEl.textContent.trim() : '🌸',
-              });
-            }
-          } catch(e) {}
-        });
-
-        allProducts = products;
-        allCollections = collections;
+    /* ─── LOAD PRODUCTS (catalog managed in the admin portal) ─── */
+    function loadProducts() {
+      return RB.load('catalog', catalog => {
+        const cols = RB.visibleCollections(catalog);
+        allProducts = RB.visibleProducts(catalog).map(p => ({
+          cat: p.cat, catName: RB.collectionName(catalog, p.cat), name: p.name,
+          desc: p.desc || '', badge: p.badge || '', imgSrc: p.image || '',
+          price: Number(p.price) || 0, currency: 'QR',
+        }));
+        allCollections = [{ slug: 'all', name: 'All Collections', icon: '✦' }]
+          .concat(cols.map(c => ({ slug: c.slug, name: c.name, icon: c.icon || '🌸' })));
         buildSidebar();
         buildOccasionPills();
         renderProducts();
-      } catch(err) {
-        console.error('Failed to load products:', err);
+      }).then(data => {
+        if (data) return;
         document.getElementById('skeletonGrid').style.display = 'none';
         document.getElementById('productGrid').style.display = 'grid';
         document.getElementById('shopSubtitle').textContent = 'Could not load products. Please refresh.';
-      }
+      });
     }
 
     /* ─── BUILD SIDEBAR ─────────────────── */
@@ -811,5 +749,6 @@
     /* ─── INIT ─────────────────────────── */
     loadProducts();
   </script>
+  <script>RB.load('settings', RB.applyStore);</script>
 </body>
 </html>

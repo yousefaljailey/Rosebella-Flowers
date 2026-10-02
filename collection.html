@@ -427,6 +427,7 @@
     }
     @media (max-width: 480px) { .products-grid { grid-template-columns: 1fr; } }
   </style>
+  <script src="js/rb-data.js"></script>
 </head>
 <body>
 
@@ -697,20 +698,14 @@ function variantAddToCart() {
 }
 function toggleWish(btn) { btn.classList.toggle('liked'); btn.textContent=btn.classList.contains('liked')?'♥':'♡'; }
 
-// ── Load products from main page ────────────────
-async function loadProducts() {
+// ── Load products (catalog managed in the admin portal) ──
+function loadProducts() {
   const grid = document.getElementById('productsGrid');
-  try {
-    const res  = await fetch('index.html');
-    const html = await res.text();
-    const doc  = new DOMParser().parseFromString(html, 'text/html');
-    const cards = CAT_SLUG
-      ? [...doc.querySelectorAll(`.prod-card[data-cat="${CAT_SLUG}"]`)]
-      : [...doc.querySelectorAll('.prod-card')];
+  return RB.load('catalog', catalog => {
+    const all   = RB.visibleProducts(catalog);
+    const items = CAT_SLUG ? all.filter(p => p.cat === CAT_SLUG) : all;
 
-    grid.innerHTML = '';
-
-    if (cards.length === 0) {
+    if (items.length === 0) {
       grid.innerHTML = `<div class="col-empty">
         <span class="col-empty-icon">🌸</span>
         <h3>Coming Soon</h3>
@@ -720,29 +715,22 @@ async function loadProducts() {
       return;
     }
 
-    document.getElementById('heroCount').textContent = `${cards.length} item${cards.length===1?'':'s'}`;
-
-    cards.forEach(card => {
-      card.classList.add('show');
-      // Fix all onclick attrs to use local functions
-      card.querySelectorAll('[onclick]').forEach(el => {
-        const oc = el.getAttribute('onclick');
-        el.setAttribute('onclick', oc); // keep as-is — functions exist locally
-      });
-      grid.appendChild(card);
-    });
-  } catch(err) {
+    document.getElementById('heroCount').textContent = `${items.length} item${items.length===1?'':'s'}`;
+    grid.innerHTML = items.map((p, i) => RB.productCardHTML(p, RB.collectionName(catalog, p.cat), i)).join('');
+  }).then(data => {
+    if (data) return;
     grid.innerHTML = `<div class="col-empty">
       <span class="col-empty-icon">🌸</span>
       <h3>Unable to load products</h3>
       <p>Please try refreshing the page.</p>
     </div>`;
-  }
+  });
 }
 
 // Init
 try { updateCartUI(); } catch(e) {}
 loadProducts();
 </script>
+  <script>RB.load('settings', RB.applyStore);</script>
 </body>
 </html>
