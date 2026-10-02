@@ -25,12 +25,21 @@ function isAdminUser(u) {
 /* Calls onReady(user) once an admin is signed in; otherwise shows the login screen.
    The login screen markup lives in each page (#login). */
 function requireAdmin(onReady) {
-  const loginEl = document.getElementById('login');
-  const appEl   = document.getElementById('app');
-  const errEl   = document.getElementById('loginErr');
+  const loginEl   = document.getElementById('login');
+  const appEl     = document.getElementById('app');
+  const errEl     = document.getElementById('loginErr');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const emailI    = document.getElementById('loginEmail');
   let started = false;
 
-  auth.onAuthStateChanged(user => {
+  const say = (msg, ok) => { errEl.textContent = msg; errEl.classList.toggle('login-msg', !!ok); };
+
+  auth.onAuthStateChanged(async user => {
+    verifyBtn.hidden = true;
+    if (user && !user.emailVerified && ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
+      await user.reload();               // picks up a verification done in another tab
+      user = auth.currentUser;
+    }
     if (user && isAdminUser(user)) {
       loginEl.hidden = true;
       appEl.hidden = false;
@@ -38,35 +47,51 @@ function requireAdmin(onReady) {
       return;
     }
     if (user) {
-      errEl.textContent = user.emailVerified
-        ? `${user.email} is not an admin account.`
-        : `Verify ${user.email} first (use “Continue with Google” for a verified sign-in).`;
-      auth.signOut();
+      if (!ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
+        say(`${user.email} is not an admin account.`);
+        auth.signOut();
+      } else {
+        // Admin email, not verified yet: stay signed in so the link can be sent
+        say(`Verify ${user.email} to continue: send the email, open the link in it, then sign in again.`);
+        verifyBtn.hidden = false;
+      }
     }
     appEl.hidden = true;
     loginEl.hidden = false;
   });
 
-  document.getElementById('googleBtn').onclick = async () => {
-    errEl.textContent = '';
-    try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-    catch (e) { errEl.textContent = friendlyAuthError(e); }
-  };
   document.getElementById('loginForm').onsubmit = async e => {
     e.preventDefault();
-    errEl.textContent = '';
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass  = document.getElementById('loginPass').value;
-    try { await auth.signInWithEmailAndPassword(email, pass); }
-    catch (err) { errEl.textContent = friendlyAuthError(err); }
+    say('');
+    const pass = document.getElementById('loginPass').value;
+    try { await auth.signInWithEmailAndPassword(emailI.value.trim(), pass); }
+    catch (err) { say(friendlyAuthError(err)); }
+  };
+
+  document.getElementById('forgotBtn').onclick = async () => {
+    const email = emailI.value.trim();
+    if (!email) { say('Enter your email above, then click “Forgot password?” again.'); emailI.focus(); return; }
+    try {
+      await auth.sendPasswordResetEmail(email);
+      say(`If ${email} has an account, a password reset link is on its way. Check your inbox and spam.`, true);
+    } catch (err) { say(friendlyAuthError(err)); }
+  };
+
+  verifyBtn.onclick = async () => {
+    const u = auth.currentUser;
+    if (!u) return;
+    try {
+      await u.sendEmailVerification();
+      say(`Verification email sent to ${u.email}. Open the link, then sign in again.`, true);
+      auth.signOut();
+    } catch (err) { say(friendlyAuthError(err)); }
   };
 }
 
 function friendlyAuthError(e) {
   const c = e && e.code || '';
   if (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found')) return 'Incorrect email or password.';
-  if (c.includes('popup-closed')) return '';
-  if (c.includes('popup-blocked')) return 'Chrome blocked the Google sign-in window. Click the blocked-pop-up icon at the right of the address bar, choose “Always allow pop-ups” for this site, then try again.';
+  if (c.includes('invalid-email')) return 'Enter a valid email address.';
   if (c.includes('unauthorized-domain')) return 'This domain is not authorised in Firebase → Authentication → Settings → Authorised domains.';
   if (c.includes('too-many-requests')) return 'Too many attempts. Try again in a few minutes.';
   return e.message || 'Sign-in failed.';

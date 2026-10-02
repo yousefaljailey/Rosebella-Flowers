@@ -46,7 +46,6 @@ a { color: var(--gold); }
   border: 1px solid rgba(255,255,255,0.12); color: #fff; outline: none;
 }
 .login-card input:focus { border-color: var(--gold); }
-.login-or { text-align: center; font-size: 10px; letter-spacing: 0.2em; color: rgba(255,255,255,0.3); margin: 18px 0 2px; }
 .login-err { color: #ff8a7a; font-size: 12px; min-height: 18px; margin-top: 12px; }
 
 /* ── Buttons ───────────────────────────── */
@@ -66,7 +65,10 @@ a { color: var(--gold); }
 .btn-danger:hover { border-color: var(--bad); }
 .btn-sm { padding: 6px 10px; font-size: 10px; }
 .btn-block { width: 100%; margin-top: 18px; padding: 12px; }
-.btn-google { background: #fff; color: #222; border-color: #fff; }
+.login-links { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.link-btn { background: none; border: none; color: var(--gold); font-size: 11px; cursor: pointer; padding: 0; }
+.link-btn:hover { text-decoration: underline; }
+.login-msg { color: #9fd8a8; }
 
 /* ── Shell ─────────────────────────────── */
 #app { display: grid; grid-template-columns: 230px 1fr; min-height: 100%; }

@@ -19,8 +19,6 @@
     <div class="login-card">
       <div class="brand">ROSE<span>BELLA</span></div>
       <div class="login-sub">Admin Portal</div>
-      <button class="btn btn-google btn-block" id="googleBtn" type="button">Continue with Google</button>
-      <div class="login-or">OR</div>
       <form id="loginForm">
         <label for="loginEmail">Email</label>
         <input id="loginEmail" type="email" autocomplete="username" required>
@@ -29,6 +27,10 @@
         <button class="btn btn-gold btn-block" type="submit">Sign In</button>
       </form>
       <div class="login-err" id="loginErr"></div>
+      <div class="login-links">
+        <button type="button" class="link-btn" id="forgotBtn">Forgot password?</button>
+        <button type="button" class="link-btn" id="verifyBtn" hidden>Send verification email</button>
+      </div>
     </div>
   </section>
 
