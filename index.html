@@ -2616,6 +2616,16 @@
     /* Map */
     .co-map-wrap { position:relative; height:200px; background:#e8e4dc; overflow:hidden; border:1.5px solid #e0dbd0; margin-bottom:8px; }
     #coDeliveryMap { width:100%; height:100%; }
+    .co-addr-search { position:relative; margin-bottom:8px; }
+    .co-addr-search .co-input { padding-left:36px; width:100%; }
+    .co-addr-search-ico { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--taupe); pointer-events:none; }
+    .co-addr-suggest { position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:20; background:#fff; border:1.5px solid #e0dbd0; box-shadow:0 10px 28px rgba(0,0,0,0.12); max-height:260px; overflow-y:auto; }
+    .co-addr-opt { display:block; width:100%; text-align:left; background:none; border:none; border-bottom:1px solid #f1ede4; padding:10px 14px; cursor:pointer; }
+    .co-addr-opt:last-child { border-bottom:none; }
+    .co-addr-opt:hover, .co-addr-opt.active { background:#faf6ea; }
+    .co-addr-main { display:block; font-family:var(--serif); font-size:14px; color:var(--charcoal); }
+    .co-addr-sub { display:block; font-family:var(--sans); font-size:10px; color:var(--taupe); margin-top:2px; }
+    .co-addr-msg { padding:12px 14px; font-family:var(--sans); font-size:11px; color:var(--taupe); }
     .co-map-overlay { position:absolute; inset:0; background:rgba(250,248,240,0.88); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; cursor:pointer; transition:background 0.2s; }
     .co-map-overlay:hover { background:rgba(250,248,240,0.7); }
     .co-map-init-btn { display:flex; align-items:center; gap:8px; font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; background:var(--gold); color:#fff; border:none; cursor:pointer; padding:12px 22px; transition:background 0.2s; }
@@ -2905,6 +2915,20 @@
     }
   </style>
 
+<script>
+  // Remember Google Maps key/billing errors (logged once, when the API loads) so the checkout can explain them
+  (function () {
+    const orig = console.error;
+    console.error = function (...a) {
+      const m = String(a[0] || '');
+      if (m.includes('Google Maps JavaScript API error')) {
+        window.__mapsError = m;
+        if (typeof window.gm_authFailure === 'function') window.gm_authFailure();
+      }
+      return orig.apply(this, a);
+    };
+  })();
+</script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII&amp;loading=async&amp;callback=__mapsForReviews"></script>
 <script src="js/rb-data.js"></script>
 <script src="js/rb-cart.js"></script>
@@ -3142,8 +3166,14 @@
             <div class="co-field">
               <label class="co-label">
                 <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px;vertical-align:-2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                Pin Location on Map
+                Delivery Location
               </label>
+              <div class="co-addr-search">
+                <svg class="co-addr-search-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+                <input id="coAddrSearch" class="co-input" type="text" autocomplete="off" placeholder="Search address, building, street or area"
+                  oninput="coAddrInput(this.value)" onfocus="coAddrInput(this.value)" onkeydown="coAddrKey(event)">
+                <div id="coAddrSuggest" class="co-addr-suggest" hidden></div>
+              </div>
               <div class="co-map-wrap">
                 <div id="coDeliveryMap"></div>
                 <div class="co-map-overlay" id="coMapOverlay">
@@ -3151,7 +3181,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     Tap to Set Location on Map
                   </button>
-                  <span class="co-map-api-note">Click anywhere in Qatar to drop a pin. Address auto-fills below.</span>
+                  <span class="co-map-api-note">Search above, or tap the map to drop a pin. You can drag the pin to fine-tune. Address auto-fills below.</span>
                 </div>
               </div>
               <button class="co-use-location-btn" type="button" onclick="coUseMyLocation()">
@@ -6046,23 +6076,36 @@
   const MAPS_API_KEY = 'AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII';
   let coMap = null, coMarker = null, mapsScriptLoaded = false;
 
+  const DOHA = { lat: 25.2854, lng: 51.5310 };
+  let mapsFailed = !!window.__mapsError;
+
+  // Google calls this when the key is rejected (e.g. billing not enabled)
+  window.gm_authFailure = function() {
+    mapsFailed = true;
+    const overlay = document.getElementById('coMapOverlay');
+    if (overlay) {
+      overlay.style.display = '';
+      overlay.innerHTML = `<span class="co-map-api-note" style="max-width:300px;font-size:11px;">
+        The map isn’t available right now. Please type the full delivery address below.</span>`;
+    }
+  };
+
   // Callback must be on window BEFORE the script tag is appended
-  window.onMapsReady = function() {
+  window.onMapsReady = async function() {
     const mapEl   = document.getElementById('coDeliveryMap');
     const overlay = document.getElementById('coMapOverlay');
-    if (!mapEl) return; // checkout not open yet — user hasn't tapped the map
+    if (window.__mapsError) { window.gm_authFailure(); return; }
+    if (!mapEl || mapsFailed || !window.google?.maps) return;
+    if (!google.maps.Map || !google.maps.Geocoder || !google.maps.Marker) {
+      try {
+        await Promise.all(['maps', 'geocoding', 'marker'].map(l => google.maps.importLibrary(l)));
+      } catch (e) { window.gm_authFailure(); return; }
+    }
+    if (coMap) { if (overlay) overlay.style.display = 'none'; return; }
 
     if (overlay) overlay.style.display = 'none';
-
-    if (coMap) {
-      // Map already exists — just trigger a resize in case container was hidden
-      google.maps.event.trigger(coMap, 'resize');
-      coMap.setCenter({ lat: 25.2854, lng: 51.5310 });
-      return;
-    }
-
     coMap = new google.maps.Map(mapEl, {
-      center: { lat: 25.2854, lng: 51.5310 },
+      center: DOHA,
       zoom: 12,
       mapTypeControl: false,
       streetViewControl: false,
@@ -6070,79 +6113,194 @@
       styles: [{ featureType:'poi', elementType:'labels', stylers:[{visibility:'off'}] }]
     });
     coMap.addListener('click', e => dropPin(e.latLng));
+
+    // Billing / key problems don't always call gm_authFailure — the map just never draws.
+    // If no tiles arrive in time, explain it instead of leaving a blank box.
+    let tiles = false;
+    google.maps.event.addListenerOnce(coMap, 'tilesloaded', () => { tiles = true; });
+    setTimeout(() => {
+      if (!tiles || mapEl.querySelector('.gm-err-container')) { coMap = null; window.gm_authFailure(); }
+    }, 7000);
   };
 
   function loadMapsScript() {
     if (mapsScriptLoaded || window.google?.maps) {
-      // Already loaded — just call the callback directly
       if (window.google?.maps) window.onMapsReady();
       return;
     }
     mapsScriptLoaded = true;
     const s = document.createElement('script');
-    // callback=onMapsReady is set above BEFORE this runs
     s.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_API_KEY}&callback=onMapsReady&loading=async&v=weekly`;
     s.async = true;
-    s.onerror = () => {
-      mapsScriptLoaded = false;
-      const overlay = document.getElementById('coMapOverlay');
-      if (overlay) overlay.innerHTML = `<div style="padding:20px;text-align:center;">
-        <p style="font-family:var(--sans);font-size:11px;color:var(--taupe);line-height:1.7;max-width:280px;">
-          Maps failed to load.<br>Check that your API key allows <strong>localhost</strong> in Google Cloud Console →
-          API key → HTTP referrers.
-        </p></div>`;
-    };
+    s.onerror = () => { mapsScriptLoaded = false; window.gm_authFailure(); };
     document.head.appendChild(s);
   }
 
+  // Resolves once the Maps JS API (incl. importLibrary) is available
+  function ensureMaps() {
+    return new Promise((resolve, reject) => {
+      if (mapsFailed || window.__mapsError) return reject(new Error('maps unavailable'));
+      if (window.google?.maps?.importLibrary) return resolve();
+      loadMapsScript();
+      const t0 = Date.now();
+      const iv = setInterval(() => {
+        if (window.google?.maps?.importLibrary) { clearInterval(iv); resolve(); }
+        else if (mapsFailed || Date.now() - t0 > 10000) { clearInterval(iv); reject(new Error('maps unavailable')); }
+      }, 150);
+    });
+  }
+
   function initCoMap() {
-    // If Maps already loaded, render immediately
-    if (window.google?.maps) { window.onMapsReady(); return; }
-    // Otherwise load the script (callback fires when ready)
+    if (window.__mapsError) { window.gm_authFailure(); return; }
+    if (window.google?.maps) return window.onMapsReady();
     loadMapsScript();
   }
 
-  function dropPin(latLng) {
+  function placePin(latLng) {
     if (coMarker) coMarker.setMap(null);
-    coMarker = new google.maps.Marker({ position: latLng, map: coMap,
+    coMarker = new google.maps.Marker({ position: latLng, map: coMap, draggable: true,
       icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: '#C6922A', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
     });
-    reverseGeocode(latLng.lat(), latLng.lng());
+    coMarker.addListener('dragend', e => reverseGeocode(e.latLng.lat(), e.latLng.lng(), true));
+  }
+
+  function dropPin(latLng) {
+    placePin(latLng);
+    reverseGeocode(latLng.lat(), latLng.lng(), true);
   }
 
   function coUseMyLocation() {
     if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
-    navigator.geolocation.getCurrentPosition(pos => {
+    navigator.geolocation.getCurrentPosition(async pos => {
       const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      if (coMap) { coMap.setCenter(latLng); coMap.setZoom(15); dropPin(new google.maps.LatLng(latLng)); }
-      else reverseGeocode(latLng.lat, latLng.lng);
-    }, () => alert('Unable to get your location. Please pin manually on the map.'));
+      try { await ensureMaps(); await initCoMap(); } catch (e) { return; }
+      if (coMap) { coMap.setCenter(latLng); coMap.setZoom(16); dropPin(new google.maps.LatLng(latLng)); }
+    }, () => alert('Unable to get your location. Please search for the address or pin it on the map.'));
   }
 
-  function reverseGeocode(lat, lng) {
-    if (!window.google?.maps) return;
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+  // Picks the matching option in the Recipient Area list
+  function coMatchArea(names) {
+    const areaEl = document.getElementById('coArea');
+    if (!areaEl) return;
+    const opts = Array.from(areaEl.options).filter(o => o.value);
+    for (const name of names.filter(Boolean)) {
+      const n = name.toLowerCase();
+      const match = opts.find(o => n.includes(o.value.toLowerCase()) || o.value.toLowerCase().includes(n));
+      if (match) { areaEl.value = match.value; return; }
+    }
+  }
+
+  function coSetAddress(text) {
+    const addrEl = document.getElementById('coAddress');
+    if (addrEl) addrEl.value = text;
+    const lbl = document.getElementById('coMapAddress');
+    if (lbl) lbl.textContent = text;
+  }
+
+  function reverseGeocode(lat, lng, overwrite) {
+    if (!window.google?.maps?.Geocoder) return;
+    new google.maps.Geocoder().geocode({ location: { lat, lng } }, (results, status) => {
       if (status !== 'OK' || !results[0]) return;
       const addr = results[0];
-      // Fill address textarea
       const addrEl = document.getElementById('coAddress');
-      if (addrEl && !addrEl.value) addrEl.value = addr.formatted_address;
-      document.getElementById('coMapAddress').textContent = addr.formatted_address;
-      // Try to auto-select area
-      const areaEl = document.getElementById('coArea');
-      if (areaEl) {
-        const components = addr.address_components || [];
-        const sublocality = components.find(c => c.types.includes('sublocality') || c.types.includes('neighborhood'));
-        const locality    = components.find(c => c.types.includes('locality'));
-        const name = (sublocality || locality)?.long_name || '';
-        // Try to match to one of our options
-        const opts = Array.from(areaEl.options);
-        const match = opts.find(o => name.toLowerCase().includes(o.value.toLowerCase()) || o.value.toLowerCase().includes(name.toLowerCase()));
-        if (match) areaEl.value = match.value;
-      }
+      if (overwrite || (addrEl && !addrEl.value)) coSetAddress(addr.formatted_address);
+      else document.getElementById('coMapAddress').textContent = addr.formatted_address;
+      const comps = addr.address_components || [];
+      coMatchArea(comps.filter(c => c.types.some(t => ['neighborhood','sublocality','sublocality_level_1','locality'].includes(t))).map(c => c.long_name));
     });
   }
+
+  // ── Address search (Places autocomplete, Qatar only) ──
+  let coSearchTimer = null, coSearchToken = null, coSuggestions = [], coSuggestIdx = -1;
+
+  function coHideSuggest() {
+    const box = document.getElementById('coAddrSuggest');
+    if (box) { box.hidden = true; box.innerHTML = ''; }
+    coSuggestions = []; coSuggestIdx = -1;
+  }
+
+  function coAddrInput(q) {
+    clearTimeout(coSearchTimer);
+    q = (q || '').trim();
+    if (q.length < 3) { coHideSuggest(); return; }
+    coSearchTimer = setTimeout(() => coFetchSuggestions(q), 250);
+  }
+
+  async function coFetchSuggestions(q) {
+    const box = document.getElementById('coAddrSuggest');
+    try {
+      await ensureMaps();
+      const { AutocompleteSuggestion, AutocompleteSessionToken } = await google.maps.importLibrary('places');
+      if (!coSearchToken) coSearchToken = new AutocompleteSessionToken();
+      const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+        input: q, sessionToken: coSearchToken, includedRegionCodes: ['qa'], language: 'en',
+      });
+      if (document.getElementById('coAddrSearch').value.trim() !== q) return; // a newer search is running
+      coSuggestions = (suggestions || []).filter(s => s.placePrediction).slice(0, 6);
+      coSuggestIdx = -1;
+      box.innerHTML = coSuggestions.length
+        ? coSuggestions.map((s, i) => {
+            const p = s.placePrediction;
+            const main = p.mainText ? p.mainText.toString() : p.text.toString();
+            const sub  = p.secondaryText ? p.secondaryText.toString() : '';
+            return `<button type="button" class="co-addr-opt" data-i="${i}" onmousedown="event.preventDefault();coPickSuggestion(${i})">
+              <span class="co-addr-main">${main.replace(/</g,'&lt;')}</span>${sub ? `<span class="co-addr-sub">${sub.replace(/</g,'&lt;')}</span>` : ''}</button>`;
+          }).join('')
+        : '<div class="co-addr-msg">No matches — try a building name, street or area, or drop a pin on the map.</div>';
+      box.hidden = false;
+    } catch (e) {
+      console.warn('Address search unavailable:', e);
+      if (/permission|billing|denied/i.test(String(e && e.message))) window.gm_authFailure();
+      box.innerHTML = '<div class="co-addr-msg">Address search isn’t available right now — please type the full address below.</div>';
+      box.hidden = false;
+    }
+  }
+
+  function coAddrKey(e) {
+    const box = document.getElementById('coAddrSuggest');
+    if (!coSuggestions.length || box.hidden) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      coSuggestIdx = (coSuggestIdx + (e.key === 'ArrowDown' ? 1 : -1) + coSuggestions.length) % coSuggestions.length;
+      box.querySelectorAll('.co-addr-opt').forEach((b, i) => b.classList.toggle('active', i === coSuggestIdx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      coPickSuggestion(coSuggestIdx >= 0 ? coSuggestIdx : 0);
+    } else if (e.key === 'Escape') {
+      coHideSuggest();
+    }
+  }
+
+  async function coPickSuggestion(i) {
+    const s = coSuggestions[i];
+    if (!s) return;
+    const input = document.getElementById('coAddrSearch');
+    input.value = s.placePrediction.text.toString();
+    coHideSuggest();
+    try {
+      const place = s.placePrediction.toPlace();
+      await place.fetchFields({ fields: ['location', 'formattedAddress', 'displayName', 'addressComponents'] });
+      coSearchToken = null; // session ends when a place is chosen
+      const name = place.displayName || '';
+      const full = place.formattedAddress || input.value;
+      coSetAddress(name && !full.startsWith(name) ? `${name}, ${full}` : full);
+      coMatchArea((place.addressComponents || [])
+        .filter(c => c.types.some(t => ['neighborhood','sublocality','sublocality_level_1','locality'].includes(t)))
+        .map(c => c.longText));
+      await initCoMap();
+      if (coMap && place.location) {
+        coMap.setCenter(place.location);
+        coMap.setZoom(17);
+        placePin(place.location);
+      }
+    } catch (e) {
+      console.warn('Could not load place details:', e);
+    }
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.co-addr-search')) coHideSuggest();
+  });
 
 
   // ── Mobile nav ────────────────────────────────
