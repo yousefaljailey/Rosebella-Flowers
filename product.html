@@ -431,7 +431,7 @@
     /* ── PRODUCT PAGE ── */
     .pd { max-width: 1180px; margin: 0 auto; padding: 28px 60px 60px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 56px; align-items: start; }
     .pd-gallery { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 14px; position: sticky; top: 92px; }
-    .pd-thumbs { display: flex; flex-direction: column; gap: 10px; max-height: 620px; overflow-y: auto; scrollbar-width: none; }
+    .pd-thumbs { position: relative; display: flex; flex-direction: column; gap: 10px; max-height: 620px; overflow-y: auto; scrollbar-width: none; }
     .pd-thumbs::-webkit-scrollbar { display: none; }
     .pd-thumb { width: 78px; height: 78px; flex-shrink: 0; border-radius: 10px; border: 2px solid transparent; padding: 0; cursor: pointer;
       background: #efe9dc center / cover no-repeat; opacity: .7; transition: opacity .2s, border-color .2s; }
@@ -883,7 +883,18 @@ function pdShow(i, inLightbox) {
     main.style.backgroundPosition = pdIndex === 0 && pdProduct.imagePos ? pdProduct.imagePos : 'center';
   }
   document.querySelectorAll('.pd-thumb').forEach(t => t.classList.toggle('active', +t.dataset.i === pdIndex));
-  document.querySelector('.pd-thumb.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  // Keep the active thumbnail visible by scrolling the strip only (never the page)
+  const strip = document.getElementById('pdThumbs'), act = document.querySelector('.pd-thumb.active');
+  if (strip && act) {
+    const vertical = strip.scrollHeight > strip.clientHeight;
+    if (vertical) {
+      if (act.offsetTop < strip.scrollTop) strip.scrollTop = act.offsetTop;
+      else if (act.offsetTop + act.offsetHeight > strip.scrollTop + strip.clientHeight) strip.scrollTop = act.offsetTop + act.offsetHeight - strip.clientHeight;
+    } else {
+      if (act.offsetLeft < strip.scrollLeft) strip.scrollLeft = act.offsetLeft;
+      else if (act.offsetLeft + act.offsetWidth > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = act.offsetLeft + act.offsetWidth - strip.clientWidth;
+    }
+  }
   if (inLightbox || document.getElementById('pdLightbox').classList.contains('show')) {
     const img = document.getElementById('pdLbImg');
     img.classList.remove('zoomed');
