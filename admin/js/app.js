@@ -77,8 +77,14 @@ function subscribe() {
     refresh('slides');
   }, e => toast(firestoreError(e), true));
 
+  let firstOrders = true;
   db.collection('orders').orderBy('createdAt', 'desc').limit(300).onSnapshot(qs => {
     state.orders = qs.docs.map(d => ({ ...d.data(), id: d.id }));
+    // New order alerts (not for the orders already there when the portal opened)
+    if (!firstOrders) qs.docChanges().forEach(ch => {
+      if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) newOrderAlert({ ...ch.doc.data(), id: ch.doc.id });
+    });
+    firstOrders = false;
     state.ordersError = null;
     const pending = state.orders.filter(o => (o.status || 'pending') === 'pending').length;
     const pc = document.getElementById('pendingCount');
@@ -274,6 +280,7 @@ PAGES.orders = {
     });
     el.querySelectorAll('[data-status]').forEach(b => b.onclick = () => setOrderStatus(b.dataset.id, b.dataset.status));
     el.querySelectorAll('[data-verify]').forEach(b => b.onclick = () => verifyPayment(b));
+    el.querySelectorAll('[data-invoice]').forEach(b => b.onclick = () => sendInvoice(b.dataset.invoice));
   },
 };
 
@@ -315,9 +322,12 @@ function orderHTML(o) {
         ${r.occasion ? `<p class="order-meta">Occasion: ${esc(r.occasion)}</p>` : ''}
         ${r.notes ? `<p class="order-meta">Notes: ${esc(r.notes)}</p>` : ''}
         <div class="row" style="margin-top:10px">
+          ${invoicePhone(o) ? `<button class="btn btn-sm btn-gold" data-invoice="${esc(o.id)}">${o.invoiceSentAt ? 'Send invoice again' : 'Send invoice'}</button>` : ''}
           ${phone ? `<a class="btn btn-sm" href="https://wa.me/${phone}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
           ${addr ? `<a class="btn btn-sm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}" target="_blank" rel="noopener">Map</a>` : ''}
         </div>
+        ${o.invoiceSentAt ? `<p class="order-meta" style="margin-top:6px">✓ Invoice sent ${fmtDate(o.invoiceSentAt)}</p>` : ''}
+        ${o.buyer?.phone && o.recipient?.notes === 'gift' ? `<h4 style="margin-top:14px">Ordered by</h4><p>${esc(o.buyer.name || '')} ${esc(o.buyer.phone)}</p>` : ''}
         ${o.customer?.email ? `<h4 style="margin-top:14px">Customer</h4><p>${esc(o.customer.name || '')} ${esc(o.customer.email)}</p>` : ''}
         ${o.appliedPromo?.code ? `<p class="order-meta">Promo: ${esc(o.appliedPromo.code)}</p>` : ''}
         ${o.payment?.paymentId ? `<h4 style="margin-top:14px">Payment</h4>
@@ -327,6 +337,126 @@ function orderHTML(o) {
       </div>
     </div>` : ''}
   </div>`;
+}
+
+// ── New order alerts: sound + popup + desktop notification ──
+const ALERTS_KEY = 'rb_order_alerts';
+let audioCtx = null, unseenOrders = 0;
+const alertsOn = () => { try { return localStorage.getItem(ALERTS_KEY) !== 'off'; } catch (e) { return true; } };
+
+function chime() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const t0 = audioCtx.currentTime;
+    // Two soft rising "ding-dong" chimes
+    [[0, 880], [0.18, 1318.5], [0.9, 880], [1.08, 1318.5]].forEach(([at, f]) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0 + at);
+      g.gain.exponentialRampToValueAtTime(0.35, t0 + at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + 0.7);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0 + at); o.stop(t0 + at + 0.75);
+    });
+  } catch (e) {}
+}
+
+function newOrderAlert(o) {
+  if (!alertsOn()) return;
+  chime();
+  const r = o.recipient || {};
+  const items = (o.items || []).map(i => `${i.name} ×${i.qty || 1}`).join(', ');
+  // Pop-up inside the portal
+  const box = document.createElement('div');
+  box.className = 'order-alert';
+  box.innerHTML = `<div class="oa-hd"><b>🛎 New order</b><button class="oa-x" title="Dismiss">✕</button></div>
+    <div class="oa-id">${esc(o.id)} · <b>${money(o.total)}</b></div>
+    <div class="oa-meta">${esc(items)}</div>
+    <div class="oa-meta">${esc(r.name || '')} · ${esc(o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Paid online')}</div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-sm btn-gold" data-a="view">View order</button>
+      ${invoicePhone(o) ? '<button class="btn btn-sm" data-a="inv">Send invoice</button>' : ''}
+    </div>`;
+  box.querySelector('.oa-x').onclick = () => box.remove();
+  box.querySelector('[data-a=view]').onclick = () => {
+    state.orderFilter = 'all'; state.openOrders.add(o.id);
+    location.hash = 'orders'; render(); box.remove();
+    setTimeout(() => document.querySelector(`[data-toggle="${CSS.escape(o.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  };
+  box.querySelector('[data-a=inv]')?.addEventListener('click', () => { sendInvoice(o.id); box.remove(); });
+  document.getElementById('orderAlerts').prepend(box);
+  // Desktop notification (shows even when this tab is in the background)
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      const n = new Notification(`New order ${o.id} — ${money(o.total)}`, { body: items + (r.name ? `\n${r.name}` : ''), tag: o.id, requireInteraction: true });
+      n.onclick = () => { window.focus(); box.querySelector('[data-a=view]').click(); n.close(); };
+    } catch (e) {}
+  }
+  // Tab title counter until the portal is looked at
+  if (document.hidden) { unseenOrders++; document.title = `(${unseenOrders}) New order — Rosebella Admin`; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { unseenOrders = 0; document.title = 'Rosebella Admin'; }
+});
+
+function syncAlertsBtn() {
+  const st = document.getElementById('alertsState'); if (!st) return;
+  const perm = 'Notification' in window ? Notification.permission : 'denied';
+  st.textContent = !alertsOn() ? 'Off' : perm === 'granted' ? 'On' : 'Sound only';
+}
+document.getElementById('alertsBtn')?.addEventListener('click', async () => {
+  const perm = 'Notification' in window ? Notification.permission : 'denied';
+  if (alertsOn() && perm === 'default') { await Notification.requestPermission(); }
+  else { try { localStorage.setItem(ALERTS_KEY, alertsOn() ? 'off' : 'on'); } catch (e) {} }
+  syncAlertsBtn();
+  if (alertsOn()) { chime(); toast(Notification.permission === 'granted' ? 'Order alerts on — sound + pop-up + desktop notification' : 'Order alerts on (sound + pop-up). Allow notifications in the browser for desktop pop-ups.'); }
+  else toast('Order alerts off');
+});
+// Browsers only allow sound after a click on the page — unlock it on the first click
+document.addEventListener('pointerdown', () => { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }, { once: true });
+syncAlertsBtn();
+
+// ── Invoice by WhatsApp ──
+// Goes to the person who placed the order; for gifts never to the recipient
+function invoicePhone(o) {
+  const d = String(o.buyer?.phone || (o.recipient?.notes !== 'gift' ? o.recipient?.phone : '') || '').replace(/\D/g, '');
+  if (!d) return '';
+  return d.length === 8 ? '974' + d : d;
+}
+function invoiceText(o) {
+  const ds = o.deliverySlot || {};
+  const items = o.items || [];
+  const sub = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 1), 0);
+  const fee = Number(ds.expressFee) || 0;
+  const discount = Math.max(0, Math.round((sub - (Number(o.total) || 0)) * 100) / 100);
+  const store = state.settings?.store || {};
+  const lines = [
+    `🌹 *ROSEBELLA — Invoice*`,
+    `Order *${o.id}*`,
+    `Date: ${fmtDate(o.createdAt)}`,
+    '',
+    ...items.map(i => `• ${i.name}${i.variants?.addons?.length ? ' + ' + i.variants.addons.join(', ') : ''} ×${i.qty || 1} — QR ${((Number(i.price) || 0) * (Number(i.qty) || 1)).toFixed(0)}`),
+    '',
+    ...(fee ? [`Delivery fee: QR ${fee}  (included above)`] : []),
+    ...(discount && o.appliedPromo?.code ? [`Promo ${o.appliedPromo.code}: −QR ${discount}`] : []),
+    `*Total: QR ${Number(o.total || 0).toFixed(0)}*`,
+    `Payment: ${o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Paid online' + (o.payment?.invoiceId ? ' (ref ' + o.payment.invoiceId + ')' : '')}`,
+    '',
+    `🚚 Delivery: ${ds.type === 'express' ? 'Express (90 min)' : [ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · ')}`,
+    ...(o.recipient?.notes === 'gift' ? [`🎁 For: ${o.recipient.name || ''}`] : []),
+    '',
+    `Thank you for choosing Rosebella 💐`,
+    `rosebella.qa${store.phone ? ' · ' + store.phone : ''}`,
+  ];
+  return lines.join('\n');
+}
+async function sendInvoice(id) {
+  const o = state.orders.find(x => x.id === id); if (!o) return;
+  const phone = invoicePhone(o);
+  if (!phone) { toast('This order has no customer phone number', true); return; }
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(invoiceText(o))}`, '_blank', 'noopener');
+  try { await db.collection('orders').doc(id).update({ invoiceSentAt: new Date().toISOString() }); } catch (e) { toast(firestoreError(e), true); }
 }
 
 function slotLabel(id) {

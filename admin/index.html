@@ -7,7 +7,7 @@
   <title>Rosebella Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=202610032123">
+  <link rel="stylesheet" href="css/admin.css?v=202610032136">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -52,6 +52,7 @@
       <div class="nav-sep"></div>
       <a class="nav-btn" href="pos.html">🏪 POS Mode</a>
       <a class="nav-btn" id="storefrontLink" target="_blank" rel="noopener">↗ View Storefront</a>
+      <button class="nav-btn" id="alertsBtn" type="button">🔔 Order alerts: <b id="alertsState">On</b></button>
       <div class="side-foot">
         <div id="whoami"></div>
         <button class="btn btn-sm btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.2)" onclick="signOut()">Sign out</button>
@@ -66,8 +67,9 @@
   </div>
 
   <div id="modalRoot"></div>
+  <div id="orderAlerts"></div>
 
-  <script src="js/shared.js?v=202610032123"></script>
-  <script src="js/app.js?v=202610032123"></script>
+  <script src="js/shared.js?v=202610032136"></script>
+  <script src="js/app.js?v=202610032136"></script>
 </body>
 </html>

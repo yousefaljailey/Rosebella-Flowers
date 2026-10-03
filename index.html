@@ -3217,6 +3217,14 @@
           </div>
           <div class="co-section-body">
 
+            <div class="co-field" id="coMyPhoneField">
+              <label class="co-label" for="coMyPhone">Your Phone Number <span class="co-req">*</span></label>
+              <div class="co-phone-row">
+                <div class="co-phone-prefix"><span class="co-phone-flag">🇶🇦</span><span class="co-phone-code">+974</span></div>
+                <input id="coMyPhone" class="co-input co-phone-input" type="tel" placeholder="5555 1234" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')">
+              </div>
+            </div>
+
             <!-- Send as a gift (we collect the address from the recipient) -->
             <label class="co-gift-card" for="coSendAsGift">
               <span class="co-gift-ico">🎁</span>
@@ -3253,13 +3261,6 @@
             <div id="coAddrFields">
             <div class="co-block-title"><span>📍</span> Delivery address <small class="co-opt-tag" id="coAddrOptTag" hidden>optional</small></div>
             <p class="co-addr-gift-note" id="coAddrGiftNote" hidden>Know where it's going? Add the location below. Leave it empty and we'll call the recipient for their address.</p>
-            <div class="co-field" id="coMyPhoneField">
-              <label class="co-label" for="coMyPhone">Your Phone Number <span class="co-req">*</span></label>
-              <div class="co-phone-row">
-                <div class="co-phone-prefix"><span class="co-phone-flag">🇶🇦</span><span class="co-phone-code">+974</span></div>
-                <input id="coMyPhone" class="co-input co-phone-input" type="tel" placeholder="5555 1234" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')">
-              </div>
-            </div>
             <!-- Location map -->
             <div class="co-field">
               <label class="co-label">
@@ -4410,6 +4411,7 @@
   let giftMessage  = loadGiftMsg();
   let deliverySlot = loadDelivery();
   let recipient    = loadRecipient();
+  let buyer        = { name: '', phone: '' };   // who placed the order (gets the invoice)
 
   // ── Recipient helpers ─────────────────────────
   function onRecipientInput(field, value) {
@@ -5228,7 +5230,8 @@
     const ph = recipient.phone ? recipient.phone.replace(/^\+?974\s?/, '') : '';
     setVal('coName',     wasGift ? recipient.name : '');
     setVal('coPhoneNum', wasGift ? ph : '');
-    setVal('coMyPhone',  wasGift ? '' : ph);
+    let savedBuyer = ''; try { savedBuyer = localStorage.getItem('rb_buyer_phone') || ''; } catch (e) {}
+    setVal('coMyPhone',  savedBuyer || (wasGift ? '' : ph));
     // Find area from saved data
     const areaEl = document.getElementById('coArea');
     if (areaEl && recipient.landmark) areaEl.value = recipient.landmark;
@@ -5377,11 +5380,12 @@
     const name    = isGift ? document.getElementById('coName').value.trim() : (me.name && me.name !== 'Guest' ? me.name : 'Customer');
     const phoneId = isGift ? 'coPhoneNum' : 'coMyPhone';
     const phone   = document.getElementById(phoneId).value.trim();
+    const myPhone = document.getElementById('coMyPhone').value.trim();
     const area    = document.getElementById('coArea').value;
     const address = document.getElementById('coAddress').value.trim();
 
     let valid = true;
-    const required = isGift ? [['coName', name], ['coPhoneNum', phone]]
+    const required = isGift ? [['coName', name], ['coPhoneNum', phone], ['coMyPhone', myPhone]]
                             : [['coMyPhone', phone], ['coArea', area], ['coAddress', address]];
     ['coName', 'coPhoneNum', 'coMyPhone', 'coArea', 'coAddress'].forEach(id => document.getElementById(id)?.classList.remove('err'));
     required.forEach(([id, v]) => {
@@ -5389,6 +5393,7 @@
       if (!v) { el?.classList.add('err'); valid = false; }
     });
     if (phone && !/^\d{8}$/.test(phone)) { document.getElementById(phoneId).classList.add('err'); valid = false; }
+    if (myPhone && !/^\d{8}$/.test(myPhone)) { document.getElementById('coMyPhone').classList.add('err'); valid = false; }
     if (!coDeliverySlotId) {
       document.getElementById('coDtTrigger').style.borderColor = '#e05060';
       valid = false;
@@ -5416,6 +5421,8 @@
     };
     deliverySlot = { date: coDeliveryDate || toDateStr(new Date()), slot: coDeliverySlotId, type: coDeliveryType, expressFee: coExpressFee };
     giftMessage  = document.getElementById('coGiftMsg')?.value.trim() || '';
+    buyer = { name: me.name && me.name !== 'Guest' ? me.name : '', phone: '+974 ' + myPhone };
+    try { localStorage.setItem('rb_buyer_phone', myPhone); } catch (e) {}
     saveRecipient(); saveDelivery(); saveGiftMsg();
     return true;
   }
@@ -5459,7 +5466,7 @@
   function pyBuildSnapshot() {
     return {
       cart: cart.map(i => ({...i})), total: pyCalcTotal(),
-      recipient: {...recipient}, deliverySlot: {...deliverySlot},
+      recipient: {...recipient}, buyer: {...buyer}, deliverySlot: {...deliverySlot},
       giftMessage, coPayment: coPayMethod, appliedPromo, coExpressFee
     };
   }
@@ -5769,8 +5776,8 @@
     const gift = coIsGift();
     const r = document.getElementById('coRecipFields');
     if (r) r.style.display = gift ? '' : 'none';
-    const myPhone = document.getElementById('coMyPhoneField');
-    if (myPhone) myPhone.style.display = gift ? 'none' : '';
+    const myPhoneLbl = document.querySelector('label[for="coMyPhone"]');
+    if (myPhoneLbl) myPhoneLbl.firstChild.textContent = gift ? 'Your Phone Number (for your receipt) ' : 'Your Phone Number ';
     document.getElementById('coAddrOptTag').hidden = !gift;
     document.getElementById('coAddrGiftNote').hidden = !gift;
     document.querySelectorAll('.co-addr-req').forEach(el => el.style.display = gift ? 'none' : '');
@@ -5792,7 +5799,7 @@
     document.getElementById('pySuccessTotalVal').textContent = snap.total.toFixed(0);
     // Save order
     const orders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
-    orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod, paymentIntentId, payment: payment || null, appliedPromo: snap.appliedPromo || null, recipient:snap.recipient, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
+    orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod, paymentIntentId, payment: payment || null, appliedPromo: snap.appliedPromo || null, recipient:snap.recipient, buyer:snap.buyer || null, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
     localStorage.setItem('rosebella_orders', JSON.stringify(orders));
     saveOrderToFirestore(orders[0]);
     // Clear cart
