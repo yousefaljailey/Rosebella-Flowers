@@ -262,6 +262,7 @@ PAGES.orders = {
       <div class="row" style="margin-bottom:12px">
         <input class="input" id="orderSearch" placeholder="Search by order ID, name, phone, address…" value="${esc(state.orderQuery)}" style="max-width:380px">
       </div>
+      ${waApi.checked && !waApi.configured ? '<div class="banner" style="margin-bottom:12px;background:#fff7e6;border:1px solid #f0d9a8;font-size:13px">WhatsApp API not connected yet — “Send receipt on WhatsApp” opens WhatsApp with the message ready instead of sending it automatically.</div>' : ''}
       <div class="filters">${chips}</div>
       ${list.length ? list.map(orderHTML).join('') : '<div class="empty">No orders here yet.</div>'}`;
   },
@@ -280,7 +281,7 @@ PAGES.orders = {
     });
     el.querySelectorAll('[data-status]').forEach(b => b.onclick = () => setOrderStatus(b.dataset.id, b.dataset.status));
     el.querySelectorAll('[data-verify]').forEach(b => b.onclick = () => verifyPayment(b));
-    el.querySelectorAll('[data-invoice]').forEach(b => b.onclick = () => sendInvoice(b.dataset.invoice));
+    el.querySelectorAll('[data-invoice]').forEach(b => b.onclick = () => sendInvoice(b.dataset.invoice, b));
     el.querySelectorAll('[data-email]').forEach(b => b.onclick = () => emailReceipt(b.dataset.email));
     el.querySelectorAll('[data-pdf]').forEach(b => b.onclick = () => downloadReceipt(b.dataset.pdf));
     el.querySelectorAll('[data-share]').forEach(b => b.onclick = () => shareReceipt(b.dataset.share));
@@ -325,14 +326,13 @@ function orderHTML(o) {
         ${r.occasion ? `<p class="order-meta">Occasion: ${esc(r.occasion)}</p>` : ''}
         ${r.notes ? `<p class="order-meta">Notes: ${esc(r.notes)}</p>` : ''}
         <div class="row" style="margin-top:10px">
-          ${invoicePhone(o) ? `<button class="btn btn-sm btn-gold" data-invoice="${esc(o.id)}">${o.invoiceSentAt ? 'WhatsApp receipt again' : 'WhatsApp receipt'}</button>` : ''}
+          ${invoicePhone(o) ? `<button class="btn btn-sm btn-gold" data-invoice="${esc(o.id)}">${o.invoiceSentAt ? 'Send receipt on WhatsApp again' : 'Send receipt on WhatsApp'}</button>` : ''}
           ${o.customer?.email ? `<button class="btn btn-sm btn-gold" data-email="${esc(o.id)}">${o.receiptEmailedAt ? 'Email receipt again' : 'Email receipt'}</button>` : ''}
           <button class="btn btn-sm" data-pdf="${esc(o.id)}">⬇ Receipt PDF</button>
           ${canShareFiles ? `<button class="btn btn-sm" data-share="${esc(o.id)}">Share PDF</button>` : ''}
-          ${phone ? `<a class="btn btn-sm" href="https://wa.me/${phone}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
           ${addr ? `<a class="btn btn-sm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}" target="_blank" rel="noopener">Map</a>` : ''}
         </div>
-        ${o.invoiceSentAt ? `<p class="order-meta" style="margin-top:6px">✓ Receipt sent on WhatsApp ${fmtDate(o.invoiceSentAt)}</p>` : ''}
+        ${o.invoiceSentAt ? `<p class="order-meta" style="margin-top:6px">✓ Receipt ${o.invoiceVia === 'whatsapp-api' ? 'delivered' : 'opened'} on WhatsApp ${fmtDate(o.invoiceSentAt)}</p>` : ''}
         ${o.receiptEmailedAt ? `<p class="order-meta" style="margin-top:2px">✓ Receipt emailed ${fmtDate(o.receiptEmailedAt)}</p>` : ''}
         ${o.buyer?.phone && o.recipient?.notes === 'gift' ? `<h4 style="margin-top:14px">Ordered by</h4><p>${esc(o.buyer.name || '')} ${esc(o.buyer.phone)}</p>` : ''}
         ${o.customer?.email ? `<h4 style="margin-top:14px">Customer</h4><p>${esc(o.customer.name || '')} ${esc(o.customer.email)}</p>` : ''}
@@ -403,7 +403,7 @@ function newOrderAlert(o) {
     <div class="oa-meta">${esc(r.name || '')} · ${esc(o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Paid online')}</div>
     <div class="row" style="margin-top:10px">
       <button class="btn btn-sm btn-gold" data-a="view">View order</button>
-      ${invoicePhone(o) ? '<button class="btn btn-sm" data-a="inv">WhatsApp receipt</button>' : ''}
+      ${invoicePhone(o) ? '<button class="btn btn-sm" data-a="inv">Send receipt on WhatsApp</button>' : ''}
     </div>`;
   box.querySelector('.oa-x').onclick = () => { box.remove(); if (!document.querySelector('.order-alert')) stopRinging(); };
   box.querySelector('[data-a=view]').onclick = () => {
@@ -509,15 +509,46 @@ async function openAfter(makeUrl, label) {
   try { const url = await makeUrl(); if (w) w.location.href = url; else window.open(url, '_blank'); return true; }
   catch (e) { if (w) w.close(); toast(e.message || String(e), true); return false; }
 }
-async function sendInvoice(id) {
+// WhatsApp Cloud API (api/whatsapp on the storefront) — sends the PDF straight to the customer
+let waApi = { checked: false, configured: false };
+fetch(`${STOREFRONT_URL}/api/whatsapp`).then(r => r.json()).then(d => { waApi = { checked: true, configured: !!d.configured }; refresh('orders'); })
+  .catch(() => { waApi = { checked: true, configured: false }; });
+const blobToBase64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+
+async function sendInvoice(id, btn) {
   const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
   const phone = invoicePhone(o);
   if (!phone) { toast('This order has no customer phone number', true); return; }
+  if (waApi.configured) {
+    const label = btn?.textContent; if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    try {
+      const pdf = await RBReceipt.pdf(receiptOrder(o));
+      const idToken = await firebase.auth().currentUser.getIdToken();
+      const r = await fetch(`${STOREFRONT_URL}/api/whatsapp`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + idToken },
+        body: JSON.stringify({ orderId: o.id, phone, name: receiptName(o), total: Number(o.total || 0).toFixed(0), pdfBase64: await blobToBase64(pdf) }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'WhatsApp could not send the receipt');
+      await db.collection('orders').doc(id).update({ invoiceSentAt: new Date().toISOString(), invoiceVia: 'whatsapp-api' });
+      toast(`Receipt sent to +${phone} on WhatsApp ✓`);
+    } catch (e) { toast(e.message || String(e), true); }
+    finally { if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = label; } }
+    return;
+  }
+  // Not connected yet: open WhatsApp with the message ready (web on computers, the app on phones)
   const ok = await openAfter(async () => {
     const link = await receiptLink(o);
-    return `https://wa.me/${phone}?text=${encodeURIComponent(invoiceText(o) + '\n\n🧾 Receipt: ' + link)}`;
+    const text = invoiceText(o) + '\n\n🧾 Receipt: ' + link;
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
+      : `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
   }, 'WhatsApp');
-  if (ok) db.collection('orders').doc(id).update({ invoiceSentAt: new Date().toISOString() }).catch(e => toast(firestoreError(e), true));
+  if (ok) db.collection('orders').doc(id).update({ invoiceSentAt: new Date().toISOString(), invoiceVia: 'whatsapp-link' }).catch(e => toast(firestoreError(e), true));
+}
+function receiptName(o) {
+  const real = n => n && !/^(guest|customer)$/i.test(String(n).trim()) ? n : '';
+  return real(o.buyer?.name) || real(o.customer?.name) || (o.recipient?.notes !== 'gift' ? real(o.recipient?.name) : '') || '';
 }
 async function emailReceipt(id) {
   const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
