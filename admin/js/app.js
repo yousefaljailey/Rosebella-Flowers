@@ -61,13 +61,13 @@ function subscribe() {
   db.doc('catalog/main').onSnapshot(snap => {
     state.catalog = snap.exists ? normalizeCatalog(snap.data()) : null;
     state.catalogLoaded = true;
-    refresh('catalog');
+    refresh('catalog', 'home');
   }, e => toast(firestoreError(e), true));
 
   db.doc('config/settings').onSnapshot(snap => {
     state.settings = snap.exists ? snap.data() : null;
     state.settingsLoaded = true;
-    refresh('slots', 'store', 'promos', 'extras');
+    refresh('slots', 'store', 'promos', 'extras', 'home');
   }, e => toast(firestoreError(e), true));
 
   db.doc('config/heroSlides').onSnapshot(snap => {
@@ -989,3 +989,126 @@ async function verifyPayment(btn) {
       : `<b style="color:var(--bad)">✕ Not paid (${esc(st.status || 'unknown')})</b>`;
   } catch (e) { out.textContent = 'Could not check: ' + e.message; }
 }
+
+// ── Homepage sections (New Arrivals, Recently Arrived, Best Sellers, Recommended) ──
+const HOME_DEFAULTS = [
+  { id: 'new',         title: 'New Arrivals',        subtitle: 'Fresh designs, just added',   layout: 'slider', visible: true, productIds: [] },
+  { id: 'recent',      title: 'Recently Arrived',    subtitle: 'In the studio this week',     layout: 'slider', visible: true, productIds: [] },
+  { id: 'best',        title: 'Best Sellers',        subtitle: 'Our most loved arrangements', layout: 'slider', visible: true, productIds: [] },
+  { id: 'recommended', title: 'Recommended for You', subtitle: 'Picked with you in mind',      layout: 'grid',   visible: true, productIds: [] },
+];
+let homeDraft = null;   // edited copy, saved with the Save button
+
+function homeSections() {
+  const saved = Array.isArray(state.settings?.homeSections) ? state.settings.homeSections : [];
+  if (!saved.length) return HOME_DEFAULTS.map(d => ({ ...d, productIds: [] }));
+  const list = saved.map(x => ({ ...HOME_DEFAULTS.find(d => d.id === x.id), ...x, productIds: [...(x.productIds || [])] }));
+  HOME_DEFAULTS.forEach(d => { if (!list.some(x => x.id === d.id)) list.push({ ...d, productIds: [] }); });
+  return list;
+}
+
+// Same automatic rules as the storefront (js/rb-home.js)
+function homeAutoPreview(id) {
+  const prods = (state.catalog?.products || []).filter(p => p.visible !== false && p.image);
+  const newest = [...prods].sort((a, b) => (b.order ?? 0) - (a.order ?? 0));
+  if (id === 'new') { const t = newest.filter(p => /new/i.test(p.badge || '') || p.badgeStyle === 'new'); return [...t, ...newest.filter(p => !t.includes(p))].slice(0, 10); }
+  if (id === 'recent') return newest.slice(0, 10);
+  if (id === 'best') { const t = prods.filter(p => /best|popular/i.test(p.badge || '') || p.badgeStyle === 'popular'); return [...t, ...prods.filter(p => !t.includes(p) && p.image)].slice(0, 10); }
+  return [];
+}
+
+PAGES.home = {
+  html() {
+    if (!state.settingsLoaded || !state.catalogLoaded) return loadingHTML();
+    if (!homeDraft) homeDraft = homeSections();
+    const byId = Object.fromEntries((state.catalog?.products || []).map(p => [p.id, p]));
+    const thumb = p => `<span class="hp-thumb" style="${p.image ? `background-image:url('${esc(p.image)}')` : ''}"></span>`;
+    return pageHd('Homepage <em>Sections</em>', 'The product rows on the homepage. Leave a section empty to fill it automatically, or hand-pick the products and their order.',
+      '<button class="btn btn-gold" id="saveHome">Save sections</button>') +
+      homeDraft.map((sec, si) => {
+        const picked = sec.productIds.map(id => byId[id]).filter(Boolean);
+        const auto = !picked.length;
+        const preview = auto ? homeAutoPreview(sec.id) : [];
+        return `<div class="card" data-si="${si}">
+          <div class="row" style="justify-content:space-between;margin-bottom:12px">
+            <div class="row"><b style="font-size:15px">${esc(sec.title)}</b>
+              <span class="badge ${sec.visible === false ? 'st-cancelled' : 'st-delivered'}">${sec.visible === false ? 'Hidden' : 'Shown'}</span>
+              <span class="order-meta">${sec.layout === 'grid' ? 'Grid' : 'Sliding row'}</span></div>
+            <div class="row">
+              <button class="btn btn-sm" data-act="up" title="Move section up">↑</button>
+              <button class="btn btn-sm" data-act="down" title="Move section down">↓</button>
+            </div>
+          </div>
+          <div class="grid-3">
+            <label class="field"><span>Title</span><input data-f="title" value="${esc(sec.title)}"></label>
+            <label class="field"><span>Subtitle</span><input data-f="subtitle" value="${esc(sec.subtitle || '')}"></label>
+            <label class="field"><span>Layout</span><select data-f="layout">
+              <option value="slider" ${sec.layout !== 'grid' ? 'selected' : ''}>Sliding row</option>
+              <option value="grid" ${sec.layout === 'grid' ? 'selected' : ''}>Grid</option></select></label>
+          </div>
+          <label class="switch" style="margin-top:12px"><input type="checkbox" data-f="visible" ${sec.visible !== false ? 'checked' : ''}> Show on homepage</label>
+          <div style="margin-top:16px">
+            <div class="field"><span>Products ${auto ? '— filling automatically' : `— ${picked.length} hand-picked`}</span></div>
+            ${auto
+              ? `<p class="order-meta" style="margin:6px 0 10px">${sec.id === 'recommended'
+                  ? 'Personalised for each visitor from what they viewed and added to their bag.'
+                  : sec.id === 'best' ? 'Products with a “Bestseller” badge first, then the rest of your catalog.'
+                  : sec.id === 'new' ? 'Products with a “New” badge first, then the most recently added.'
+                  : 'The most recently added products.'}</p>
+                 <div class="hp-list hp-preview">${preview.map(p => `<div class="hp-item">${thumb(p)}<span>${esc(p.name)}</span></div>`).join('')}</div>`
+              : `<div class="hp-list">${picked.map((p, pi) => `<div class="hp-item" data-pi="${pi}">${thumb(p)}<span>${esc(p.name)}</span>
+                   <span class="hp-acts"><button class="btn btn-sm" data-act="pup">‹</button><button class="btn btn-sm" data-act="pdown">›</button><button class="btn btn-sm btn-danger" data-act="prm">✕</button></span></div>`).join('')}</div>`}
+            <div class="hp-add">
+              <input class="input" data-add placeholder="＋ Add a product — type its name" autocomplete="off">
+              <div class="hp-results" hidden></div>
+            </div>
+            ${auto ? '' : '<button class="btn btn-sm btn-ghost" data-act="clear" style="margin-top:8px">Clear picks (fill automatically)</button>'}
+          </div>
+        </div>`;
+      }).join('');
+  },
+  bind(el) {
+    const byName = (state.catalog?.products || []).filter(p => p.visible !== false);
+    el.querySelectorAll('.card[data-si]').forEach(card => {
+      const si = +card.dataset.si, sec = homeDraft[si];
+      card.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener('input', () => {
+        sec[inp.dataset.f] = inp.type === 'checkbox' ? inp.checked : inp.value;
+      }));
+      card.querySelectorAll('[data-f=visible],[data-f=layout]').forEach(inp => inp.addEventListener('change', () => {
+        sec[inp.dataset.f] = inp.type === 'checkbox' ? inp.checked : inp.value; render();
+      }));
+      card.addEventListener('click', e => {
+        const b = e.target.closest('[data-act]'); if (!b) return;
+        const act = b.dataset.act;
+        const pi = +(b.closest('[data-pi]')?.dataset.pi ?? -1);
+        if (act === 'up' && si > 0) [homeDraft[si - 1], homeDraft[si]] = [homeDraft[si], homeDraft[si - 1]];
+        if (act === 'down' && si < homeDraft.length - 1) [homeDraft[si + 1], homeDraft[si]] = [homeDraft[si], homeDraft[si + 1]];
+        if (act === 'pup' && pi > 0) [sec.productIds[pi - 1], sec.productIds[pi]] = [sec.productIds[pi], sec.productIds[pi - 1]];
+        if (act === 'pdown' && pi < sec.productIds.length - 1) [sec.productIds[pi + 1], sec.productIds[pi]] = [sec.productIds[pi], sec.productIds[pi + 1]];
+        if (act === 'prm') sec.productIds.splice(pi, 1);
+        if (act === 'clear') sec.productIds = [];
+        render();
+      });
+      const addI = card.querySelector('[data-add]'), res = card.querySelector('.hp-results');
+      addI.addEventListener('input', () => {
+        const q = addI.value.trim().toLowerCase();
+        const hits = q ? byName.filter(p => p.name.toLowerCase().includes(q) && !sec.productIds.includes(p.id)).slice(0, 8) : [];
+        res.hidden = !hits.length;
+        res.innerHTML = hits.map(p => `<button type="button" data-pid="${esc(p.id)}"><span class="hp-thumb" style="${p.image ? `background-image:url('${esc(p.image)}')` : ''}"></span>${esc(p.name)} <span class="order-meta">QR ${esc(p.price)}</span></button>`).join('');
+      });
+      res.addEventListener('mousedown', e => {
+        const b = e.target.closest('[data-pid]'); if (!b) return;
+        e.preventDefault();
+        sec.productIds.push(b.dataset.pid);
+        render();
+        document.querySelector(`.card[data-si="${si}"] [data-add]`)?.focus();
+      });
+      addI.addEventListener('blur', () => setTimeout(() => { res.hidden = true; }, 150));
+    });
+    el.querySelector('#saveHome').onclick = async () => {
+      const clean = homeDraft.map(x => ({ id: x.id, title: (x.title || '').trim() || HOME_DEFAULTS.find(d => d.id === x.id)?.title || '',
+        subtitle: (x.subtitle || '').trim(), layout: x.layout === 'grid' ? 'grid' : 'slider', visible: x.visible !== false, productIds: x.productIds }));
+      if (await saveSettings({ homeSections: clean })) homeDraft = null;
+    };
+  },
+};

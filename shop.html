@@ -188,7 +188,11 @@
       font-family: var(--sans); font-size: 11px; color: var(--taupe);
       margin-top: 4px;
     }
-    .shop-controls { display: flex; align-items: center; gap: 12px; }
+    .shop-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .shop-search { display: flex; align-items: center; gap: 8px; border: 1px solid rgba(198,146,42,0.3); background: #fff; padding: 0 12px; height: 38px; min-width: 220px; color: var(--taupe); }
+    .shop-search:focus-within { border-color: var(--gold); }
+    .shop-search input { border: none; outline: none; background: none; font-family: var(--sans); font-size: 12px; color: var(--charcoal); width: 100%; }
+    @media (max-width: 600px) { .shop-search { min-width: 0; flex: 1 1 100%; } }
     .shop-sort {
       font-family: var(--sans); font-size: 11px; border: 1.5px solid var(--gold-dim);
       background: var(--white); color: var(--charcoal); padding: 8px 12px;
@@ -423,6 +427,10 @@
           <div class="shop-subtitle" id="shopSubtitle">Loading products…</div>
         </div>
         <div class="shop-controls">
+          <label class="shop-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+            <input id="shopSearch" type="search" placeholder="Search flowers & gifts" autocomplete="off" oninput="applySortAndFilter()">
+          </label>
           <button class="mobile-filter-btn" onclick="openMobileFilter()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>
             Filter
@@ -644,6 +652,10 @@
     function applySortAndFilter() {
       let filtered = allProducts.filter(p => activeSlug === 'all' || p.cat === activeSlug);
 
+      /* Search */
+      const q = (document.getElementById('shopSearch')?.value || '').trim().toLowerCase();
+      if (q) filtered = filtered.filter(p => [p.name, p.catName, p.desc].join(' ').toLowerCase().includes(q));
+
       /* Price filter */
       if (activePriceRange !== 'all') {
         const [minS, maxS] = activePriceRange.split('-');
@@ -764,6 +776,10 @@
       const cat = params.get('cat');
       const name = params.get('name');
       if (cat) { activeSlug = cat; }
+      const q = params.get('q');
+      const box = document.getElementById('shopSearch');
+      if (q) box.value = q;
+      if (params.has('search') || q) setTimeout(() => box.focus(), 300);
     })();
 
     /* ─── INIT ─────────────────────────── */

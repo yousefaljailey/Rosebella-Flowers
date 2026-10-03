@@ -2949,6 +2949,7 @@
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII&amp;loading=async&amp;callback=__mapsForReviews"></script>
 <script src="js/rb-data.js"></script>
 <script src="js/rb-cart.js"></script>
+<script src="js/rb-home.js"></script>
 </head>
 <body>
 
@@ -3534,7 +3535,7 @@
     </ul>
     <div class="nav-right">
       <!-- Search icon -->
-      <button class="rb-search-btn" onclick="document.getElementById('collections').scrollIntoView({behavior:'smooth'})" title="Search" aria-label="Search">
+      <button class="rb-search-btn" onclick="location.href='shop.html?search=1'" title="Search" aria-label="Search">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </button>
       <button id="cartNavBtn" onclick="goToReview()" title="Gift Bag">
@@ -3681,78 +3682,10 @@
     }
   </style>
 
-  <!-- COLLECTIONS (Floward-style) -->
-  <section class="collections" id="collections">
-
-    <div class="col-header-row reveal visible">
-      <div>
-        <div class="section-label">Collections</div>
-        <h2 class="section-title">Shop our <em>curated</em> gifts</h2>
-      </div>
-      <a href="#" class="col-link">View All →</a>
-    </div>
-
-    <!-- Product Search -->
-    <div class="prod-search-wrap reveal visible">
-      <div class="prod-search-inner">
-        <span class="prod-search-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </span>
-        <input id="prodSearch" class="prod-search-input" type="search" placeholder="Search by product name or category…" autocomplete="off" autocorrect="off" spellcheck="false" oninput="applyFilters()">
-        <button id="searchClear" class="prod-search-clear" onclick="clearSearch()" title="Clear search">✕</button>
-      </div>
-      <div class="prod-search-hint" id="searchHint"></div>
-    </div>
-
-    <!-- Filter Bar -->
-    <div class="filter-bar reveal visible">
-      <div class="fb-group">
-        <span class="fb-label">Sort by</span>
-        <select id="sortSelect" class="fb-select" onchange="applyFilters()">
-          <option value="newest">Newest</option>
-          <option value="price-asc">Price: Low → High</option>
-          <option value="price-desc">Price: High → Low</option>
-        </select>
-      </div>
-
-      <div class="fb-group fb-price-group">
-        <span class="fb-label">Price Range</span>
-        <div class="fb-price-slider">
-          <div class="fb-slider-track"></div>
-          <div class="fb-slider-fill" id="fbPriceFill" style="left: 0%; right: 0%;"></div>
-          <input type="range" class="fb-range" id="fbPriceMin" min="0" max="1850" value="0" step="25" oninput="onPriceSlide()">
-          <input type="range" class="fb-range" id="fbPriceMax" min="0" max="1850" value="600" step="25" oninput="onPriceSlide()">
-        </div>
-        <div class="fb-price-vals">
-          <span id="fbPriceMinLabel">QR 0</span>
-          <span id="fbPriceMaxLabel">QR 1850+</span>
-        </div>
-      </div>
-
-      <div class="fb-right">
-        <div id="fbChips"></div>
-        <button class="fb-reset-btn" id="fbResetBtn" onclick="resetFilters()">↺ Reset</button>
-      </div>
-    </div>
-    <div class="filter-result-count" id="filterResultCount"></div>
-
-    <!-- Category Filter Tabs (hidden — browsing is now via the collection cards above) -->
-    <div class="cat-tabs" style="display:none;">
-      <button class="cat-tab active" data-cat="all">All Collections</button>
-    </div>
-
-    <!-- Product Grid -->
-    <div class="products-grid" id="productsGrid">
-      <div class="search-empty-state" id="searchEmptyState">
-        <span class="search-empty-icon">🔍</span>
-        <div class="search-empty-title">No products found</div>
-        <div class="search-empty-sub">Try a different name or category</div>
-        <button class="search-empty-clear" onclick="clearSearch()">Clear Search</button>
-      </div>
-    </div><!-- /products-grid -->
-  </section>
+  <!-- HOMEPAGE PRODUCT SECTIONS (managed in the admin portal → Homepage Sections) -->
+  <div id="collections">
+    <div id="rbHomeSections"></div>
+  </div>
 
   <!-- Cart Toast -->
   <div class="cart-toast" id="cartToast">✦ Added to your gift bag</div>
@@ -5051,191 +4984,12 @@
 
 
   <script>
-  // ── Filter helpers ────────────────────────────
-  function getCardPrice(card) {
-    const el = card.querySelector('.prod-price');
-    if (!el) return 0;
-    const cl = el.cloneNode(true);
-    const cu = cl.querySelector('.currency'); if (cu) cu.remove();
-    return parseFloat(cl.textContent.trim()) || 0;
-  }
-
-  function updatePriceFill() {
-    const minEl = document.getElementById('fbPriceMin');
-    const maxEl = document.getElementById('fbPriceMax');
-    const fill  = document.getElementById('fbPriceFill');
-    if (!minEl || !maxEl || !fill) return;
-    const min = parseFloat(minEl.value), max = parseFloat(maxEl.value);
-    const total = parseFloat(maxEl.max) || 600;
-    fill.style.left  = (min / total * 100) + '%';
-    fill.style.right = (100 - max / total * 100) + '%';
-    const minLbl = document.getElementById('fbPriceMinLabel');
-    const maxLbl = document.getElementById('fbPriceMaxLabel');
-    if (minLbl) minLbl.textContent = `QR ${min}`;
-    if (maxLbl) maxLbl.textContent = max >= total ? `QR ${max}+` : `QR ${max}`;
-  }
-
-  function onPriceSlide() {
-    const minEl = document.getElementById('fbPriceMin');
-    const maxEl = document.getElementById('fbPriceMax');
-    const gap = 25;
-    if (parseFloat(minEl.value) > parseFloat(maxEl.value) - gap) minEl.value = parseFloat(maxEl.value) - gap;
-    if (parseFloat(maxEl.value) < parseFloat(minEl.value) + gap) maxEl.value = parseFloat(minEl.value) + gap;
-    updatePriceFill();
-    applyFilters();
-  }
-
-  function resetPriceFilter() {
-    const maxEl = document.getElementById('fbPriceMax');
-    document.getElementById('fbPriceMin').value = 0;
-    if (maxEl) maxEl.value = maxEl.max;
-    updatePriceFill();
-  }
-
-  function updateFilterChips(sort, priceMin, priceMax, sliderMax) {
-    const chips = [];
-    if (sort !== 'newest') {
-      const lbl = sort === 'price-asc' ? 'Price: Low → High' : 'Price: High → Low';
-      chips.push(`<span class="fb-chip">${lbl}<button class="fb-chip-x" onclick="document.getElementById('sortSelect').value='newest';applyFilters()">✕</button></span>`);
-    }
-    if (priceMin > 0 || priceMax < sliderMax) {
-      const maxLbl = priceMax >= sliderMax ? `${priceMax}+` : priceMax;
-      chips.push(`<span class="fb-chip">QR ${priceMin} – ${maxLbl}<button class="fb-chip-x" onclick="resetPriceFilter();applyFilters()">✕</button></span>`);
-    }
-    const el = document.getElementById('fbChips');
-    if (el) el.innerHTML = chips.join('');
-    const btn = document.getElementById('fbResetBtn');
-    if (btn) btn.style.display = chips.length ? 'inline-block' : 'none';
-  }
-
-  function resetFilters() {
-    document.getElementById('sortSelect').value = 'newest';
-    resetPriceFilter();
-    applyFilters();
-  }
-
-  // ── Product search + filter + sort ────────────
-  function applyFilters() {
-    const raw       = document.getElementById('prodSearch')?.value || '';
-    const query     = raw.trim().toLowerCase();
-    const activeCat = document.querySelector('.cat-tab.active')?.dataset.cat || 'all';
-    const sort      = document.getElementById('sortSelect')?.value || 'newest';
-    const priceMinEl = document.getElementById('fbPriceMin');
-    const priceMaxEl = document.getElementById('fbPriceMax');
-    const sliderMax  = parseFloat(priceMaxEl?.max || 600);
-    const priceMin   = parseFloat(priceMinEl?.value || 0);
-    const priceMax   = parseFloat(priceMaxEl?.value || sliderMax);
-
-    const cards = [...document.querySelectorAll('.prod-card')];
-    const matching = [], nonMatching = [];
-
-    cards.forEach(card => {
-      const name     = (card.querySelector('.prod-body h3')?.textContent || '').trim().toLowerCase();
-      const slug     = (card.dataset.cat || '').toLowerCase();
-      const catLabel = (card.querySelector('.prod-cat')?.textContent || '').trim().toLowerCase();
-      const price    = getCardPrice(card);
-
-      const matchCat   = activeCat === 'all' || slug === activeCat;
-      const matchQuery = !query || name.includes(query) || slug.replace(/-/g,' ').includes(query) || catLabel.includes(query);
-      const matchPrice = price === 0 || (price >= priceMin && price <= priceMax);
-
-      (matchCat && matchQuery && matchPrice ? matching : nonMatching).push(card);
-    });
-
-    // Sort matching cards
-    matching.sort((a, b) => {
-      if (sort === 'price-asc')  return getCardPrice(a) - getCardPrice(b);
-      if (sort === 'price-desc') return getCardPrice(b) - getCardPrice(a);
-      return parseInt(a.dataset.originalIndex || 0) - parseInt(b.dataset.originalIndex || 0);
-    });
-
-    // Reorder DOM: matching → non-matching → empty state
-    const grid  = document.getElementById('productsGrid');
-    const empty = document.getElementById('searchEmptyState');
-    [...matching, ...nonMatching].forEach(c => grid.insertBefore(c, empty));
-
-    // Visibility + animation
-    matching.forEach(c => {
-      c.classList.add('show');
-      c.style.animation = 'none'; c.offsetHeight;
-      c.style.animation = 'cardIn 0.35s ease both';
-    });
-    nonMatching.forEach(c => c.classList.remove('show'));
-
-    const visible = matching.length;
-    if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
-
-    // Search UI
-    const clearBtn = document.getElementById('searchClear');
-    if (clearBtn) clearBtn.style.display = query ? 'flex' : 'none';
-    const tabsEl = document.querySelector('.cat-tabs');
-    if (tabsEl) tabsEl.style.opacity = query ? '0.45' : '';
-    const hint = document.getElementById('searchHint');
-    if (hint) hint.textContent = query
-      ? (visible === 0 ? `No results for "${raw.trim()}"` : `${visible} product${visible !== 1 ? 's' : ''} found`)
-      : '';
-
-    // Result count + chips
-    const countEl = document.getElementById('filterResultCount');
-    if (countEl) countEl.textContent = visible > 0 ? `${visible} product${visible !== 1 ? 's' : ''} shown` : '';
-    updateFilterChips(sort, priceMin, priceMax, sliderMax);
-  }
-
-  function clearSearch() {
-    const inp = document.getElementById('prodSearch');
-    if (inp) { inp.value = ''; inp.focus(); }
-    applyFilters();
-  }
-
-  // ── Category tabs ─────────────────────────────
-  document.querySelector('.cat-tabs')?.addEventListener('click', e => {
-    const tab = e.target.closest('.cat-tab');
-    if (!tab) return;
-    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    applyFilters();
-  });
-
-  // ── Init filtering ────────────────────────────
-  function initProductFiltering() {
-    const prices = [...document.querySelectorAll('.prod-card')]
-      .map(getCardPrice).filter(p => p > 0);
-    if (prices.length) {
-      const roundedMax = Math.ceil(Math.max(...prices) / 50) * 50 + 50;
-      const maxEl = document.getElementById('fbPriceMax');
-      const minEl = document.getElementById('fbPriceMin');
-      if (maxEl) { maxEl.max = roundedMax; maxEl.value = roundedMax; }
-      if (minEl) { minEl.max = roundedMax; }
-      updatePriceFill();
-    }
-  }
-
   // ── Catalog (managed in the admin portal) ─────
   function renderCatalog(catalog) {
-    const cols  = RB.visibleCollections(catalog);
-    const prods = RB.visibleProducts(catalog);
-
+    window.__rbCatalog = catalog;
     const track = document.getElementById('collScrollTrack');
-    if (track) track.innerHTML = cols.map(RB.collCardHTML).join('');
-
-    const tabsEl = document.querySelector('.cat-tabs');
-    if (tabsEl) {
-      const active = tabsEl.querySelector('.cat-tab.active')?.dataset.cat || 'all';
-      tabsEl.innerHTML = '<button class="cat-tab" data-cat="all">All Collections</button>' +
-        cols.map(c => `<button class="cat-tab" data-cat="${RB.esc(c.slug)}">${RB.esc(c.name)}</button>`).join('');
-      const tabs = [...tabsEl.querySelectorAll('.cat-tab')];
-      (tabs.find(t => t.dataset.cat === active) || tabs[0]).classList.add('active');
-    }
-
-    const grid  = document.getElementById('productsGrid');
-    const empty = document.getElementById('searchEmptyState');
-    grid.querySelectorAll('.prod-card').forEach(c => c.remove());
-    empty.insertAdjacentHTML('beforebegin',
-      prods.map((p, i) => RB.productCardHTML(p, RB.collectionName(catalog, p.cat), i)).join(''));
-
-    initProductFiltering();
-    applyFilters();
-    RB.cartUI.sync();
+    if (track) track.innerHTML = RB.visibleCollections(catalog).map(RB.collCardHTML).join('');
+    RB.home.render(catalog, typeof siteSettings !== 'undefined' ? siteSettings : null);
   }
   RB.load('catalog', renderCatalog);
 
@@ -6068,6 +5822,7 @@
     }
     VARIANTS.addons = RB.activeAddons(siteSettings);
     RB.applyStore(siteSettings);
+    if (window.__rbCatalog) RB.home.render(window.__rbCatalog, siteSettings);
   }
   RB.load('settings', applySettings);
 

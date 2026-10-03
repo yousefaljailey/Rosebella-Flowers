@@ -812,6 +812,10 @@ function renderProduct(catalog) {
   }
   const collName = RB.collectionName(catalog, p.cat);
   pdProduct = { ...p, catName: collName };
+  try {
+    const seen = (JSON.parse(localStorage.getItem('rb_viewed')) || []).filter(x => x !== p.id);
+    localStorage.setItem('rb_viewed', JSON.stringify([p.id, ...seen].slice(0, 20)));
+  } catch (e) {}
   pdImages = pdImagesOf(p);
   if (pdIndex >= pdImages.length) pdIndex = 0;
 

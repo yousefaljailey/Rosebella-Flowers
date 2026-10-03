@@ -221,3 +221,17 @@ td .input { padding: 7px 9px; }
 .gal-acts button { width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(255,255,255,.92); cursor: pointer; font-size: 12px; line-height: 1; color: var(--ink); }
 .gal-acts button:disabled { opacity: .35; cursor: default; }
 .gal-acts button[data-a=del]:hover { color: var(--bad); }
+
+/* ── Homepage sections ─────────────────── */
+.hp-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+.hp-item { flex: 0 0 120px; display: flex; flex-direction: column; gap: 6px; font-size: 11px; position: relative; }
+.hp-item > span:not(.hp-thumb):not(.hp-acts) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-preview .hp-item { opacity: .65; }
+.hp-thumb { display: block; width: 100%; aspect-ratio: 4/5; border-radius: 8px; background: #efe9dc center/cover no-repeat; border: 1px solid var(--line); }
+.hp-results .hp-thumb { width: 34px; flex: 0 0 34px; }
+.hp-acts { display: flex; gap: 4px; }
+.hp-acts .btn { padding: 4px 8px; }
+.hp-add { position: relative; margin-top: 12px; max-width: 420px; }
+.hp-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.1); overflow: hidden; }
+.hp-results button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 10px; border: none; background: none; cursor: pointer; font-size: 12px; }
+.hp-results button:hover { background: #faf6ea; }
