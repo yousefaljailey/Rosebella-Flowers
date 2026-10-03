@@ -2228,6 +2228,43 @@
     .py-wallets-label::after  { right: 0; }
     #py-request-btn-wrap { min-height: 48px; }
     .py-mf-box { background: #fff; border-radius: 10px; padding: 12px; min-height: 120px; }
+
+    /* ── Checkout: gift toggle, sections, payment tiles ── */
+    .co-step-indicator { display: none !important; }
+    .co-gift-card { display: flex; align-items: flex-start; gap: 14px; border: 1.5px solid rgba(198,146,42,0.25); border-radius: 14px; padding: 16px 18px; background: #fff; cursor: pointer; margin-bottom: 26px; }
+    .co-gift-ico { font-size: 20px; line-height: 1.2; }
+    .co-gift-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .co-gift-text b { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--charcoal); }
+    .co-gift-text span { font-family: var(--sans); font-size: 11px; line-height: 1.55; color: var(--taupe); }
+    .co-toggle { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 50px; height: 28px; border-radius: 999px; background: #e3ddd0; position: relative; cursor: pointer; transition: background .2s; margin-top: 2px; }
+    .co-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: left .2s; }
+    .co-toggle:checked { background: var(--gold); }
+    .co-toggle:checked::after { left: 25px; }
+    .co-block-title { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 22px; color: var(--charcoal); margin: 4px 0 14px; }
+    .co-block-title span { font-size: 16px; }
+    .co-pm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .co-pm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 104px; padding: 14px 8px;
+      border: 1.5px solid #e6e0d3; border-radius: 14px; background: #fff; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+    .co-pm:hover:not(:disabled) { border-color: rgba(198,146,42,0.55); }
+    .co-pm.active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 4px 16px rgba(198,146,42,0.15); }
+    .co-pm:disabled { opacity: .45; cursor: not-allowed; }
+    .co-pm-logo { height: 34px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .co-pm-logo img { max-height: 34px; max-width: 74px; object-fit: contain; }
+    .co-pm-name { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--charcoal); text-align: center; line-height: 1.3; }
+    .co-pm.active .co-pm-name { color: #8a6418; }
+    .co-pm small { font-family: var(--sans); font-size: 9px; color: var(--taupe); }
+    .co-pm-pane { margin-top: 14px; }
+    .co-pm-pane p { font-family: var(--sans); font-size: 12px; line-height: 1.6; color: var(--taupe); background: #fff; border: 1px dashed rgba(198,146,42,0.35); border-radius: 12px; padding: 14px 16px; }
+    .co-pm-pane .py-mf-box { border: 1px solid #ece6d8; }
+    .co-pm-hint { margin-top: 10px; }
+    #py-card-errors { font-family: var(--sans); font-size: 12px; color: #c0392b; margin-top: 10px; min-height: 0; }
+    .co-sticky-cta { display: none; }
+    @media (max-width: 900px) {
+      .co-sticky-cta { display: block; position: sticky; bottom: 0; z-index: 5; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(250,248,240,0.96); backdrop-filter: blur(10px); border-top: 1px solid rgba(198,146,42,0.15); }
+      .co-sticky-cta .co-place-btn { width: 100%; background: var(--gold); }
+      .co-pm-grid { gap: 8px; }
+      .co-pm { min-height: 92px; }
+    }
     /* Never squash the payment form: let the sheet scroll instead (MyFatoorah sizes its own frames) */
     #pyCardPanel > *, #pyCashPanel > * { flex-shrink: 0; }
     #pyCardPanel { min-height: 0; -webkit-overflow-scrolling: touch; }
@@ -3162,6 +3199,18 @@
           </div>
           <div class="co-section-body">
 
+            <!-- Send as a gift (we collect the address from the recipient) -->
+            <label class="co-gift-card" for="coSendAsGift">
+              <span class="co-gift-ico">🎁</span>
+              <span class="co-gift-text">
+                <b>Send as a gift</b>
+                <span>We'll contact the recipient to get their address. Delivery time may be affected if we can't reach them.</span>
+              </span>
+              <input type="checkbox" id="coSendAsGift" class="co-toggle" onchange="coOnSendAsGiftChange()">
+            </label>
+
+            <div class="co-block-title"><span>👤</span> Recipient details</div>
+
             <!-- Recipient Name -->
             <div class="co-field">
               <label class="co-label" for="coName">Recipient Name <span class="co-req">*</span></label>
@@ -3180,6 +3229,8 @@
               </div>
             </div>
 
+            <div id="coAddrFields">
+            <div class="co-block-title"><span>📍</span> Delivery address</div>
             <!-- Location map -->
             <div class="co-field">
               <label class="co-label">
@@ -3249,15 +3300,7 @@
               <textarea id="coAddress" class="co-textarea" rows="3" placeholder="Apartment/villa number, floor, building name and street"></textarea>
             </div>
 
-            <!-- Send as a gift -->
-            <div class="co-identity-row">
-              <label class="co-identity-label">
-                <input type="checkbox" id="coSendAsGift" class="co-checkbox" onchange="coOnSendAsGiftChange()">
-                <span class="co-check-custom"></span>
-                Send as a gift
-              </label>
-              <span class="co-identity-note">Card payment only — cash on delivery not available for gift orders</span>
-            </div>
+            </div><!-- /coAddrFields -->
 
             <!-- Delivery time -->
             <div class="co-field" style="margin-top:20px;">
@@ -3276,6 +3319,21 @@
                 <span class="co-dt-trigger-arr">›</span>
               </div>
             </div>
+
+            <!-- Payment method -->
+            <div class="co-block-title" style="margin-top:30px"><span>💳</span> Payment method</div>
+            <div class="co-pm-grid" id="coPmGrid"></div>
+            <div class="co-pm-pane" id="coPmCash" hidden>
+              <p>Pay <b>QR <span class="co-pm-amt">0</span></b> in cash when your order arrives.</p>
+            </div>
+            <div class="co-pm-pane" id="coPmNaps" hidden>
+              <p>You'll confirm with your <b>Qatar Debit Card</b> in a secure window from your bank when you place the order.</p>
+            </div>
+            <div class="co-pm-pane" id="coPmMf" hidden>
+              <div id="mfUnified" class="py-mf-box"></div>
+              <p class="co-pm-hint" id="coPmWalletHint" hidden></p>
+            </div>
+            <div id="py-card-errors"></div>
 
           </div>
         </div>
@@ -3321,14 +3379,19 @@
         <!-- CTA -->
         <div class="co-cta-wrap">
           <div class="co-err-msg" id="coErrMsg">Please fill in all required fields.</div>
-          <button class="co-place-btn" onclick="coGoToPayment()" style="background:var(--gold);box-shadow:0 4px 20px rgba(198,146,42,0.3);">
+          <button class="co-place-btn" id="coPlaceBtn" onclick="coPlaceOrder()" style="background:var(--gold);box-shadow:0 4px 20px rgba(198,146,42,0.3);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-            Continue to Payment — QR <span id="coPayNowAmt">0</span>
+            <span class="co-place-lbl">Place order</span> — QR <span id="coPayNowAmt">0</span>
           </button>
           <p class="co-place-note">Secured by MyFatoorah</p>
         </div>
       </div><!-- /coRight -->
     </div><!-- /coBody -->
+
+    <!-- Phones: Place order always reachable -->
+    <div class="co-sticky-cta">
+      <button class="co-place-btn" onclick="coPlaceOrder()"><span class="co-place-lbl">Place order</span> — QR <span id="coStickyAmt">0</span></button>
+    </div>
   </div><!-- /coOverlay -->
 
   <!-- ── PAYMENT OVERLAY ───────────────────────── -->
@@ -3339,54 +3402,13 @@
           <span class="py-lock">🔒</span>
           <span class="py-hd-title">Secure Payment</span>
         </div>
-        <button class="py-hd-close" onclick="closePayment()">✕</button>
       </div>
-      <div class="py-amount-bar">
-        <span class="py-amount-lbl">Order Total</span>
-        <div class="py-amount-val"><sup>QR</sup><span id="pyAmountVal">0</span></div>
-      </div>
-      <div class="py-tabs">
-        <button class="py-tab active" data-tab="card" onclick="pyTab('card',this)">💳 Card / Apple Pay</button>
-        <button class="py-tab" data-tab="cash" onclick="pyTab('cash',this)" id="pyCashTab">💵 Cash on Delivery</button>
-      </div>
-
-      <!-- Online payment panel (MyFatoorah: Apple Pay, Google Pay, card) -->
-      <div class="py-panel" id="pyCardPanel">
-        <div id="mfUnified" class="py-mf-box"></div>
-        <div id="py-card-errors"></div>
-        <button class="py-submit" id="pyCardSubmit" type="button" onclick="pyPayCard()" disabled>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
-          Pay <span id="pyCardBtnAmt">QR 0</span>
-        </button>
-        <div class="py-or"><span>or</span></div>
-        <button class="py-naps-btn" type="button" onclick="pyPayNaps()">
-          <span class="py-naps-logo">NAPS</span> Pay with Qatar Debit Card
-        </button>
-      </div>
-
-      <!-- Cash on Delivery panel -->
-      <div class="py-panel" id="pyCashPanel" style="display:none">
-        <div class="py-cod-wrap">
-          <div class="py-cod-icon">💵</div>
-          <div class="py-cod-title">Cash on Delivery</div>
-          <div class="py-cod-desc">Pay <strong>QR <span id="pyCodAmt">0</span></strong> in cash when your order arrives.</div>
-        </div>
-        <button class="py-submit" id="pyCashSubmit" onclick="pyConfirmCash()">
-          Confirm Order — Pay on Delivery
-        </button>
-      </div>
-
-      <!-- Loading panel -->
-      <div id="pyLoading">
+      <div id="pyLoading" style="display:flex">
         <div class="py-spinner"></div>
         <span class="py-loading-txt" id="pyLoadingTxt">Processing payment…</span>
         <button type="button" class="py-naps-btn" id="pyFocusWin" style="display:none;max-width:280px" onclick="pyFocusPayWindow()">Show the verification window</button>
       </div>
-
-      <div class="py-footer">
-        <span>Payments secured by</span>
-        <span class="py-stripe-logo">MYFATOORAH</span>
-      </div>
+      <div class="py-footer"><span>Payments secured by</span><span class="py-stripe-logo">MYFATOORAH</span></div>
     </div>
   </div>
 
@@ -5163,6 +5185,8 @@
     if (triggerSub)  triggerSub.textContent  = 'Tap to choose a date and time slot';
     if (trigger)     { trigger.classList.remove('selected'); trigger.style.borderColor = ''; }
     coPopulate();
+    coSyncGift();
+    coSelectPm(coPayMethod || 'card');
     document.getElementById('coOverlay').classList.add('show');
     document.body.style.overflow = 'hidden';
     document.getElementById('coOverlay').scrollTop = 0;
@@ -5224,6 +5248,12 @@
     const sumLblEl   = document.getElementById('coSumLabel');
     if (grandEl)   grandEl.textContent   = total.toFixed(0);
     if (payNowEl)  payNowEl.textContent  = total.toFixed(0);
+    const stickyEl = document.getElementById('coStickyAmt');
+    if (stickyEl) stickyEl.textContent = total.toFixed(0);
+    document.querySelectorAll('.co-pm-amt').forEach(el => el.textContent = total.toFixed(0));
+    if (typeof coUpdatePlaceBtn === 'function') coUpdatePlaceBtn();
+    // Apple/Google Pay show the amount in their sheet — refresh when the total changes
+    if (typeof coInitMf === 'function' && pmById(coPayMethod)?.wallet && document.getElementById('coOverlay').classList.contains('show')) coInitMf();
     if (mbTotalEl) mbTotalEl.textContent = total.toFixed(0);
     if (sumLblEl)  sumLblEl.textContent  = `Order Summary — ${count} item${count !== 1 ? 's' : ''}`;
 
@@ -5328,19 +5358,24 @@
   }
 
   // ── Validate + proceed to payment ────────────
-  function coGoToPayment() {
+  // Validates the checkout form and saves recipient + delivery. Returns true when ready to pay.
+  function coValidateAndSave() {
+    const isGift  = coIsGift();
     const name    = document.getElementById('coName').value.trim();
     const phone   = document.getElementById('coPhoneNum').value.trim();
     const area    = document.getElementById('coArea').value;
     const address = document.getElementById('coAddress').value.trim();
 
     let valid = true;
-    [['coName', name], ['coPhoneNum', phone], ['coArea', area], ['coAddress', address]]
-      .forEach(([id, v]) => {
-        const el = document.getElementById(id);
-        if (!v) { el?.classList.add('err'); valid = false; }
-        else      el?.classList.remove('err');
-      });
+    const required = [['coName', name], ['coPhoneNum', phone]];
+    if (!isGift) required.push(['coArea', area], ['coAddress', address]);
+    ['coArea', 'coAddress'].forEach(id => document.getElementById(id)?.classList.remove('err'));
+    required.forEach(([id, v]) => {
+      const el = document.getElementById(id);
+      if (!v) { el?.classList.add('err'); valid = false; }
+      else      el?.classList.remove('err');
+    });
+    if (phone && !/^\d{8}$/.test(phone)) { document.getElementById('coPhoneNum').classList.add('err'); valid = false; }
     if (!coDeliverySlotId) {
       document.getElementById('coDtTrigger').style.borderColor = '#e05060';
       valid = false;
@@ -5352,44 +5387,47 @@
       const errEl = document.getElementById('coErrMsg');
       errEl.classList.add('show');
       setTimeout(() => errEl.classList.remove('show'), 4000);
-      const first = document.querySelector('#coOverlay .err');
+      const first = document.querySelector('#coOverlay .err') || (!coDeliverySlotId && document.getElementById('coDtTrigger'));
       if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
+      return false;
     }
 
-    // Save to state
-    const sendAsGift = document.getElementById('coSendAsGift').checked;
     recipient = {
       name,
       phone: '+974 ' + phone,
-      address,
-      landmark: area,
+      address: isGift ? 'Gift — contact the recipient for the address' : address,
+      landmark: isGift ? '' : area,
       occasion: '',
-      notes: sendAsGift ? 'gift' : ''
+      notes: isGift ? 'gift' : ''
     };
     deliverySlot = { date: coDeliveryDate || toDateStr(new Date()), slot: coDeliverySlotId, type: coDeliveryType, expressFee: coExpressFee };
-    giftMessage     = document.getElementById('coGiftMsg')?.value.trim() || '';
+    giftMessage  = document.getElementById('coGiftMsg')?.value.trim() || '';
     saveRecipient(); saveDelivery(); saveGiftMsg();
-
-    // Mark step 1 done, step 2 active
-    document.getElementById('coStepDot1')?.classList.remove('active');
-    document.getElementById('coStepDot1')?.classList.add('done');
-    document.getElementById('coStepDot2')?.classList.add('active');
-    document.getElementById('coStepLine')?.style && (document.getElementById('coStepLine').style.background = 'var(--gold)');
-
-    openPayment();
+    return true;
   }
+  function coGoToPayment() { coPlaceOrder(); }
 
   // ══════════════════════════════════════════════
-  //  PAYMENT SYSTEM (MyFatoorah — Apple Pay, Google Pay, cards, NAPS)
-  //  The secret key and the price calculation live in /api/pay (server).
+  //  PAYMENT (MyFatoorah — cards, Apple Pay, Google Pay, NAPS · plus cash)
+  //  Chosen on the checkout page. The secret key + price calculation live in /api/pay.
   // ══════════════════════════════════════════════
   const PAY_API = '/api/pay';
   const MF_SCRIPT = 'https://qa.myfatoorah.com/payment/v1/session.js';
+  const MF_IMG = 'https://qa.myfatoorah.com/imgs/payment-methods/';
   const PENDING_KEY = 'rosebella_pending_payment';
+  const PAY_METHODS = [
+    { id: 'cash',      label: 'Cash on delivery',  icon: '💵' },
+    { id: 'card',      label: 'Visa / Mastercard', img: 'vm.png', mf: 'Card', networks: ['visa', 'masterCard'] },
+    { id: 'amex',      label: 'American Express',  img: 'ae.png', mf: 'Card', networks: ['amex'] },
+    { id: 'naps',      label: 'Qatar Debit Card',  img: 'np.png' },
+    { id: 'applepay',  label: 'Apple Pay',         img: 'ap.png', mf: 'ApplePay', wallet: true },
+    { id: 'googlepay', label: 'Google Pay',        img: 'gp.png', mf: 'GooglePay', wallet: true },
+  ];
 
   let pyOrderSnapshot = null;
   let mfScriptPromise = null;
+  let coPayMethod = 'card';
+  let mfInitKey = '';
 
   function pyCalcTotal() {
     const sub = cart.reduce((s,i) => s + i.price * i.qty, 0);
@@ -5401,21 +5439,25 @@
     }
     return Math.max(0, sub - disc) + (coExpressFee || 0);
   }
+  function coIsGift() { return !!document.getElementById('coSendAsGift')?.checked; }
+  function pmById(id) { return PAY_METHODS.find(m => m.id === id); }
 
-  function pySetAmounts(total) {
-    document.getElementById('pyAmountVal').textContent = Number(total).toFixed(0);
-    document.getElementById('pyCodAmt').textContent    = Number(total).toFixed(0);
-    document.getElementById('pyCardBtnAmt').textContent = 'QR ' + Number(total).toFixed(0);
+  function pyBuildSnapshot() {
+    return {
+      cart: cart.map(i => ({...i})), total: pyCalcTotal(),
+      recipient: {...recipient}, deliverySlot: {...deliverySlot},
+      giftMessage, coPayment: coPayMethod, appliedPromo, coExpressFee
+    };
   }
 
   // What the server needs to price the order (it ignores any prices sent from here)
   function pyOrderPayload() {
-    const s = pyOrderSnapshot;
+    const s = pyOrderSnapshot || pyBuildSnapshot();
     const u = (typeof authUser !== 'undefined' && authUser) ? authUser : {};
     return {
       items: s.cart.map(i => ({ name: i.name, qty: i.qty, variants: i.variants || { addons: [] } })),
       promoCode: s.appliedPromo?.code || '',
-      slotId: s.deliverySlot?.slot || '',
+      slotId: pyOrderSnapshot ? (s.deliverySlot?.slot || '') : coDeliverySlotId,
       recipient: s.recipient,
       customerName: u.name && u.name !== 'Guest' ? u.name : s.recipient?.name,
       customerEmail: u.email || '',
@@ -5442,34 +5484,66 @@
     return mfScriptPromise;
   }
 
-  function pyCardError(msg) { document.getElementById('py-card-errors').textContent = msg || ''; }
+  function pyCardError(msg) { const e = document.getElementById('py-card-errors'); if (e) e.textContent = msg || ''; }
 
-  function openPayment() {
-    if (!cart.length) return;
-    pyOrderSnapshot = {
-      cart: cart.map(i => ({...i})), total: pyCalcTotal(),
-      recipient: {...recipient}, deliverySlot: {...deliverySlot},
-      giftMessage, coPayment: 'card', appliedPromo, coExpressFee
-    };
-    pySetAmounts(pyOrderSnapshot.total);
-    const isGift = document.getElementById('coSendAsGift')?.checked;
-    const cashTab = document.getElementById('pyCashTab');
-    if (cashTab) cashTab.style.display = isGift ? 'none' : '';
-    pyShowPanel('card');
-    document.getElementById('pyOverlay').classList.add('show');
-    pyInitMyFatoorah();
+  // ── Payment method tiles ─────────────────────
+  function coPmAvailable(m) {
+    const ua = navigator.userAgent;
+    if (m.id === 'applepay') return !/Android/i.test(ua);
+    return true;
+  }
+  function coRenderPmTiles() {
+    const grid = document.getElementById('coPmGrid');
+    if (!grid) return;
+    const gift = coIsGift();
+    if (gift && coPayMethod === 'cash') coPayMethod = 'card';
+    grid.innerHTML = PAY_METHODS.filter(coPmAvailable).map(m => {
+      const off = gift && m.id === 'cash';
+      return `<button type="button" class="co-pm${coPayMethod === m.id ? ' active' : ''}" data-pm="${m.id}" onclick="coSelectPm('${m.id}')" ${off ? 'disabled' : ''}>
+        <span class="co-pm-logo">${m.img ? `<img src="${MF_IMG + m.img}" alt="">` : m.icon}</span>
+        <span class="co-pm-name">${m.label}</span>${off ? '<small>Not for gifts</small>' : ''}
+      </button>`;
+    }).join('');
   }
 
-  async function pyInitMyFatoorah() {
-    const box = document.getElementById('mfUnified');
+  function coSelectPm(id) {
+    coPayMethod = id;
+    coRenderPmTiles();
+    const m = pmById(id);
+    document.getElementById('coPmCash').hidden = id !== 'cash';
+    document.getElementById('coPmNaps').hidden = id !== 'naps';
+    document.getElementById('coPmMf').hidden   = !m?.mf;
     pyCardError('');
-    document.getElementById('pyCardSubmit').disabled = true;
+    coUpdatePlaceBtn();
+    if (m?.mf) coInitMf();
+  }
+
+  function coUpdatePlaceBtn() {
+    const m = pmById(coPayMethod);
+    const label = !m ? 'Place order'
+      : m.id === 'cash' ? 'Place order'
+      : m.wallet ? `Continue to ${m.label}`
+      : 'Pay now';
+    document.querySelectorAll('.co-place-lbl').forEach(el => el.textContent = label);
+    const hint = document.getElementById('coPmWalletHint');
+    if (hint) {
+      hint.hidden = !m?.wallet;
+      if (m?.wallet) hint.textContent = `Fill in the details above, then tap the ${m.label} button to pay QR ${pyCalcTotal().toFixed(0)}.`;
+    }
+  }
+
+  // Loads MyFatoorah's fields for the chosen method (card fields, or the Apple/Google Pay button)
+  async function coInitMf(force) {
+    const m = pmById(coPayMethod);
+    if (!m?.mf || !cart.length) return;
+    const key = `${m.id}|${pyCalcTotal()}|${coDeliverySlotId}|${appliedPromo?.code || ''}`;
+    if (!force && key === mfInitKey) return;
+    mfInitKey = key;
+    const box = document.getElementById('mfUnified');
     box.innerHTML = '<div class="py-mf-loading">Loading secure payment…</div>';
     try {
       const [, session] = await Promise.all([loadMfScript(), pyApi('session', { order: pyOrderPayload() })]);
-      // The server's price is the one that will be charged
-      pyOrderSnapshot.total = session.amount;
-      pySetAmounts(session.amount);
+      if (mfInitKey !== key) return;   // method or total changed meanwhile
       box.innerHTML = '';
       myfatoorah.init({
         sessionId: session.sessionId,
@@ -5478,22 +5552,46 @@
         amount: String(session.amount),
         callback: pyMfCallback,
         containerId: 'mfUnified',
-        paymentOptions: ['ApplePay', 'GooglePay', 'Card'],
-        supportedNetworks: ['visa', 'masterCard', 'amex'],
+        paymentOptions: [m.mf],
+        supportedNetworks: m.networks || ['visa', 'masterCard', 'amex'],
         language: 'en',
-        settings: { card: { style: { button: { useCustomButton: true } } } },   // we use our own Pay button
+        settings: { card: { style: { button: { useCustomButton: true } } } },   // our Place order button submits
       });
-      document.getElementById('pyCardSubmit').disabled = false;
     } catch (e) {
+      mfInitKey = '';
       box.innerHTML = '';
-      pyCardError(e.message || 'Online payment is unavailable right now. Please choose Cash on Delivery or try again.');
+      pyCardError(e.message || 'Online payment is unavailable right now. Please choose another method or try again.');
     }
   }
 
+  // ── Place order ──────────────────────────────
+  function coPlaceOrder() {
+    if (!cart.length) return;
+    const m = pmById(coPayMethod);
+    if (!m) { pyCardError('Please choose a payment method.'); return; }
+    if (!coValidateAndSave()) return;
+    pyOrderSnapshot = pyBuildSnapshot();
+    pyCardError('');
+    if (m.id === 'cash') {
+      if (coIsGift()) { pyCardError('Cash on delivery isn’t available for gifts.'); return; }
+      pyOrderSnapshot.coPayment = 'cash';
+      pyShowSuccess(null, 'cash');
+      return;
+    }
+    if (m.id === 'naps') return pyPayNaps();
+    if (m.wallet) {
+      // Apple/Google Pay need a tap on their own button
+      document.getElementById('coPmMf').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const hint = document.getElementById('coPmWalletHint');
+      if (hint) { hint.textContent = `Now tap the ${m.label} button above to pay.`; hint.style.borderColor = 'var(--gold)'; }
+      return;
+    }
+    pyPayCard();
+  }
+
   // ── Paying without leaving the site ──────────────
-  // Card details, Apple Pay and Google Pay are entered on this page. If the bank asks for
-  // its security check (3-D Secure / NAPS), it opens in a small window over the site that
-  // closes itself; this page never navigates away.
+  // If the bank asks for its security check (3-D Secure / NAPS), it opens in a small window
+  // over the site that closes itself; this page never navigates away.
   let pyPayWin = null, pyPayWinTimer = null, pyAwaitingCard = false;
 
   function pyOpenPayWindow() {
@@ -5508,32 +5606,31 @@
     } catch (e) {}
     return win;
   }
-
   function pyFocusPayWindow() { try { pyPayWin && pyPayWin.focus(); } catch (e) {} }
 
   function pyShowWaiting(text, showFocus) {
-    document.getElementById('pyCardPanel').style.display = 'none';
-    document.getElementById('pyLoading').style.display   = 'flex';
-    document.getElementById('pyLoadingTxt').textContent  = text;
-    document.getElementById('pyFocusWin').style.display  = showFocus ? '' : 'none';
+    document.getElementById('pyOverlay').classList.add('show');
+    document.getElementById('pyLoadingTxt').textContent = text;
+    document.getElementById('pyFocusWin').style.display = showFocus ? '' : 'none';
   }
+  function closePayment() { document.getElementById('pyOverlay').classList.remove('show'); }
+
   function pyBackToForm(msg) {
     clearInterval(pyPayWinTimer);
     try { pyPayWin && !pyPayWin.closed && pyPayWin.close(); } catch (e) {}
     pyPayWin = null;
-    document.getElementById('pyLoading').style.display   = 'none';
-    document.getElementById('pyCardPanel').style.display = '';
+    closePayment();
     pyCardError(msg || '');
-    pyInitMyFatoorah();   // a payment session can only be used once
+    document.getElementById('py-card-errors')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    coInitMf(true);   // a payment session can only be used once
   }
 
-  // Our Pay button: open the (blank) secure window during the click so browsers allow it,
+  // Our button: open the (blank) secure window during the click so browsers allow it,
   // then submit the card form inside MyFatoorah's fields.
   function pyPayCard() {
-    pyCardError('');
+    if (!window.myfatoorah) { pyCardError('The card form is still loading — please try again in a moment.'); return; }
     pyAwaitingCard = true;
     pyPayWin = pyOpenPayWindow();
-    document.getElementById('pyCardSubmit').disabled = true;
     myfatoorah.submitCardPayment();
   }
 
@@ -5544,13 +5641,18 @@
 
   async function pyMfCallback(response) {
     const wasCard = pyAwaitingCard; pyAwaitingCard = false;
-    document.getElementById('pyCardSubmit').disabled = false;
     if (!response || !response.isSuccess) {
       if (wasCard) { try { pyPayWin && pyPayWin.close(); } catch (e) {} pyPayWin = null; }
       pyCardError(response?.error || 'Payment details were not accepted. Please check them and try again.');
       return;
     }
-    await pyStartPayment({ sessionId: response.sessionId, wallet: response.paymentType !== 'Card' });
+    const wallet = response.paymentType && response.paymentType !== 'Card';
+    if (wallet) {
+      // Wallet tapped directly: make sure the delivery details are complete before charging
+      if (!coValidateAndSave()) { pyCardError('Please complete the details above, then tap the button again. You have not been charged.'); coInitMf(true); return; }
+      pyOrderSnapshot = pyBuildSnapshot();
+    }
+    await pyStartPayment({ sessionId: response.sessionId, wallet });
   }
 
   async function pyStartPayment(extra) {
@@ -5563,6 +5665,7 @@
       pyOrderSnapshot.coPayment = 'card';
       localStorage.setItem(PENDING_KEY, JSON.stringify(pyOrderSnapshot));
       const r = await pyApi('execute', { order: pyOrderPayload(), orderId, ...extra });
+      pyOrderSnapshot.total = r.amount;
 
       // Apple Pay / Google Pay are usually complete already — no bank page needed
       if (wallet && r.invoiceId) {
@@ -5578,10 +5681,9 @@
       pyPayWinTimer = setInterval(async () => {
         if (pyPayWin && !pyPayWin.closed) return;
         clearInterval(pyPayWinTimer);
-        // Window closed — maybe paid (message missed), maybe cancelled
         const st = await pyCheckStatus({ invoiceId: r.invoiceId });
         if (st && st.paid) pyPaymentConfirmed(st);
-        else if (document.getElementById('pyLoading').style.display !== 'none') pyBackToForm('The payment window was closed before the payment finished. You have not been charged.');
+        else if (document.getElementById('pyOverlay').classList.contains('show')) pyBackToForm('The payment window was closed before the payment finished. You have not been charged.');
       }, 800);
     } catch (e) {
       pyBackToForm(e.message);
@@ -5618,7 +5720,7 @@
     else pyBackToForm(st?.error || 'Your payment was not completed. You have not been charged.');
   });
 
-  // Back from MyFatoorah: confirm the payment with the server before showing success
+  // Back from MyFatoorah's page (only when the secure window was blocked)
   window.addEventListener('DOMContentLoaded', async () => {
     const q = new URLSearchParams(location.search);
     const mf = q.get('mf');
@@ -5650,46 +5752,21 @@
     }
   });
 
-  function closePayment() { document.getElementById('pyOverlay').classList.remove('show'); }
-
-  function coOnSendAsGiftChange() {
-    const isGift = document.getElementById('coSendAsGift').checked;
-    const cashTab = document.getElementById('pyCashTab');
-    if (!cashTab) return;
-    cashTab.style.display = isGift ? 'none' : '';
-    if (isGift && cashTab.classList.contains('active')) {
-      const cardTab = document.querySelector('[data-tab="card"]');
-      if (cardTab) pyTab('card', cardTab);
-    }
-  }
-
-  function pyConfirmCash() {
-    const btn = document.getElementById('pyCashSubmit');
-    btn.disabled = true;
-    btn.textContent = 'Placing order…';
-    pyOrderSnapshot.coPayment = 'cash';
-    pyShowSuccess(null, 'cash');
-    btn.disabled = false;
-    btn.textContent = 'Confirm Order — Pay on Delivery';
-  }
-
-  function pyTab(tab, btn) {
-    document.querySelectorAll('.py-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('pyCardPanel').style.display = tab === 'card' ? '' : 'none';
-    document.getElementById('pyCashPanel').style.display = tab === 'cash' ? '' : 'none';
-  }
-
-  function pyShowPanel(tab) {
-    document.querySelectorAll('.py-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-    document.getElementById('pyCardPanel').style.display = tab === 'card' ? '' : 'none';
-    document.getElementById('pyCashPanel').style.display = tab === 'cash' ? '' : 'none';
-    document.getElementById('pyLoading').style.display   = 'none';
+  // Gift toggle: hide the address (we contact the recipient) and disable cash
+  function coOnSendAsGiftChange() { coSyncGift(); }
+  function coSyncGift() {
+    const gift = coIsGift();
+    const f = document.getElementById('coAddrFields');
+    if (f) f.style.display = gift ? 'none' : '';
+    const wasCash = coPayMethod === 'cash';
+    coRenderPmTiles();
+    if (gift && wasCash) coSelectPm('card');
   }
 
   function pyShowSuccess(paymentIntentId, paymentMethod, payment) {
     paymentMethod = paymentMethod || 'card';
     closePayment();
+    mfInitKey = '';
     const snap = pyOrderSnapshot;
     const orderId = snap.orderId || ('RB-' + (Date.now().toString(36).toUpperCase()));
     document.getElementById('pyOrderNum').textContent = orderId;
@@ -5743,7 +5820,7 @@
   }
 
   function pyShowError(msg) {
-    document.getElementById('pyOverlay').classList.remove('show');
+    closePayment();
     document.getElementById('pyErrMsg').textContent = msg;
     document.getElementById('pyError').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -5751,10 +5828,8 @@
 
   function pyRetry() {
     document.getElementById('pyError').classList.remove('show');
-    if (!pyOrderSnapshot) { document.body.style.overflow = ''; return; }
-    pyShowPanel('card');
-    document.getElementById('pyOverlay').classList.add('show');
-    pyInitMyFatoorah();
+    document.body.style.overflow = '';
+    if (cart.length) openCartOrAuth();
   }
 
   function pyFallbackWA() {
