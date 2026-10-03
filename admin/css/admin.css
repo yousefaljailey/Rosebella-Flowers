@@ -227,8 +227,9 @@ td .input { padding: 7px 9px; }
 .hp-item { flex: 0 0 120px; width: 120px; min-width: 0; display: flex; flex-direction: column; gap: 6px; font-size: 11px; position: relative; }
 .hp-item > span:not(.hp-thumb):not(.hp-acts) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hp-preview .hp-thumb { opacity: .7; }
-.hp-preview .hp-acts { position: absolute; top: 5px; right: 5px; }
-.hp-preview .hp-acts .btn { padding: 2px 7px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+.hp-tools { position: absolute; top: 5px; right: 5px; display: flex; gap: 4px; }
+.hp-tools .btn { padding: 2px 7px; font-size: 11px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+.hp-item > span:not(.hp-thumb):not(.hp-acts):not(.hp-tools) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hp-thumb { display: block; width: 100%; aspect-ratio: 4/5; border-radius: 8px; background: #efe9dc center/cover no-repeat; border: 1px solid var(--line); }
 .hp-results .hp-thumb { width: 34px; flex: 0 0 34px; }
 .hp-acts { display: flex; gap: 4px; }

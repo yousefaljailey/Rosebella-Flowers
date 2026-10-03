@@ -1016,6 +1016,7 @@ function homeAutoPreview(sec) {
   if (id === 'new') { const t = newest.filter(p => /new/i.test(p.badge || '') || p.badgeStyle === 'new'); return [...t, ...newest.filter(p => !t.includes(p))].slice(0, 10); }
   if (id === 'recent') return newest.slice(0, 10);
   if (id === 'best') { const t = prods.filter(p => /best|popular/i.test(p.badge || '') || p.badgeStyle === 'popular'); return [...t, ...prods.filter(p => !t.includes(p) && p.image)].slice(0, 10); }
+  if (id === 'recommended') return [...prods].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, 8);
   return [];
 }
 
@@ -1029,14 +1030,15 @@ PAGES.home = {
     return pageHd('Homepage <em>Sections</em>', 'The product rows on the homepage. Leave a section empty to fill it automatically, or hand-pick the products and their order.',
       '<button class="btn btn-gold" id="saveHome">Save sections</button>') +
       homeDraft.map((sec, si) => {
-        const picked = sec.productIds.map(id => byId[id]).filter(Boolean);
+        sec.productIds = sec.productIds.filter(id => byId[id]);   // drop products that were deleted
+        const picked = sec.productIds.map(id => byId[id]);
         const auto = !picked.length;
         const preview = auto ? homeAutoPreview(sec) : [];
         const builtin = isBuiltinSection(sec.id);
         const removed = (sec.excludeIds || []).length;
         const autoText = !builtin
           ? (sec.collection ? `Products from “${esc(collectionNames[sec.collection] || sec.collection)}”, in collection order.` : 'Choose a collection to fill this row automatically, or add products by hand below.')
-          : sec.id === 'recommended' ? 'Personalised for each visitor from what they viewed and added to their bag.'
+          : sec.id === 'recommended' ? 'Personalised for each visitor from what they viewed and added to their bag. First-time visitors see these:'
           : sec.id === 'best' ? 'Products with a “Bestseller” badge first, then the rest of your catalog.'
           : sec.id === 'new' ? 'Products with a “New” badge first, then the most recently added.'
           : 'The most recently added products.';
@@ -1068,9 +1070,11 @@ PAGES.home = {
             ${auto
               ? `<p class="order-meta" style="margin:6px 0 10px">${autoText}${removed ? ` &nbsp;·&nbsp; ${removed} removed <button class="btn btn-sm btn-ghost" data-act="restore">Restore</button>` : ''}</p>
                  <div class="hp-list hp-preview">${preview.map(p => `<div class="hp-item" data-pid="${esc(p.id)}">${thumb(p)}<span>${esc(p.name)}</span>
-                   <span class="hp-acts"><button class="btn btn-sm btn-danger" data-act="xrm" title="Remove from this row">✕</button></span></div>`).join('')}</div>`
-              : `<div class="hp-list">${picked.map((p, pi) => `<div class="hp-item" data-pi="${pi}">${thumb(p)}<span>${esc(p.name)}</span>
-                   <span class="hp-acts"><button class="btn btn-sm" data-act="pup">‹</button><button class="btn btn-sm" data-act="pdown">›</button><button class="btn btn-sm btn-danger" data-act="prm">✕</button></span></div>`).join('')}</div>`}
+                   <span class="hp-tools"><button class="btn btn-sm" data-act="pedit" title="Edit product">Edit</button><button class="btn btn-sm btn-danger" data-act="xrm" title="Remove from this row">✕</button></span></div>`).join('')}</div>
+                 ${preview.length ? '<button class="btn btn-sm btn-ghost" data-act="freeze" style="margin-top:8px">Arrange these by hand</button>' : ''}`
+              : `<div class="hp-list">${picked.map((p, pi) => `<div class="hp-item" data-pi="${pi}" data-pid="${esc(p.id)}">${thumb(p)}<span>${esc(p.name)}</span>
+                   <span class="hp-tools"><button class="btn btn-sm" data-act="pedit" title="Edit product">Edit</button><button class="btn btn-sm btn-danger" data-act="prm" title="Remove from this row">✕</button></span>
+                   <span class="hp-acts"><button class="btn btn-sm" data-act="pup" title="Move left">‹</button><button class="btn btn-sm" data-act="pdown" title="Move right">›</button></span></div>`).join('')}</div>`}
             <div class="hp-add">
               <input class="input" data-add placeholder="＋ Add a product — type its name" autocomplete="off">
               <div class="hp-results" hidden></div>
@@ -1109,6 +1113,8 @@ PAGES.home = {
         if (act === 'prm') sec.productIds.splice(pi, 1);
         if (act === 'xrm') { const pid = b.closest('[data-pid]')?.dataset.pid; if (pid) (sec.excludeIds = sec.excludeIds || []).push(pid); }
         if (act === 'restore') sec.excludeIds = [];
+        if (act === 'freeze') sec.productIds = homeAutoPreview(sec).map(p => p.id);
+        if (act === 'pedit') { const pid = b.closest('[data-pid]')?.dataset.pid; if (pid) editProduct(pid); return; }
         if (act === 'delsec') { if (!confirm(`Delete the section “${sec.title || 'Untitled'}”?`)) return; homeDraft.splice(si, 1); }
         if (act === 'clear') sec.productIds = [];
         render();
