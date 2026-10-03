@@ -106,33 +106,39 @@
     return String(u || '').replace('/image/upload/f_auto,q_auto,w_1200/', '/image/upload/f_auto,q_auto,w_600/');
   }
 
-  // Card photos load when they come near the screen instead of all at once
-  const lazyObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      const el = e.target;
-      el.style.backgroundImage = `url("${el.dataset.bg}")`;
-      el.removeAttribute('data-bg');
-      lazyObserver.unobserve(el);
-    });
-  }, { rootMargin: '400px 0px' }) : null;
-  function lazyLoadImages(root) {
-    (root || document).querySelectorAll('[data-bg]').forEach(el => {
-      if (lazyObserver) lazyObserver.observe(el);
-      else { el.style.backgroundImage = `url("${el.dataset.bg}")`; el.removeAttribute('data-bg'); }
-    });
+  // Card photos load when they come near the screen instead of all at once.
+  // (Plain position checks on scroll/resize — works even in background tabs.)
+  function showBg(el) { el.style.backgroundImage = `url("${el.dataset.bg}")`; el.removeAttribute('data-bg'); }
+  let lazyQueued = false;
+  function lazyLoadImages() {
+    if (lazyQueued) return;
+    lazyQueued = true;
+    setTimeout(() => {
+      lazyQueued = false;
+      const vh = window.innerHeight || 800, vw = window.innerWidth || 1200;
+      document.querySelectorAll('[data-bg]').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (!r.width && !r.height) return;                 // not displayed (e.g. filtered out)
+        if (r.top < vh + 500 && r.bottom > -500 && r.left < vw + 800 && r.right > -800) showBg(el);
+      });
+    }, 30);
   }
+  window.addEventListener('scroll', lazyLoadImages, { passive: true });
+  window.addEventListener('resize', lazyLoadImages);
+  // Sliding rows scroll sideways inside their own container
+  document.addEventListener('scroll', e => { if (e.target !== document) lazyLoadImages(); }, { capture: true, passive: true });
+
   // A tap on a card loads its photo right away (the bag / extras popup read it)
   document.addEventListener('click', e => {
     const card = e.target.closest && e.target.closest('.prod-card');
     const el = card && card.querySelector('[data-bg]');
-    if (el) { el.style.backgroundImage = `url("${el.dataset.bg}")`; el.removeAttribute('data-bg'); lazyObserver && lazyObserver.unobserve(el); }
+    if (el) showBg(el);
   }, true);
   // Observe cards whenever any page inserts them
   if (window.MutationObserver) {
     new MutationObserver(muts => {
       for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) {
-        if (n.dataset && n.dataset.bg) lazyLoadImages(n.parentNode); else if (n.querySelector && n.querySelector('[data-bg]')) lazyLoadImages(n);
+        if ((n.dataset && n.dataset.bg) || (n.querySelector && n.querySelector('[data-bg]'))) { lazyLoadImages(); return; }
       }
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
