@@ -3536,20 +3536,31 @@
       <span class="mob-nav-brand">ROSE<span>BELLA</span></span>
       <button class="mob-nav-close" onclick="closeMobileNav()">✕</button>
     </div>
-    <nav class="mob-nav-links">
-      <a href="shop.html" onclick="closeMobileNav()">Collections</a>
-      <a href="story.html">Our Story</a>
-      <a href="contact.html">Contact</a>
-    </nav>
+    <!-- (a div, not <nav>: the page's nav styles are for the top bar) -->
+    <div class="mob-nav-links">
+      <a href="shop.html" onclick="closeMobileNav()"><span class="mn-ico">🌸</span><span class="mn-txt">All Collections</span></a>
+      <a href="#occasions" onclick="closeMobileNav()"><span class="mn-ico">🎁</span><span class="mn-txt">Shop by Occasion</span></a>
+      <a href="#collections" onclick="closeMobileNav()"><span class="mn-ico">✨</span><span class="mn-txt">New Arrivals</span></a>
+      <a href="shop.html?search=1"><span class="mn-ico">🔍</span><span class="mn-txt">Search</span></a>
+      <a href="story.html"><span class="mn-ico">📖</span><span class="mn-txt">Our Story</span></a>
+      <a href="contact.html"><span class="mn-ico">✉️</span><span class="mn-txt">Contact Us</span></a>
+    </div>
     <div class="mob-nav-langs">
-      <button class="mob-lang-btn active" id="mobBtnEN" onclick="setLang('en');updateMobLangBtns('en')">EN</button>
-      <button class="mob-lang-btn" id="mobBtnAR" onclick="setLang('ar');updateMobLangBtns('ar')">عربي</button>
+      <span class="mob-nav-langs-lbl">Language · اللغة</span>
+      <div class="mob-nav-seg">
+        <button class="mob-lang-btn active" id="mobBtnEN" onclick="setLang('en');updateMobLangBtns('en')">English</button>
+        <button class="mob-lang-btn" id="mobBtnAR" onclick="setLang('ar');updateMobLangBtns('ar')">عربي</button>
+      </div>
     </div>
     <div class="mob-nav-bottom">
       <a href="#collections" class="mob-nav-cta" onclick="closeMobileNav()">Shop Now</a>
       <a href="https://wa.me/97433446618" class="mob-nav-wa" target="_blank" rel="noopener">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"></path><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.533 5.849L.057 23.617a.75.75 0 00.906.94l5.946-1.557A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.698-.5-5.254-1.376l-.372-.215-3.899 1.021 1.04-3.794-.235-.38A9.932 9.932 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path></svg>
         WhatsApp Us
+      </a>
+      <a class="mob-nav-app" href="https://apps.apple.com/qa/app/rosebella-%D8%B1%D9%88%D8%B2%D8%A8%D9%8A%D9%84%D8%A7/id6741586783" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+        Get the Rosebella app
       </a>
     </div>
   </div>
@@ -3592,8 +3603,8 @@
     <button class="hs-arrow hs-next" id="hsNext" onclick="hsNext()" aria-label="Next slide">›</button>
     <div class="hs-dots" id="hsDots"><div class="hs-dot hs-dot-active" onclick="hsGoTo(0)" aria-label="Slide 1"></div></div>
     <div class="hs-controls">
-      <button class="hs-ctrl" id="hsPauseBtn" onclick="hsTogglePause()" title="Pause/Play">⏸</button>
-      <button class="hs-ctrl" id="hsMuteBtn" onclick="hsToggleMute()" title="Mute/Unmute">🔇</button>
+      <button class="hs-ctrl" id="hsPauseBtn" onclick="hsTogglePause()" title="Pause/Play" aria-label="Pause slideshow"></button>
+      <button class="hs-ctrl" id="hsMuteBtn" onclick="hsToggleMute()" title="Mute/Unmute" aria-label="Unmute"></button>
     </div>
   </section>
 
@@ -6651,10 +6662,22 @@
   }
 
   // ── Pause / Mute ────────────────────────────
+  // Plain line icons (emoji ⏸ 🔇 render as coloured stickers on iPhone)
+  const HS_ICONS = {
+    pause: '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>',
+    play:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>',
+    muted: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>',
+    sound: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  };
+  function hsSyncCtrlIcons() {
+    const p = document.getElementById('hsPauseBtn'), m = document.getElementById('hsMuteBtn');
+    if (p) { p.innerHTML = paused ? HS_ICONS.play : HS_ICONS.pause; p.setAttribute('aria-label', paused ? 'Play slideshow' : 'Pause slideshow'); }
+    if (m) { m.innerHTML = muted ? HS_ICONS.muted : HS_ICONS.sound; m.setAttribute('aria-label', muted ? 'Unmute' : 'Mute'); }
+  }
+  hsSyncCtrlIcons();
   window.hsTogglePause = function() {
     paused = !paused;
-    const btn = document.getElementById('hsPauseBtn');
-    if (btn) btn.textContent = paused ? '▶' : '⏸';
+    hsSyncCtrlIcons();
     if (paused) { clearInterval(timer); }
     else        { startTimer(); }
     applyVideoState();
@@ -6662,8 +6685,7 @@
 
   window.hsToggleMute = function() {
     muted = !muted;
-    const btn = document.getElementById('hsMuteBtn');
-    if (btn) btn.textContent = muted ? '🔇' : '🔊';
+    hsSyncCtrlIcons();
     applyVideoState();
   };
 
@@ -6704,6 +6726,6 @@
 })();
 </script>
 
-<link rel="stylesheet" href="css/rb-mobile.css?v=2">
+<link rel="stylesheet" href="css/rb-mobile.css?v=4">
 </body>
 </html>

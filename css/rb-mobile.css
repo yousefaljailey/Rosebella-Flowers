@@ -73,3 +73,45 @@ html, body { max-width: 100%; overflow-x: clip; }
   .prod-card .prod-body h3 { font-size: 14px !important; }
   .pd-extras { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
+
+/* ══ Mobile menu (☰) ══ */
+#mobNav { height: 100vh; height: 100dvh; width: min(340px, 86vw) !important; background: #14120d !important; }
+#mobNav .mob-nav-hd { padding: 18px 20px !important; padding-top: max(18px, env(safe-area-inset-top)) !important; }
+#mobNav .mob-nav-close { width: 38px !important; height: 38px !important; font-size: 14px !important; }
+#mobNav .mob-nav-links { padding: 10px 0 !important; }
+#mobNav .mob-nav-links a { justify-content: flex-start !important; gap: 14px; padding: 15px 22px !important; font-size: 12px !important;
+  letter-spacing: .14em !important; color: rgba(255,255,255,0.86) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+#mobNav .mob-nav-links a::after { margin-left: auto; color: var(--gold); opacity: .6 !important; }
+#mobNav .mn-ico { width: 22px; text-align: center; font-size: 15px; filter: saturate(.85); }
+#mobNav .mob-nav-langs { flex-direction: column; gap: 10px !important; padding: 18px 22px 6px !important; }
+#mobNav .mob-nav-langs-lbl { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+#mobNav .mob-nav-seg { display: flex; padding: 4px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+#mobNav .mob-lang-btn { border: none !important; border-radius: 999px !important; padding: 10px !important; font-size: 11px !important; letter-spacing: .08em !important; color: rgba(255,255,255,0.65) !important; }
+#mobNav .mob-lang-btn.active { background: var(--gold) !important; color: #fff !important; }
+#mobNav .mob-nav-bottom { padding: 20px 22px !important; padding-bottom: max(20px, env(safe-area-inset-bottom)) !important; gap: 10px !important; }
+#mobNav .mob-nav-cta, #mobNav .mob-nav-wa, #mobNav .mob-nav-app { border-radius: 999px !important; padding: 14px !important; font-size: 10.5px !important; }
+#mobNav .mob-nav-app { display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--sans); font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; text-decoration: none; color: #fff; background: #000; border: 1px solid rgba(255,255,255,0.25); }
+
+@media (max-width: 768px) {
+  /* ══ Hero on phones: tidy card, text + button at the bottom, small indicators ══ */
+  .hero-slider { height: min(112vw, 62vh) !important; min-height: 340px !important; margin: 10px 12px 0 !important; border-radius: 22px !important; }
+  .hs-overlay { background: linear-gradient(to top, rgba(8,6,3,0.72) 0%, rgba(8,6,3,0.25) 42%, rgba(8,6,3,0) 65%) !important; animation: none !important; }
+  .hs-content { justify-content: flex-end !important; align-items: flex-start !important; text-align: left !important;
+    max-width: none !important; margin: 0 !important; padding: 0 20px 56px !important; }
+  .hs-h1 { font-size: 30px !important; margin-bottom: 6px !important; }
+  .hs-tagline { font-size: 14px !important; margin: 0 0 14px !important; max-width: 92% !important; }
+  .hs-cta { padding: 12px 26px !important; font-size: 10px !important; letter-spacing: .16em !important; box-shadow: 0 4px 16px rgba(0,0,0,0.25) !important; }
+  .hs-dots { left: 20px !important; right: auto !important; bottom: 24px !important; transform: none !important; gap: 6px !important; align-items: center; }
+  .hs-dot { min-height: 0 !important; height: 3px !important; width: 16px !important; border-radius: 3px; padding: 0 !important; }
+  .hs-dot.hs-dot-active { width: 30px !important; }
+  .hs-controls { bottom: 14px !important; right: 14px !important; gap: 6px !important; }
+  .hs-ctrl { min-height: 0 !important; width: 32px !important; height: 32px !important; border-radius: 50% !important;
+    background: rgba(0,0,0,0.35) !important; border: 1px solid rgba(255,255,255,0.35) !important; color: #fff !important; padding: 0 !important; }
+
+  /* ══ Floating buttons: the bag bar takes priority over the WhatsApp bubble ══ */
+  body.rb-has-bar #waBubble { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; animation: none !important; }
+  #waBubble { transition: opacity .25s, transform .25s; }
+  #rbReviewBar { left: 12px !important; right: 12px !important; bottom: max(12px, env(safe-area-inset-bottom)) !important; padding: 8px 8px 8px 18px !important; border-radius: 999px !important; }
+  #rbReviewBar button { padding: 11px 16px !important; font-size: 10px !important; letter-spacing: .12em !important; }
+}
