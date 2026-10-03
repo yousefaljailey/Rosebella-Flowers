@@ -6580,11 +6580,17 @@
     if (!track || !dots) return;
 
     track.innerHTML = slides.map((s, i) => {
-      const mediaHtml = s.type === 'video'
-        ? `<video class="hs-media" id="hsVid${s.id}" autoplay muted loop playsinline preload="auto"${s.poster ? ` poster="${s.poster}"` : ''}>
+      // Optional phone photo (square/portrait) — shown instead of the wide one on phones
+      const mobIsVideo = /\/video\/upload\/|\.(mp4|webm|mov)(\?|$)/i.test(s.mobileSrc || '');
+      const mobileHtml = !s.mobileSrc ? ''
+        : mobIsVideo
+          ? `<video class="hs-media hs-mob" autoplay muted loop playsinline preload="metadata"><source src="${s.mobileSrc}"></video>`
+          : `<img class="hs-media hs-mob" src="${s.mobileSrc}" alt="${s.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" style="object-position:${s.mobilePosX ?? 50}% ${s.mobilePosY ?? 50}%;" />`;
+      const mediaHtml = mobileHtml + (s.type === 'video'
+        ? `<video class="hs-media${s.mobileSrc ? ' hs-desk' : ''}" id="hsVid${s.id}" autoplay muted loop playsinline preload="auto"${s.poster ? ` poster="${s.poster}"` : ''}>
              <source src="${s.src}" type="video/mp4">
            </video>`
-        : `<img class="hs-media" src="${s.src}" alt="${s.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" style="object-position:${s.posX ?? 50}% ${s.posY ?? 50}%;" />`;
+        : `<img class="hs-media${s.mobileSrc ? ' hs-desk' : ''}" src="${s.src}" alt="${s.title || ''}" loading="${i === 0 && !s.mobileSrc ? 'eager' : 'lazy'}" style="object-position:${s.posX ?? 50}% ${s.posY ?? 50}%;" />`);
 
       return `<div class="hs-slide${i === index ? ' hs-active' : ''}" data-idx="${i}">
         ${mediaHtml}
@@ -6649,15 +6655,13 @@
   // ── Video helpers ───────────────────────────
   function applyVideoState() {
     document.querySelectorAll('.hs-slide').forEach((slide, i) => {
-      const vid = slide.querySelector('video');
-      if (!vid) return;
-      vid.muted = muted;
-      if (i === index) {
-        if (!paused) vid.play().catch(() => {});
+      // A slide can have a computer video and a phone video — only the one on screen plays
+      slide.querySelectorAll('video').forEach(vid => {
+        vid.muted = muted;
+        const shown = getComputedStyle(vid).display !== 'none';
+        if (i === index && shown && !paused) vid.play().catch(() => {});
         else vid.pause();
-      } else {
-        vid.pause();
-      }
+      });
     });
   }
 
@@ -6726,6 +6730,6 @@
 })();
 </script>
 
-<link rel="stylesheet" href="css/rb-mobile.css?v=4">
+<link rel="stylesheet" href="css/rb-mobile.css?v=5">
 </body>
 </html>

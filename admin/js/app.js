@@ -958,7 +958,8 @@ function editSlide(i) {
   const src = String(s.src || '').startsWith('blob:') ? '' : s.src;
   openModal(`<h3>${isNew ? 'New slide' : 'Edit slide'}</h3>
     <form class="stack" id="slideForm">
-      <div class="field"><span>Photo or video</span>${mediaPickerHTML({ url: src, pos: s.type === 'image' && s.posX != null ? `${s.posX}% ${s.posY}%` : '', wide: true, video: true })}</div>
+      <div class="field" id="deskPick"><span>Photo or video (computer — wide)</span>${mediaPickerHTML({ url: src, pos: s.type === 'image' && s.posX != null ? `${s.posX}% ${s.posY}%` : '', wide: true, video: true })}</div>
+      <div class="field" id="mobPick"><span>Phone version — optional square photo or video (otherwise the wide one is cropped to a square)</span>${mediaPickerHTML({ url: s.mobileSrc || '', pos: s.mobilePosX != null ? `${s.mobilePosX}% ${s.mobilePosY}%` : '', video: true })}</div>
       <label class="field"><span>Small heading</span><input name="eyebrow" value="${esc(s.eyebrow)}"></label>
       <div class="grid-2">
         <label class="field"><span>Heading</span><input name="title" value="${esc(s.title)}" placeholder="Elegance"></label>
@@ -976,7 +977,8 @@ function editSlide(i) {
         <button type="button" class="btn" onclick="closeModal()">Cancel</button>
         <button class="btn btn-gold" type="submit">Save slide</button></div></div>
     </form>`, m => {
-    const media = bindMediaPicker(m, { folder: 'rosebella/hero' });
+    const media = bindMediaPicker(m.querySelector('#deskPick'), { folder: 'rosebella/hero' });
+    const mobMedia = bindMediaPicker(m.querySelector('#mobPick'), { folder: 'rosebella/hero' });
     const sel = m.querySelector('[name=ctaSel]'), cus = m.querySelector('[name=ctaCustom]');
     sel.onchange = () => { cus.hidden = sel.value !== 'custom'; };
     m.querySelector('#slideForm').onsubmit = async e => {
@@ -984,7 +986,9 @@ function editSlide(i) {
       const f = new FormData(e.target);
       if (!media.url()) { toast('Add a photo or video', true); return; }
       const [x, y] = media.xy();
+      const [mx, my] = mobMedia.xy();
       const next = { ...s, src: media.url(), type: media.isVideo() ? 'video' : 'image', posX: x, posY: y,
+        mobileSrc: mobMedia.url(), mobilePosX: mx, mobilePosY: my,
         eyebrow: f.get('eyebrow').trim(), title: f.get('title').trim(), titleItalic: f.get('titleItalic').trim(),
         subtitle: f.get('subtitle').trim(), cta: f.get('cta').trim() || 'Shop Now',
         ctaLink: sel.value === 'custom' ? (f.get('ctaCustom').trim() || '#collections') : sel.value };
