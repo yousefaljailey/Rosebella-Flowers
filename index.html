@@ -6211,19 +6211,22 @@
     coLocateArea(name);
   }
   // Centre the map on the chosen area so the shopper can drop the exact pin
+  let coAreaCenter = null;   // remembered so a map that appears later (fallback) starts there too
   async function coLocateArea(name) {
     try {
-      await initCoMap();
-      if (osmMap || mapsFailed || window.__mapsError) {
-        const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(name + ', Qatar')}&limit=1&lang=en&bbox=${QATAR_BBOX}`).then(r => r.json());
-        const f = r.features?.[0];
-        if (f && osmMap) osmMap.setView([f.geometry.coordinates[1], f.geometry.coordinates[0]], 15);
-      } else if (coMap && google.maps.Geocoder) {
-        new google.maps.Geocoder().geocode({ address: name + ', Qatar', region: 'qa' }, (res, status) => {
-          if (status === 'OK' && res[0]) { coMap.setCenter(res[0].geometry.location); coMap.setZoom(15); }
-        });
-      }
+      const mapReady = initCoMap();
+      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(name + ', Qatar')}&limit=1&lang=en&bbox=${QATAR_BBOX}`).then(r => r.json());
+      const f = r.features?.[0];
+      if (!f) return;
+      coAreaCenter = { lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+      await mapReady;
+      coApplyAreaCenter();
     } catch (e) {}
+  }
+  function coApplyAreaCenter() {
+    if (!coAreaCenter) return;
+    if (osmMap) osmMap.setView([coAreaCenter.lat, coAreaCenter.lng], 15);
+    else if (coMap) { coMap.setCenter(coAreaCenter); coMap.setZoom(15); }
   }
   document.addEventListener('click', e => { if (!e.target.closest('#coArea, #coAreaSuggest')) coAreaHide(); });
 
@@ -6397,7 +6400,7 @@
       maxZoom: 19, attribution: '© OpenStreetMap'
     }).addTo(osmMap);
     osmMap.on('click', e => { osmPlacePin(e.latlng.lat, e.latlng.lng); osmReverse(e.latlng.lat, e.latlng.lng); });
-    setTimeout(() => osmMap.invalidateSize(), 50);
+    setTimeout(() => { osmMap.invalidateSize(); coApplyAreaCenter(); }, 50);
   }
 
   function osmPlacePin(lat, lng) {
