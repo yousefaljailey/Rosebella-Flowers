@@ -429,7 +429,7 @@ function invoiceText(o) {
   const items = o.items || [];
   const sub = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 1), 0);
   const fee = Number(ds.expressFee) || 0;
-  const discount = Math.max(0, Math.round((sub - (Number(o.total) || 0)) * 100) / 100);
+  const discount = Math.max(0, Math.round((sub + fee - (Number(o.total) || 0)) * 100) / 100);
   const store = state.settings?.store || {};
   const lines = [
     `🌹 *ROSEBELLA — Invoice*`,
@@ -438,7 +438,8 @@ function invoiceText(o) {
     '',
     ...items.map(i => `• ${i.name}${i.variants?.addons?.length ? ' + ' + i.variants.addons.join(', ') : ''} ×${i.qty || 1} — QR ${((Number(i.price) || 0) * (Number(i.qty) || 1)).toFixed(0)}`),
     '',
-    ...(fee ? [`Delivery fee: QR ${fee}  (included above)`] : []),
+    `Subtotal: QR ${sub.toFixed(0)}`,
+    ...(fee ? [`Delivery fee: QR ${fee}`] : []),
     ...(discount && o.appliedPromo?.code ? [`Promo ${o.appliedPromo.code}: −QR ${discount}`] : []),
     `*Total: QR ${Number(o.total || 0).toFixed(0)}*`,
     `Payment: ${o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Paid online' + (o.payment?.invoiceId ? ' (ref ' + o.payment.invoiceId + ')' : '')}`,
