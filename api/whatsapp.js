@@ -17,10 +17,7 @@
      ADMIN_EMAILS              comma-separated admin emails (default: the portal admin)
    ══════════════════════════════════════════════ */
 const GRAPH = 'https://graph.facebook.com/v21.0';
-const FIREBASE_API_KEY = 'AIzaSyCWaVcGjH3ZZ11Oy1vEBJOE9L_wbsgYET0';
-const ADMIN_ALLOWED_ORIGINS = ['https://rosebella-admin.vercel.app'];
-
-function httpError(status, message) { const e = new Error(message); e.status = status; return e; }
+const { requireAdmin, adminCors, httpError } = require('./_admin');
 
 function config() {
   return {
@@ -28,21 +25,7 @@ function config() {
     phoneId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
     template: process.env.WHATSAPP_TEMPLATE || 'order_receipt',
     lang: process.env.WHATSAPP_TEMPLATE_LANG || 'en',
-    admins: (process.env.ADMIN_EMAILS || 'yousefaljailey@gmail.com').split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
   };
-}
-
-// Only a signed-in, verified portal admin may send messages
-async function requireAdmin(req, cfg) {
-  const idToken = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  if (!idToken) throw httpError(401, 'Please sign in to the admin portal again.');
-  const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken }),
-  });
-  const d = await r.json().catch(() => ({}));
-  const u = (d.users || [])[0];
-  if (!r.ok || !u) throw httpError(401, 'Your admin session has expired — sign in again.');
-  if (!u.emailVerified || !cfg.admins.includes(String(u.email || '').toLowerCase())) throw httpError(403, 'Not allowed.');
 }
 
 async function graph(path, cfg, init) {
@@ -71,19 +54,13 @@ function explain(e) {
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  const origin = req.headers.origin || '';
-  if (ADMIN_ALLOWED_ORIGINS.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  }
-  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (adminCors(req, res)) return;
   const cfg = config();
   try {
     if (req.method === 'GET') return res.status(200).json({ configured: !!(cfg.token && cfg.phoneId), template: cfg.template });
     if (req.method !== 'POST') throw httpError(405, 'Method not allowed.');
     if (!cfg.token || !cfg.phoneId) throw httpError(503, 'WhatsApp is not connected yet.');
-    await requireAdmin(req, cfg);
+    await requireAdmin(req);
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const orderId = String(body.orderId || '');

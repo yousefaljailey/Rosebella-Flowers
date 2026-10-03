@@ -11,6 +11,7 @@
    ══════════════════════════════════════════════ */
 const MF_BASE  = process.env.MYFATOORAH_BASE_URL || 'https://api-qa.myfatoorah.com';  // Qatar live
 const { readDoc, loadCatalog } = require('./_catalog');
+const { requireAdmin, adminCors } = require('./_admin');
 const NAPS_METHOD_ID = 6;   // Qatar Debit Card (redirect only)
 
 const DEFAULT_ADDONS = [
@@ -120,6 +121,26 @@ module.exports = async (req, res) => {
         method: tx.PaymentGateway || '',
         paymentId: tx.PaymentId ? String(tx.PaymentId) : paymentId,
       });
+    }
+
+    // Apple Pay (embedded) needs rosebella.qa registered with MyFatoorah — admin only
+    if (action === 'applepay-domain') {
+      if (adminCors(req, res)) return;
+      const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').replace(/^www\./, '');
+      const fileUrl = `https://${host}/.well-known/apple-developer-merchantid-domain-association`;
+      const f = await fetch(fileUrl).catch(() => null);
+      const fileHosted = !!(f && f.ok && (await f.text()).trim().length > 100);
+      if (req.method === 'GET') return res.status(200).json({ domain: host, fileHosted });
+      if (req.method !== 'POST') throw httpError(405, 'Method not allowed.');
+      await requireAdmin(req);
+      if (!fileHosted) throw httpError(400, 'The Apple Pay verification file is not on the website yet.');
+      const domains = [host, 'www.' + host];
+      const results = [];
+      for (const DomainName of domains) {
+        try { await mf('RegisterApplePayDomain', { DomainName }); results.push({ domain: DomainName, ok: true }); }
+        catch (e) { results.push({ domain: DomainName, ok: false, error: e.message }); }
+      }
+      return res.status(results.some(r => r.ok) ? 200 : 502).json({ results });
     }
 
     if (req.method !== 'POST') throw httpError(405, 'Method not allowed.');

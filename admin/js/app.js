@@ -1027,9 +1027,34 @@ PAGES.store = {
             <label class="field"><span>Text</span><input name="annText" value="${esc(a.text || '')}" placeholder="Free delivery across Doha this weekend"></label>
             <label class="field"><span>Link (optional)</span><input name="annLink" value="${esc(a.link || '')}" placeholder="shop.html"></label>
           </div></div>
-      </form>`;
+      </form>
+      <div class="card"><h2>Apple Pay</h2>
+        <p class="hint">Apple Pay on the website only works once rosebella.qa is verified with Apple through MyFatoorah.
+          Until then the Apple Pay sheet opens and closes straight away.</p>
+        <div class="order-meta" id="apStatus" style="margin:8px 0 12px">Checking…</div>
+        <button type="button" class="btn btn-gold" id="apRegister">Register rosebella.qa for Apple Pay</button>
+        <div class="order-meta" id="apResult" style="margin-top:10px"></div>
+      </div>`;
   },
   bind(el) {
+    const apStatus = el.querySelector('#apStatus'), apBtn = el.querySelector('#apRegister'), apOut = el.querySelector('#apResult');
+    fetch(`${STOREFRONT_URL}/api/pay?action=applepay-domain`).then(r => r.json()).then(d => {
+      apStatus.innerHTML = d.fileHosted
+        ? '✓ Apple’s verification file is on the website. Press the button to register the domain with MyFatoorah.'
+        : '⚠ Step 1 still to do: the Apple Pay verification file from MyFatoorah (tech@myfatoorah.com) is not on the website yet. Send it to your developer to add at /.well-known/apple-developer-merchantid-domain-association.';
+      apBtn.disabled = !d.fileHosted;
+    }).catch(() => { apStatus.textContent = 'Could not check the website right now.'; });
+    apBtn.onclick = async () => {
+      apBtn.disabled = true; apOut.textContent = 'Registering with MyFatoorah…';
+      try {
+        const r = await fetch(`${STOREFRONT_URL}/api/pay?action=applepay-domain`, { method: 'POST',
+          headers: { Authorization: 'Bearer ' + await firebase.auth().currentUser.getIdToken() } });
+        const d = await r.json().catch(() => ({}));
+        apOut.innerHTML = d.results ? d.results.map(x => `${x.ok ? '✓' : '✕'} ${esc(x.domain)}${x.ok ? ' registered' : ' — ' + esc(x.error || 'failed')}`).join('<br>')
+          : '✕ ' + esc(d.error || 'Registration failed');
+      } catch (e) { apOut.textContent = '✕ ' + e.message; }
+      apBtn.disabled = false;
+    };
     el.querySelector('#saveStore').onclick = () => {
       const f = new FormData(el.querySelector('#storeForm'));
       const store = {};
