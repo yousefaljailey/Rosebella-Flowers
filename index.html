@@ -2246,6 +2246,8 @@
     .co-toggle:checked::after { left: 25px; }
     .co-block-title { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 22px; color: var(--charcoal); margin: 4px 0 14px; }
     .co-block-title span { font-size: 16px; }
+    .co-opt-tag { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--taupe); background: #efe9dc; padding: 3px 8px; border-radius: 999px; }
+    .co-addr-gift-note { font-family: var(--sans); font-size: 11px; line-height: 1.6; color: var(--taupe); margin: -6px 0 14px; }
     .co-pm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .co-pm-wrap { border-top: 1px solid rgba(198,146,42,0.1); }
     #coRight .co-pm { min-height: 88px; padding: 10px 6px; border-radius: 12px; }
@@ -3211,7 +3213,7 @@
               <span class="co-gift-ico">🎁</span>
               <span class="co-gift-text">
                 <b>Send as a gift</b>
-                <span>We'll contact the recipient to get their address. Delivery time may be affected if we can't reach them.</span>
+                <span>Add the recipient's details. If you don't know their address, we'll contact them for it — delivery time may be affected if we can't reach them.</span>
               </span>
               <input type="checkbox" id="coSendAsGift" class="co-toggle" onchange="coOnSendAsGiftChange()">
             </label>
@@ -3240,8 +3242,9 @@
             </div><!-- /coRecipFields -->
 
             <div id="coAddrFields">
-            <div class="co-block-title"><span>📍</span> Delivery address</div>
-            <div class="co-field">
+            <div class="co-block-title"><span>📍</span> Delivery address <small class="co-opt-tag" id="coAddrOptTag" hidden>optional</small></div>
+            <p class="co-addr-gift-note" id="coAddrGiftNote" hidden>Know where it's going? Add the location below. Leave it empty and we'll call the recipient for their address.</p>
+            <div class="co-field" id="coMyPhoneField">
               <label class="co-label" for="coMyPhone">Your Phone Number <span class="co-req">*</span></label>
               <div class="co-phone-row">
                 <div class="co-phone-prefix"><span class="co-phone-flag">🇶🇦</span><span class="co-phone-code">+974</span></div>
@@ -3279,7 +3282,7 @@
 
             <!-- Recipient Area -->
             <div class="co-field">
-              <label class="co-label" for="coArea">Recipient Area <span class="co-req">*</span></label>
+              <label class="co-label" for="coArea">Recipient Area <span class="co-req co-addr-req">*</span></label>
               <select id="coArea" class="co-select">
                 <option value="">Select area</option>
                 <optgroup label="Doha">
@@ -3313,7 +3316,7 @@
 
             <!-- Recipient Address -->
             <div class="co-field">
-              <label class="co-label" for="coAddress">Recipient Address <span class="co-req">*</span></label>
+              <label class="co-label" for="coAddress">Recipient Address <span class="co-req co-addr-req">*</span></label>
               <textarea id="coAddress" class="co-textarea" rows="3" placeholder="Apartment/villa number, floor, building name and street"></textarea>
             </div>
 
@@ -5244,7 +5247,7 @@
     // Find area from saved data
     const areaEl = document.getElementById('coArea');
     if (areaEl && recipient.landmark) areaEl.value = recipient.landmark;
-    setVal('coAddress', wasGift ? '' : recipient.address);
+    setVal('coAddress', /^Gift — |^\(area only/.test(recipient.address || '') ? '' : recipient.address);
     if (recipient.notes) document.getElementById('coSendAsGift').checked = recipient.notes === 'gift';
     // Gift message
     const gm = document.getElementById('coGiftMsg');
@@ -5417,11 +5420,12 @@
       return false;
     }
 
+    const knownAddress = !isGift || !!(address || area);
     recipient = {
       name,
       phone: '+974 ' + phone,
-      address: isGift ? 'Gift — contact the recipient for the address' : address,
-      landmark: isGift ? '' : area,
+      address: knownAddress ? (address || '(area only — confirm details with the recipient)') : 'Gift — contact the recipient for the address',
+      landmark: area,
       occasion: '',
       notes: isGift ? 'gift' : ''
     };
@@ -5778,10 +5782,13 @@
   function coOnSendAsGiftChange() { coSyncGift(); }
   function coSyncGift() {
     const gift = coIsGift();
-    const f = document.getElementById('coAddrFields');
-    if (f) f.style.display = gift ? 'none' : '';
     const r = document.getElementById('coRecipFields');
     if (r) r.style.display = gift ? '' : 'none';
+    const myPhone = document.getElementById('coMyPhoneField');
+    if (myPhone) myPhone.style.display = gift ? 'none' : '';
+    document.getElementById('coAddrOptTag').hidden = !gift;
+    document.getElementById('coAddrGiftNote').hidden = !gift;
+    document.querySelectorAll('.co-addr-req').forEach(el => el.style.display = gift ? 'none' : '');
     const wasCash = coPayMethod === 'cash';
     coRenderPmTiles();
     if (gift && wasCash) coSelectPm('card');
