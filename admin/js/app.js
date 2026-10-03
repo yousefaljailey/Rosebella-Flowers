@@ -281,6 +281,9 @@ PAGES.orders = {
     el.querySelectorAll('[data-status]').forEach(b => b.onclick = () => setOrderStatus(b.dataset.id, b.dataset.status));
     el.querySelectorAll('[data-verify]').forEach(b => b.onclick = () => verifyPayment(b));
     el.querySelectorAll('[data-invoice]').forEach(b => b.onclick = () => sendInvoice(b.dataset.invoice));
+    el.querySelectorAll('[data-email]').forEach(b => b.onclick = () => emailReceipt(b.dataset.email));
+    el.querySelectorAll('[data-pdf]').forEach(b => b.onclick = () => downloadReceipt(b.dataset.pdf));
+    el.querySelectorAll('[data-share]').forEach(b => b.onclick = () => shareReceipt(b.dataset.share));
   },
 };
 
@@ -322,11 +325,15 @@ function orderHTML(o) {
         ${r.occasion ? `<p class="order-meta">Occasion: ${esc(r.occasion)}</p>` : ''}
         ${r.notes ? `<p class="order-meta">Notes: ${esc(r.notes)}</p>` : ''}
         <div class="row" style="margin-top:10px">
-          ${invoicePhone(o) ? `<button class="btn btn-sm btn-gold" data-invoice="${esc(o.id)}">${o.invoiceSentAt ? 'Send invoice again' : 'Send invoice'}</button>` : ''}
+          ${invoicePhone(o) ? `<button class="btn btn-sm btn-gold" data-invoice="${esc(o.id)}">${o.invoiceSentAt ? 'WhatsApp receipt again' : 'WhatsApp receipt'}</button>` : ''}
+          ${o.customer?.email ? `<button class="btn btn-sm btn-gold" data-email="${esc(o.id)}">${o.receiptEmailedAt ? 'Email receipt again' : 'Email receipt'}</button>` : ''}
+          <button class="btn btn-sm" data-pdf="${esc(o.id)}">⬇ Receipt PDF</button>
+          ${canShareFiles ? `<button class="btn btn-sm" data-share="${esc(o.id)}">Share PDF</button>` : ''}
           ${phone ? `<a class="btn btn-sm" href="https://wa.me/${phone}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
           ${addr ? `<a class="btn btn-sm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}" target="_blank" rel="noopener">Map</a>` : ''}
         </div>
-        ${o.invoiceSentAt ? `<p class="order-meta" style="margin-top:6px">✓ Invoice sent ${fmtDate(o.invoiceSentAt)}</p>` : ''}
+        ${o.invoiceSentAt ? `<p class="order-meta" style="margin-top:6px">✓ Receipt sent on WhatsApp ${fmtDate(o.invoiceSentAt)}</p>` : ''}
+        ${o.receiptEmailedAt ? `<p class="order-meta" style="margin-top:2px">✓ Receipt emailed ${fmtDate(o.receiptEmailedAt)}</p>` : ''}
         ${o.buyer?.phone && o.recipient?.notes === 'gift' ? `<h4 style="margin-top:14px">Ordered by</h4><p>${esc(o.buyer.name || '')} ${esc(o.buyer.phone)}</p>` : ''}
         ${o.customer?.email ? `<h4 style="margin-top:14px">Customer</h4><p>${esc(o.customer.name || '')} ${esc(o.customer.email)}</p>` : ''}
         ${o.appliedPromo?.code ? `<p class="order-meta">Promo: ${esc(o.appliedPromo.code)}</p>` : ''}
@@ -349,22 +356,42 @@ function chime() {
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const t0 = audioCtx.currentTime;
-    // Two soft rising "ding-dong" chimes
-    [[0, 880], [0.18, 1318.5], [0.9, 880], [1.08, 1318.5]].forEach(([at, f]) => {
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-      o.type = 'sine'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t0 + at);
-      g.gain.exponentialRampToValueAtTime(0.35, t0 + at + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + 0.7);
-      o.connect(g).connect(audioCtx.destination);
-      o.start(t0 + at); o.stop(t0 + at + 0.75);
-    });
+    // Loud doorbell: three bright ding-dongs through a limiter (so it is loud without distorting)
+    const out = audioCtx.createDynamicsCompressor();
+    out.threshold.value = -6; out.ratio.value = 12;
+    const master = audioCtx.createGain(); master.gain.value = 1;
+    out.connect(master).connect(audioCtx.destination);
+    [0, 0.75, 1.5].forEach(start => [[0, 1046.5], [0.22, 1568]].forEach(([at, f]) => {
+      [['triangle', 1], ['square', 0.18]].forEach(([type, vol]) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = type; o.frequency.value = f;
+        const t = t0 + start + at;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+        o.connect(g).connect(out);
+        o.start(t); o.stop(t + 0.65);
+      });
+    }));
   } catch (e) {}
 }
 
+// Keeps ringing every 20 s until the new-order pop-up is opened or dismissed (max 10 minutes)
+let ringTimer = null, ringUntil = 0;
+function startRinging() {
+  chime();
+  ringUntil = Date.now() + 10 * 60 * 1000;
+  clearInterval(ringTimer);
+  ringTimer = setInterval(() => {
+    if (!document.querySelector('.order-alert') || Date.now() > ringUntil) { stopRinging(); return; }
+    chime();
+  }, 20000);
+}
+function stopRinging() { clearInterval(ringTimer); ringTimer = null; }
+
 function newOrderAlert(o) {
   if (!alertsOn()) return;
-  chime();
+  startRinging();
   const r = o.recipient || {};
   const items = (o.items || []).map(i => `${i.name} ×${i.qty || 1}`).join(', ');
   // Pop-up inside the portal
@@ -376,15 +403,15 @@ function newOrderAlert(o) {
     <div class="oa-meta">${esc(r.name || '')} · ${esc(o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Paid online')}</div>
     <div class="row" style="margin-top:10px">
       <button class="btn btn-sm btn-gold" data-a="view">View order</button>
-      ${invoicePhone(o) ? '<button class="btn btn-sm" data-a="inv">Send invoice</button>' : ''}
+      ${invoicePhone(o) ? '<button class="btn btn-sm" data-a="inv">WhatsApp receipt</button>' : ''}
     </div>`;
-  box.querySelector('.oa-x').onclick = () => box.remove();
+  box.querySelector('.oa-x').onclick = () => { box.remove(); if (!document.querySelector('.order-alert')) stopRinging(); };
   box.querySelector('[data-a=view]').onclick = () => {
     state.orderFilter = 'all'; state.openOrders.add(o.id);
-    location.hash = 'orders'; render(); box.remove();
+    location.hash = 'orders'; render(); box.remove(); stopRinging();
     setTimeout(() => document.querySelector(`[data-toggle="${CSS.escape(o.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   };
-  box.querySelector('[data-a=inv]')?.addEventListener('click', () => { sendInvoice(o.id); box.remove(); });
+  box.querySelector('[data-a=inv]')?.addEventListener('click', () => { sendInvoice(o.id); box.remove(); stopRinging(); });
   document.getElementById('orderAlerts').prepend(box);
   // Desktop notification (shows even when this tab is in the background)
   if ('Notification' in window && Notification.permission === 'granted') {
@@ -452,12 +479,69 @@ function invoiceText(o) {
   ];
   return lines.join('\n');
 }
+// Receipt (RBReceipt from the storefront's js/rb-receipt.js — same layout as the Rosebella invoice)
+function receiptOrder(o) {
+  return { ...o, deliverySlot: { ...(o.deliverySlot || {}), slotLabel: slotLabel(o.deliverySlot?.slot) } };
+}
+function needReceiptLib() {
+  if (window.RBReceipt) return true;
+  toast('The receipt maker did not load — refresh the page', true); return false;
+}
+// Upload the receipt as an image (Cloudinary blocks PDF links on this account) and remember the link
+async function receiptLink(o) {
+  if (o.receiptUrl && o.receiptTotal === o.total) return o.receiptUrl;
+  const blob = await RBReceipt.image(receiptOrder(o));
+  const fd = new FormData();
+  fd.append('file', blob, `receipt-${o.id}.jpg`);
+  fd.append('upload_preset', CLOUDINARY.preset);
+  fd.append('folder', 'rosebella/receipts');
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloud}/image/upload`, { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!res.ok || !data.secure_url) throw new Error(data.error?.message || 'Receipt upload failed');
+  const url = data.secure_url.replace('/image/upload/', '/image/upload/q_auto/');
+  db.collection('orders').doc(o.id).update({ receiptUrl: url, receiptTotal: o.total }).catch(() => {});
+  return url;
+}
+// Opens the tab straight away (browsers block pop-ups opened after a wait), then fills it in
+async function openAfter(makeUrl, label) {
+  const w = window.open('about:blank', '_blank');
+  if (w) w.document.write(`<p style="font:16px sans-serif;padding:30px">Preparing the receipt for ${esc(label)}…</p>`);
+  try { const url = await makeUrl(); if (w) w.location.href = url; else window.open(url, '_blank'); return true; }
+  catch (e) { if (w) w.close(); toast(e.message || String(e), true); return false; }
+}
 async function sendInvoice(id) {
-  const o = state.orders.find(x => x.id === id); if (!o) return;
+  const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
   const phone = invoicePhone(o);
   if (!phone) { toast('This order has no customer phone number', true); return; }
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(invoiceText(o))}`, '_blank', 'noopener');
-  try { await db.collection('orders').doc(id).update({ invoiceSentAt: new Date().toISOString() }); } catch (e) { toast(firestoreError(e), true); }
+  const ok = await openAfter(async () => {
+    const link = await receiptLink(o);
+    return `https://wa.me/${phone}?text=${encodeURIComponent(invoiceText(o) + '\n\n🧾 Receipt: ' + link)}`;
+  }, 'WhatsApp');
+  if (ok) db.collection('orders').doc(id).update({ invoiceSentAt: new Date().toISOString() }).catch(e => toast(firestoreError(e), true));
+}
+async function emailReceipt(id) {
+  const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
+  const to = o.customer?.email; if (!to) return;
+  const ok = await openAfter(async () => {
+    const link = await receiptLink(o);
+    const body = invoiceText(o).replace(/\*/g, '') + '\n\nReceipt: ' + link;
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent('Your Rosebella receipt — ' + o.id)}&body=${encodeURIComponent(body)}`;
+  }, 'email');
+  if (ok) db.collection('orders').doc(id).update({ receiptEmailedAt: new Date().toISOString() }).catch(e => toast(firestoreError(e), true));
+}
+async function downloadReceipt(id) {
+  const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
+  toast('Making the receipt PDF…');
+  try { await RBReceipt.download(receiptOrder(o)); } catch (e) { toast(e.message || String(e), true); }
+}
+// Share the PDF itself (opens the share menu → WhatsApp, Mail, AirDrop…) where the browser allows files
+const canShareFiles = (() => { try { return !!navigator.canShare && navigator.canShare({ files: [new File([''], 'x.pdf', { type: 'application/pdf' })] }); } catch (e) { return false; } })();
+async function shareReceipt(id) {
+  const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
+  try {
+    const blob = await RBReceipt.pdf(receiptOrder(o));
+    await navigator.share({ files: [new File([blob], `Rosebella-receipt-${o.id}.pdf`, { type: 'application/pdf' })], title: `Rosebella receipt ${o.id}` });
+  } catch (e) { if (e.name !== 'AbortError') toast(e.message || String(e), true); }
 }
 
 function slotLabel(id) {
