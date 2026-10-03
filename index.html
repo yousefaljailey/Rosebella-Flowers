@@ -17,7 +17,6 @@
       measurementId:     "G-5GPNDXZR8E"
     });
   </script>
-  <script src="https://js.stripe.com/v3/" async=""></script>
   <title>Rosebella — Luxury Flowers &amp; Chocolates</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&amp;family=Montserrat:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
@@ -2228,6 +2227,14 @@
     .py-wallets-label::before { left: 0; }
     .py-wallets-label::after  { right: 0; }
     #py-request-btn-wrap { min-height: 48px; }
+    .py-mf-box { background: #fff; border-radius: 10px; padding: 12px; min-height: 120px; }
+    .py-mf-loading { font-family: var(--sans); font-size: 11px; letter-spacing: .08em; color: var(--taupe); text-align: center; padding: 40px 0; }
+    .py-or { display: flex; align-items: center; gap: 12px; font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+    .py-or::before, .py-or::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    .py-naps-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; cursor: pointer;
+      background: transparent; color: #fff; border: 1px solid rgba(198,146,42,0.4); font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .08em; transition: border-color .2s, background .2s; }
+    .py-naps-btn:hover { border-color: var(--gold); background: rgba(198,146,42,0.08); }
+    .py-naps-logo { background: #8a1538; color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .1em; padding: 3px 6px; border-radius: 3px; }
     .py-no-wallets {
       font-family: var(--serif); font-size: 14px; font-style: italic;
       color: rgba(255,255,255,0.3); text-align: center; padding: 20px 0;
@@ -3307,7 +3314,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
             Continue to Payment — QR <span id="coPayNowAmt">0</span>
           </button>
-          <p class="co-place-note">Secured by Stripe</p>
+          <p class="co-place-note">Secured by MyFatoorah</p>
         </div>
       </div><!-- /coRight -->
     </div><!-- /coBody -->
@@ -3328,38 +3335,18 @@
         <div class="py-amount-val"><sup>QR</sup><span id="pyAmountVal">0</span></div>
       </div>
       <div class="py-tabs">
-        <button class="py-tab active" data-tab="card" onclick="pyTab('card',this)">💳 Card</button>
+        <button class="py-tab active" data-tab="card" onclick="pyTab('card',this)">💳 Card / Apple Pay</button>
         <button class="py-tab" data-tab="cash" onclick="pyTab('cash',this)" id="pyCashTab">💵 Cash on Delivery</button>
-        <button class="py-tab" data-tab="wallets" onclick="pyTab('wallets',this)" id="pyWalletsTab" style="display:none">⚡ Express Pay</button>
       </div>
 
-      <!-- Card panel -->
+      <!-- Online payment panel (MyFatoorah: Apple Pay, Google Pay, card) -->
       <div class="py-panel" id="pyCardPanel">
-        <div>
-          <div class="py-field-lbl" style="margin-bottom:8px;">Card Details</div>
-          <div class="py-card-wrap" id="pyCardWrap">
-            <div id="py-card-element"></div>
-          </div>
-          <div id="py-card-errors"></div>
-        </div>
-        <div class="py-name-wrap">
-          <span class="py-field-lbl">Name on Card</span>
-          <input id="pyCardName" class="py-name-inp" type="text" placeholder="As it appears on your card" autocomplete="cc-name">
-        </div>
-        <button class="py-submit" id="pyCardSubmit" onclick="pySubmitCard()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-          Pay <span id="pyCardBtnAmt">QR 0</span>
+        <div id="mfUnified" class="py-mf-box"></div>
+        <div id="py-card-errors"></div>
+        <div class="py-or"><span>or</span></div>
+        <button class="py-naps-btn" type="button" onclick="pyPayNaps()">
+          <span class="py-naps-logo">NAPS</span> Pay with Qatar Debit Card
         </button>
-      </div>
-
-      <!-- Wallets panel (Apple Pay / Google Pay) -->
-      <div class="py-panel" id="pyWalletsPanel" style="display:none">
-        <div class="py-wallets-label">Choose your payment method</div>
-        <div id="py-request-btn-wrap"></div>
-        <div class="py-no-wallets" id="pyNoWallets" style="display:none">
-          Apple Pay and Google Pay are not available on this device or browser.<br><br>
-          Please use the Card tab instead.
-        </div>
       </div>
 
       <!-- Cash on Delivery panel -->
@@ -3382,7 +3369,7 @@
 
       <div class="py-footer">
         <span>Payments secured by</span>
-        <span class="py-stripe-logo">STRIPE</span>
+        <span class="py-stripe-logo">MYFATOORAH</span>
       </div>
     </div>
   </div>
@@ -5625,15 +5612,15 @@
   }
 
   // ══════════════════════════════════════════════
-  //  PAYMENT SYSTEM (Stripe)
-  //  Replace STRIPE_KEY with your publishable key
-  //  Replace PAYMENT_API with your backend endpoint
+  //  PAYMENT SYSTEM (MyFatoorah — Apple Pay, Google Pay, cards, NAPS)
+  //  The secret key and the price calculation live in /api/pay (server).
   // ══════════════════════════════════════════════
-  const STRIPE_KEY   = 'pk_test_REPLACE_WITH_YOUR_KEY';
-  const PAYMENT_API  = '/api/create-payment-intent';
+  const PAY_API = '/api/pay';
+  const MF_SCRIPT = 'https://qa.myfatoorah.com/payment/v1/session.js';
+  const PENDING_KEY = 'rosebella_pending_payment';
 
-  let pyStripe = null, pyCardEl = null;
   let pyOrderSnapshot = null;
+  let mfScriptPromise = null;
 
   function pyCalcTotal() {
     const sub = cart.reduce((s,i) => s + i.price * i.qty, 0);
@@ -5646,54 +5633,143 @@
     return Math.max(0, sub - disc) + (coExpressFee || 0);
   }
 
+  function pySetAmounts(total) {
+    document.getElementById('pyAmountVal').textContent = Number(total).toFixed(0);
+    document.getElementById('pyCodAmt').textContent    = Number(total).toFixed(0);
+  }
+
+  // What the server needs to price the order (it ignores any prices sent from here)
+  function pyOrderPayload() {
+    const s = pyOrderSnapshot;
+    const u = (typeof authUser !== 'undefined' && authUser) ? authUser : {};
+    return {
+      items: s.cart.map(i => ({ name: i.name, qty: i.qty, variants: i.variants || { addons: [] } })),
+      promoCode: s.appliedPromo?.code || '',
+      slotId: s.deliverySlot?.slot || '',
+      recipient: s.recipient,
+      customerName: u.name && u.name !== 'Guest' ? u.name : s.recipient?.name,
+      customerEmail: u.email || '',
+    };
+  }
+
+  async function pyApi(action, body) {
+    const res = await fetch(`${PAY_API}?action=${action}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Payment server error (${res.status})`);
+    return data;
+  }
+
+  function loadMfScript() {
+    if (window.myfatoorah) return Promise.resolve();
+    if (!mfScriptPromise) mfScriptPromise = new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = MF_SCRIPT; sc.onload = resolve;
+      sc.onerror = () => { mfScriptPromise = null; reject(new Error('Could not load the payment form.')); };
+      document.head.appendChild(sc);
+    });
+    return mfScriptPromise;
+  }
+
+  function pyCardError(msg) { document.getElementById('py-card-errors').textContent = msg || ''; }
+
   function openPayment() {
     if (!cart.length) return;
-    const total = pyCalcTotal();
     pyOrderSnapshot = {
-      cart: cart.map(i => ({...i})), total,
+      cart: cart.map(i => ({...i})), total: pyCalcTotal(),
       recipient: {...recipient}, deliverySlot: {...deliverySlot},
       giftMessage, coPayment: 'card', appliedPromo, coExpressFee
     };
-    document.getElementById('pyAmountVal').textContent  = total.toFixed(0);
-    document.getElementById('pyCardBtnAmt').textContent = `QR ${total.toFixed(0)}`;
-    document.getElementById('pyCodAmt').textContent     = total.toFixed(0);
+    pySetAmounts(pyOrderSnapshot.total);
     const isGift = document.getElementById('coSendAsGift')?.checked;
     const cashTab = document.getElementById('pyCashTab');
     if (cashTab) cashTab.style.display = isGift ? 'none' : '';
     pyShowPanel('card');
     document.getElementById('pyOverlay').classList.add('show');
-    if (!pyStripe) {
-      if (!window.Stripe) { pyShowError('Payment system is loading. Please wait and try again.'); return; }
-      pyStripe = Stripe(STRIPE_KEY);
-    }
-    if (!pyCardEl) {
-      const elems = pyStripe.elements({ appearance: pyAppearance() });
-      pyCardEl = elems.create('card', {
-        style: {
-          base: { color:'#FAF8F0', fontFamily:"'Montserrat',sans-serif", fontSize:'14px', '::placeholder':{ color:'rgba(250,248,240,0.3)' }, iconColor:'#C6922A' },
-          invalid: { color:'#e05060', iconColor:'#e05060' }
-        }
+    pyInitMyFatoorah();
+  }
+
+  async function pyInitMyFatoorah() {
+    const box = document.getElementById('mfUnified');
+    pyCardError('');
+    box.innerHTML = '<div class="py-mf-loading">Loading secure payment…</div>';
+    try {
+      const [, session] = await Promise.all([loadMfScript(), pyApi('session', { order: pyOrderPayload() })]);
+      // The server's price is the one that will be charged
+      pyOrderSnapshot.total = session.amount;
+      pySetAmounts(session.amount);
+      box.innerHTML = '';
+      myfatoorah.init({
+        sessionId: session.sessionId,
+        countryCode: session.countryCode,
+        currencyCode: session.currency,
+        amount: String(session.amount),
+        callback: pyMfCallback,
+        containerId: 'mfUnified',
+        paymentOptions: ['ApplePay', 'GooglePay', 'Card'],
+        supportedNetworks: ['visa', 'masterCard', 'amex'],
+        language: 'en',
       });
-      pyCardEl.mount('#py-card-element');
-      pyCardEl.on('change', e => {
-        document.getElementById('py-card-errors').textContent = e.error ? e.error.message : '';
-      });
-      pyCardEl.on('focus', () => document.getElementById('pyCardWrap').classList.add('focused'));
-      pyCardEl.on('blur',  () => document.getElementById('pyCardWrap').classList.remove('focused'));
-      const prAmt = Math.round(total * 100);
-      const pr = pyStripe.paymentRequest({ country:'QA', currency:'qar', total:{label:'Rosebella Order', amount:prAmt}, requestPayerName:true });
-      const prBtn = elems.create('paymentRequestButton', { paymentRequest:pr, style:{ paymentRequestButton:{ theme:'dark', height:'52px', type:'buy' } } });
-      pr.canMakePayment().then(res => {
-        if (res) { prBtn.mount('#py-request-btn-wrap'); document.getElementById('pyWalletsTab').style.display = ''; }
-        else document.getElementById('pyNoWallets').style.display = '';
-      });
-      pr.on('paymentmethod', async e => { await pyConfirmWithMethod(e.paymentMethod.id); e.complete('success'); });
+    } catch (e) {
+      box.innerHTML = '';
+      pyCardError(e.message || 'Online payment is unavailable right now. Please choose Cash on Delivery or try again.');
     }
   }
 
-  function pyAppearance() {
-    return { theme:'night', variables:{ colorPrimary:'#C6922A', colorBackground:'#18160f', colorText:'#FAF8F0', colorDanger:'#e05060', fontFamily:"'Montserrat',sans-serif", borderRadius:'0' } };
+  async function pyMfCallback(response) {
+    if (!response || !response.isSuccess) {
+      pyCardError(response?.error || 'Payment details were not accepted. Please check them and try again.');
+      return;
+    }
+    await pyStartPayment({ sessionId: response.sessionId });
   }
+
+  function pyPayNaps() { pyStartPayment({ method: 'naps' }); }
+
+  // Creates the MyFatoorah invoice and sends the shopper to complete it (3-D Secure / bank page)
+  async function pyStartPayment(extra) {
+    pyCardError('');
+    document.getElementById('pyCardPanel').style.display = 'none';
+    document.getElementById('pyLoading').style.display   = 'flex';
+    try {
+      const orderId = 'RB-' + Date.now().toString(36).toUpperCase();
+      pyOrderSnapshot.orderId = orderId;
+      pyOrderSnapshot.coPayment = 'card';
+      localStorage.setItem(PENDING_KEY, JSON.stringify(pyOrderSnapshot));
+      const r = await pyApi('execute', { order: pyOrderPayload(), orderId, ...extra });
+      location.href = r.paymentUrl;
+    } catch (e) {
+      document.getElementById('pyLoading').style.display = 'none';
+      document.getElementById('pyCardPanel').style.display = '';
+      pyCardError(e.message);
+      pyInitMyFatoorah();   // a payment session can only be used once
+    }
+  }
+
+  // Back from MyFatoorah: confirm the payment with the server before showing success
+  window.addEventListener('DOMContentLoaded', async () => {
+    const q = new URLSearchParams(location.search);
+    const mf = q.get('mf');
+    if (!mf) return;
+    const paymentId = q.get('paymentId') || q.get('PaymentId') || '';
+    history.replaceState(null, '', location.pathname);
+    let pending = null;
+    try { pending = JSON.parse(localStorage.getItem(PENDING_KEY)); } catch (e) {}
+    if (pending) pyOrderSnapshot = pending;
+    if (mf !== 'return' || !paymentId) { pyShowError('Your payment was cancelled or not completed. You have not been charged.'); return; }
+    try {
+      const st = await fetch(`${PAY_API}?action=status&paymentId=${encodeURIComponent(paymentId)}`).then(r => r.json());
+      if (st.paid && pending && st.reference === pending.orderId) {
+        localStorage.removeItem(PENDING_KEY);
+        pyShowSuccess(paymentId, 'card', { provider: 'myfatoorah', paymentId, invoiceId: st.invoiceId, amount: st.amount, method: st.method });
+      } else {
+        pyShowError(st.error || 'Your payment was not completed. You have not been charged.');
+      }
+    } catch (e) {
+      pyShowError('We could not confirm your payment. If you were charged, please contact us on WhatsApp with your order details.');
+    }
+  });
 
   function closePayment() { document.getElementById('pyOverlay').classList.remove('show'); }
 
@@ -5721,73 +5797,23 @@
   function pyTab(tab, btn) {
     document.querySelectorAll('.py-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('pyCardPanel').style.display    = tab === 'card'    ? '' : 'none';
-    document.getElementById('pyWalletsPanel').style.display = tab === 'wallets' ? '' : 'none';
-    document.getElementById('pyCashPanel').style.display    = tab === 'cash'    ? '' : 'none';
+    document.getElementById('pyCardPanel').style.display = tab === 'card' ? '' : 'none';
+    document.getElementById('pyCashPanel').style.display = tab === 'cash' ? '' : 'none';
   }
 
   function pyShowPanel(tab) {
     document.querySelectorAll('.py-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-    document.getElementById('pyCardPanel').style.display    = tab === 'card'    ? '' : 'none';
-    document.getElementById('pyWalletsPanel').style.display = tab === 'wallets' ? '' : 'none';
-    document.getElementById('pyCashPanel').style.display    = tab === 'cash'    ? '' : 'none';
-    document.getElementById('pyLoading').style.display      = 'none';
+    document.getElementById('pyCardPanel').style.display = tab === 'card' ? '' : 'none';
+    document.getElementById('pyCashPanel').style.display = tab === 'cash' ? '' : 'none';
+    document.getElementById('pyLoading').style.display   = 'none';
   }
 
-  async function pySubmitCard() {
-    const btn = document.getElementById('pyCardSubmit');
-    btn.disabled = true;
-    document.getElementById('pyCardPanel').style.display = 'none';
-    document.getElementById('pyLoading').style.display   = 'flex';
-    try {
-      const clientSecret = await pyCreatePaymentIntent();
-      const result = await pyStripe.confirmCardPayment(clientSecret, {
-        payment_method: { card: pyCardEl, billing_details: { name: document.getElementById('pyCardName').value.trim() || recipient.name } }
-      });
-      if (result.error) pyShowError(result.error.message);
-      else               pyShowSuccess(result.paymentIntent.id);
-    } catch(err) {
-      pyShowError(err.message || 'An unexpected error occurred.');
-    } finally { btn.disabled = false; }
-  }
-
-  async function pyConfirmWithMethod(paymentMethodId) {
-    document.getElementById('pyWalletsPanel').style.display = 'none';
-    document.getElementById('pyLoading').style.display      = 'flex';
-    try {
-      const cs = await pyCreatePaymentIntent();
-      const res = await pyStripe.confirmCardPayment(cs, { payment_method: paymentMethodId });
-      if (res.error) pyShowError(res.error.message);
-      else            pyShowSuccess(res.paymentIntent.id);
-    } catch(err) { pyShowError(err.message || 'Payment could not be completed.'); }
-  }
-
-  async function pyCreatePaymentIntent() {
-    const total = pyOrderSnapshot.total;
-    const res = await fetch(PAYMENT_API, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        amount: Math.round(total * 100), currency:'qar',
-        metadata: {
-          recipient_name:  pyOrderSnapshot.recipient.name,
-          recipient_phone: pyOrderSnapshot.recipient.phone,
-          delivery_date:   pyOrderSnapshot.deliverySlot.date,
-          delivery_slot:   pyOrderSnapshot.deliverySlot.slot
-        }
-      })
-    });
-    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.message || `Server error ${res.status}`); }
-    const data = await res.json();
-    if (!data.clientSecret) throw new Error('No client secret returned from server.');
-    return data.clientSecret;
-  }
-
-  function pyShowSuccess(paymentIntentId, paymentMethod) {
+  function pyShowSuccess(paymentIntentId, paymentMethod, payment) {
     paymentMethod = paymentMethod || 'card';
     closePayment();
-    const orderId = 'RB-' + (Date.now().toString(36).toUpperCase());
-    document.getElementById('pyOrderNum').textContent = orderId;
     const snap = pyOrderSnapshot;
+    const orderId = snap.orderId || ('RB-' + (Date.now().toString(36).toUpperCase()));
+    document.getElementById('pyOrderNum').textContent = orderId;
     document.getElementById('pySuccessItems').innerHTML = snap.cart.map(i =>
       `<div class="py-success-item"><span class="py-success-item-name">${i.name} ×${i.qty}</span><span class="py-success-item-price">QR ${(i.price*i.qty).toFixed(0)}</span></div>`
     ).join('');
@@ -5806,7 +5832,7 @@
     document.getElementById('pyWaLink').href = 'https://wa.me/' + storeWhatsApp() + '?text=' + encodeURIComponent(msg);
     // Save order
     const orders = (function(){ try{ return JSON.parse(localStorage.getItem('rosebella_orders'))||[]; }catch(e){ return []; } })();
-    orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod, paymentIntentId, recipient:snap.recipient, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
+    orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod, paymentIntentId, payment: payment || null, appliedPromo: snap.appliedPromo || null, recipient:snap.recipient, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
     localStorage.setItem('rosebella_orders', JSON.stringify(orders));
     saveOrderToFirestore(orders[0]);
     // Clear cart
@@ -5846,8 +5872,10 @@
 
   function pyRetry() {
     document.getElementById('pyError').classList.remove('show');
+    if (!pyOrderSnapshot) { document.body.style.overflow = ''; return; }
     pyShowPanel('card');
     document.getElementById('pyOverlay').classList.add('show');
+    pyInitMyFatoorah();
   }
 
   function pyFallbackWA() {

@@ -275,6 +275,7 @@ PAGES.orders = {
       render();
     });
     el.querySelectorAll('[data-status]').forEach(b => b.onclick = () => setOrderStatus(b.dataset.id, b.dataset.status));
+    el.querySelectorAll('[data-verify]').forEach(b => b.onclick = () => verifyPayment(b));
   },
 };
 
@@ -294,7 +295,7 @@ function orderHTML(o) {
         <div class="order-meta">${fmtDate(o.createdAt)} · ${esc(r.name || 'No recipient')} · ${esc(delivery)}</div>
       </div>
       <div class="row">
-        <span class="order-meta">${esc(o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Card')}</span>
+        <span class="order-meta">${esc(o.paymentMethod === 'cash' ? 'Cash on delivery' : (o.payment?.paymentId ? 'Paid online' : 'Card'))}</span>
         <span class="order-total">${money(o.total)}</span>
       </div>
     </div>
@@ -321,6 +322,10 @@ function orderHTML(o) {
         </div>
         ${o.customer?.email ? `<h4 style="margin-top:14px">Customer</h4><p>${esc(o.customer.name || '')} ${esc(o.customer.email)}</p>` : ''}
         ${o.appliedPromo?.code ? `<p class="order-meta">Promo: ${esc(o.appliedPromo.code)}</p>` : ''}
+        ${o.payment?.paymentId ? `<h4 style="margin-top:14px">Payment</h4>
+          <p class="order-meta">MyFatoorah invoice ${esc(o.payment.invoiceId || '—')} · payment ${esc(o.payment.paymentId)}${o.payment.method ? ' · ' + esc(o.payment.method) : ''}</p>
+          <div class="row" style="margin-top:6px"><button class="btn btn-sm" data-verify="${esc(o.payment.paymentId)}" data-total="${esc(o.total)}" data-ref="${esc(o.id)}">Verify payment</button>
+          <span class="order-meta" data-verify-out="${esc(o.payment.paymentId)}"></span></div>` : ''}
       </div>
     </div>` : ''}
   </div>`;
@@ -967,4 +972,20 @@ function bindGallery(root, initial) {
   });
   draw();
   return { images: () => [...images], busy: () => uploading > 0 };
+}
+
+// Asks MyFatoorah (via the storefront's payment API) whether an online payment really went through
+async function verifyPayment(btn) {
+  const id = btn.dataset.verify;
+  const out = document.querySelector(`[data-verify-out="${CSS.escape(id)}"]`);
+  out.textContent = 'Checking…';
+  try {
+    const st = await fetch(`${STOREFRONT_URL}/api/pay?action=status&paymentId=${encodeURIComponent(id)}`).then(r => r.json());
+    if (st.error) throw new Error(st.error);
+    const amountOk = Math.abs((st.amount || 0) - Number(btn.dataset.total || 0)) < 1;
+    const refOk = st.reference === btn.dataset.ref;
+    out.innerHTML = st.paid
+      ? `<b style="color:var(--ok)">✓ Paid QR ${esc(st.amount)}</b>${amountOk && refOk ? '' : ' <b style="color:var(--bad)">— amount or order doesn’t match, check in MyFatoorah</b>'}`
+      : `<b style="color:var(--bad)">✕ Not paid (${esc(st.status || 'unknown')})</b>`;
+  } catch (e) { out.textContent = 'Could not check: ' + e.message; }
 }
