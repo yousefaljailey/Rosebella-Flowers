@@ -2711,6 +2711,32 @@
     .co-use-location-btn:hover { border-color:var(--gold); color:var(--gold); }
     .co-map-address { font-family:var(--serif); font-size:13px; font-style:italic; color:var(--taupe); padding:4px 0; min-height:18px; }
     /* DT trigger */
+    /* Inline delivery calendar + times */
+    .co-dt-inline { border:1.5px solid #e0dbd0; background:var(--white); border-radius:12px; padding:14px; transition:border-color .2s; }
+    .co-cal-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .co-cal-hd b { font-family:var(--serif); font-size:18px; font-weight:500; color:var(--charcoal); }
+    .co-cal-nav { width:32px; height:32px; border-radius:50%; border:1px solid #e0dbd0; background:#fff; color:var(--charcoal); font-size:18px; line-height:1; cursor:pointer; }
+    .co-cal-nav:disabled { opacity:.3; cursor:default; }
+    .co-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
+    .co-cal-grid i { font-style:normal; font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:.1em; color:var(--taupe); padding:4px 0; }
+    .co-cal-day { width:100%; max-width:40px; aspect-ratio:1; margin:0 auto; border-radius:50%; border:none; background:none; font-family:var(--sans); font-size:13px; color:var(--charcoal); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+    button.co-cal-day:hover { background:rgba(198,146,42,0.1); }
+    .co-cal-day.today { box-shadow:inset 0 0 0 1px var(--gold); }
+    .co-cal-day.sel { background:var(--gold) !important; color:#fff; font-weight:700; box-shadow:none; }
+    .co-cal-day.off { color:#cfc9bd; cursor:default; }
+    .co-dt-times-lbl { font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--taupe); margin:14px 0 8px; padding-top:12px; border-top:1px solid #efe9dc; }
+    .co-dt-times { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .co-time { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 12px; border:1.5px solid #e0dbd0; border-radius:10px; background:#fff; cursor:pointer; text-align:left; transition:border-color .15s, background .15s; }
+    button.co-time:hover { border-color:rgba(198,146,42,0.5); }
+    .co-time.sel { border-color:var(--gold); background:rgba(198,146,42,0.08); box-shadow:0 0 0 1px var(--gold); }
+    .co-time.now { grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:space-between; }
+    .co-time.now .co-time-main { font-size:14px; }
+    .co-time.off { opacity:.45; cursor:default; }
+    .co-time-main { font-family:var(--sans); font-size:12px; font-weight:600; color:var(--charcoal); }
+    .co-time-sub { font-family:var(--sans); font-size:10px; color:var(--taupe); }
+    .co-time.sel .co-time-sub { color:var(--gold); }
+    .co-dt-summary { margin-top:12px; font-family:var(--sans); font-size:12px; color:var(--charcoal); }
+    .co-dt-summary b { font-weight:700; }
     .co-dt-trigger { display:flex; align-items:center; justify-content:space-between; border:1.5px solid #e0dbd0; background:var(--white); padding:14px 16px; cursor:pointer; transition:border-color 0.2s; }
     .co-dt-trigger:hover { border-color:var(--gold); }
     .co-dt-trigger.selected { border-color:var(--gold); background:rgba(198,146,42,0.04); }
@@ -3319,15 +3345,11 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px;vertical-align:-2px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 Delivery Date &amp; Time <span class="co-req">*</span>
               </label>
-              <div class="co-dt-trigger" id="coDtTrigger" onclick="openDtModal()">
-                <div class="co-dt-trigger-left">
-                  <span class="co-dt-trigger-icon">📅</span>
-                  <div>
-                    <div class="co-dt-trigger-text" id="coDtTriggerText">Select delivery date &amp; time</div>
-                    <span class="co-dt-trigger-sub" id="coDtTriggerSub">Tap to choose a date and time slot</span>
-                  </div>
-                </div>
-                <span class="co-dt-trigger-arr">›</span>
+              <div class="co-dt-inline" id="coDtTrigger">
+                <div class="co-cal" id="coCal"></div>
+                <div class="co-dt-times-lbl">Delivery time</div>
+                <div class="co-dt-times" id="coDtTimes"></div>
+                <div class="co-dt-summary"><span id="coDtTriggerText">Choose a delivery time</span><span id="coDtTriggerSub" hidden></span></div>
               </div>
             </div>
 
@@ -5208,9 +5230,8 @@
     const triggerText = document.getElementById('coDtTriggerText');
     const triggerSub  = document.getElementById('coDtTriggerSub');
     const trigger     = document.getElementById('coDtTrigger');
-    if (triggerText) triggerText.textContent = 'Select delivery date & time';
-    if (triggerSub)  triggerSub.textContent  = 'Tap to choose a date and time slot';
-    if (trigger)     { trigger.classList.remove('selected'); trigger.style.borderColor = ''; }
+    if (trigger) trigger.style.borderColor = '';
+    coDtInit();
     coPopulate();
     coSyncGift();
     coSelectPm(coPayMethod || 'card');
@@ -5948,10 +5969,96 @@
     const curHour = now.getHours();
     return config.map(s => {
       let avail = s.available;
-      if (isToday && s.start !== -1 && s.start <= curHour + siteLeadHours) avail = false;
+      const start = Number(s.start);
+      if (isToday && start !== -1 && start <= curHour + siteLeadHours) avail = false;
       if (!isToday && s.id === 's_express') avail = false; // express only for today
-      return { ...s, availableNow: avail };
+      return { ...s, start, fee: Number(s.fee) || 0, availableNow: avail };
     });
+  }
+
+  // ══════════════════════════════════════════════
+  //  DELIVERY DATE & TIME — always-visible calendar + time buttons (no pop-up)
+  // ══════════════════════════════════════════════
+  let coCalMonth = null;            // first day of the month shown
+  const CO_CAL_DAYS_AHEAD = 90;
+  const CO_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const CO_MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const CO_DOW3 = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function coDateHasSlots(str) { return getSlotsForDate(str).some(x => x.availableNow); }
+  function coDtInit() {
+    // Start on the first day that still has a delivery time (today, or tomorrow late at night)
+    const d = new Date(); let first = toDateStr(d);
+    for (let i = 0; i < 7 && !coDateHasSlots(first); i++) { d.setDate(d.getDate() + 1); first = toDateStr(d); }
+    coDeliveryDate = first; coDeliverySlotId = ''; coDeliveryType = ''; coExpressFee = 0;
+    const [y, m] = first.split('-').map(Number);
+    coCalMonth = new Date(y, m - 1, 1);
+    coDtRender();
+  }
+  function coDtMonth(step) {
+    const next = new Date(coCalMonth.getFullYear(), coCalMonth.getMonth() + step, 1);
+    const now = new Date(), min = new Date(now.getFullYear(), now.getMonth(), 1);
+    const maxD = new Date(); maxD.setDate(maxD.getDate() + CO_CAL_DAYS_AHEAD);
+    if (next < min || next > maxD) return;
+    coCalMonth = next; coDtRender();
+  }
+  function coDtPickDate(str) {
+    coDeliveryDate = str;
+    // keep the chosen time if it is still possible on the new day
+    const still = getSlotsForDate(str).find(x => x.id === coDeliverySlotId && x.availableNow);
+    if (!still) { coDeliverySlotId = ''; coDeliveryType = ''; coExpressFee = 0; coRenderSummary(); }
+    coDtRender();
+  }
+  function coDtPickSlot(id) {
+    const slot = getSlotsForDate(coDeliveryDate).find(x => x.id === id && x.availableNow);
+    if (!slot) return;
+    coDeliverySlotId = id;
+    coDeliveryType   = id === 's_express' ? 'express' : 'scheduled';
+    coExpressFee     = slot.fee;
+    document.getElementById('coDtTrigger').style.borderColor = '';
+    coDtRender(); coRenderSummary();
+  }
+  function coDtRender() {
+    const cal = document.getElementById('coCal'), times = document.getElementById('coDtTimes');
+    if (!cal || !coCalMonth) return;
+    const today = toDateStr(new Date());
+    const maxD = new Date(); maxD.setDate(maxD.getDate() + CO_CAL_DAYS_AHEAD); const maxStr = toDateStr(maxD);
+    const y = coCalMonth.getFullYear(), m = coCalMonth.getMonth();
+    const lead = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+    const nowM = new Date(); const atFirst = y === nowM.getFullYear() && m === nowM.getMonth();
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += '<span></span>';
+    for (let d = 1; d <= days; d++) {
+      const str = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const ok = str >= today && str <= maxStr && coDateHasSlots(str);
+      const cls = ['co-cal-day', str === coDeliveryDate ? 'sel' : '', str === today ? 'today' : '', ok ? '' : 'off'].join(' ');
+      cells += ok ? `<button type="button" class="${cls}" onclick="coDtPickDate('${str}')">${d}</button>` : `<span class="${cls}">${d}</span>`;
+    }
+    cal.innerHTML = `<div class="co-cal-hd">
+        <button type="button" class="co-cal-nav" onclick="coDtMonth(-1)" ${atFirst ? 'disabled' : ''} aria-label="Previous month">‹</button>
+        <b>${CO_MONTHS[m]} ${y}</b>
+        <button type="button" class="co-cal-nav" onclick="coDtMonth(1)" aria-label="Next month">›</button></div>
+      <div class="co-cal-grid">${['S','M','T','W','T','F','S'].map(x => `<i>${x}</i>`).join('')}${cells}</div>`;
+    // Times for the chosen day — "Now" (express) first
+    const slots = getSlotsForDate(coDeliveryDate);
+    const express = slots.find(x => x.id === 's_express');
+    const rest = slots.filter(x => x.id !== 's_express');
+    const fee = x => x.fee > 0 ? `+QR ${x.fee}` : 'Free';
+    let html = '';
+    if (express && express.availableNow) html += `<button type="button" class="co-time now ${coDeliverySlotId === 's_express' ? 'sel' : ''}" onclick="coDtPickSlot('s_express')">
+        <span class="co-time-main">⚡ Now</span><span class="co-time-sub">Express · ${express.label.toLowerCase()} · ${fee(express)}</span></button>`;
+    html += rest.map(x => x.availableNow
+      ? `<button type="button" class="co-time ${coDeliverySlotId === x.id ? 'sel' : ''}" onclick="coDtPickSlot('${x.id}')"><span class="co-time-main">${x.label}</span><span class="co-time-sub">${fee(x)}</span></button>`
+      : `<span class="co-time off"><span class="co-time-main">${x.label}</span><span class="co-time-sub">Unavailable</span></span>`).join('');
+    times.innerHTML = html;
+    // One-line summary
+    const [yy, mm, dd] = coDeliveryDate.split('-').map(Number);
+    const dObj = new Date(yy, mm - 1, dd);
+    const tom = new Date(); tom.setDate(tom.getDate() + 1);
+    const dayName = coDeliveryDate === today ? 'Today' : coDeliveryDate === toDateStr(tom) ? 'Tomorrow' : CO_DOW3[dObj.getDay()];
+    const chosen = slots.find(x => x.id === coDeliverySlotId);
+    document.getElementById('coDtTriggerText').innerHTML = chosen
+      ? `🚚 Delivering <b>${dayName}, ${dd} ${CO_MON3[mm - 1]}</b> · ${chosen.id === 's_express' ? 'within 90 minutes' : chosen.label}${chosen.fee ? ` · +QR ${chosen.fee}` : ''}`
+      : `<b>${dayName}, ${dd} ${CO_MON3[mm - 1]}</b> — now choose a time`;
   }
 
   // ══════════════════════════════════════════════
