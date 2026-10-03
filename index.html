@@ -2228,6 +2228,16 @@
     .py-wallets-label::after  { right: 0; }
     #py-request-btn-wrap { min-height: 48px; }
     .py-mf-box { background: #fff; border-radius: 10px; padding: 12px; min-height: 120px; }
+    /* Never squash the payment form: let the sheet scroll instead (MyFatoorah sizes its own frames) */
+    #pyCardPanel > *, #pyCashPanel > * { flex-shrink: 0; }
+    #pyCardPanel { min-height: 0; -webkit-overflow-scrolling: touch; }
+    .py-mf-box iframe { max-width: 100%; }
+    @media (max-width: 600px) {
+      .py-panel { padding: 16px; gap: 14px; }
+      .py-mf-box { padding: 8px; }
+      .py-amount-bar { padding: 12px 16px; }
+      .py-hd { padding: 14px 16px; }
+    }
     .py-mf-loading { font-family: var(--sans); font-size: 11px; letter-spacing: .08em; color: var(--taupe); text-align: center; padding: 40px 0; }
     .py-or { display: flex; align-items: center; gap: 12px; font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
     .py-or::before, .py-or::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
