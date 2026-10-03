@@ -899,6 +899,15 @@
     .footer-bottom p { font-family: var(--sans); font-size: 10px; letter-spacing: 0.1em; }
     .footer-bottom span { color: var(--gold); }
 
+
+    .footer-app { margin-top: 22px; }
+    /* App Store badge */
+    .app-badge { display: inline-flex; align-items: center; gap: 9px; padding: 7px 16px 7px 12px; background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 9px; text-decoration: none; line-height: 1; transition: border-color .2s, transform .2s; }
+    .app-badge:hover { border-color: var(--gold); transform: translateY(-1px); }
+    .app-badge svg { width: 24px; height: 24px; flex: none; }
+    .app-badge-txt { display: flex; flex-direction: column; gap: 3px; text-align: left; }
+    .app-badge-txt small { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; letter-spacing: .02em; }
+    .app-badge-txt b { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
     /* ── FADE-IN OBSERVER ── */
     .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: none; }
@@ -3768,6 +3777,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"></path><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.533 5.849L.057 23.617a.75.75 0 00.906.94l5.946-1.557A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.698-.5-5.254-1.376l-.372-.215-3.899 1.021 1.04-3.794-.235-.38A9.932 9.932 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path></svg>
           </a>
         </div>
+        <div class="footer-app"><a class="app-badge" href="https://apps.apple.com/qa/app/rosebella-%D8%B1%D9%88%D8%B2%D8%A8%D9%8A%D9%84%D8%A7/id6741586783" target="_blank" rel="noopener" aria-label="Download the Rosebella app on the App Store">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+            <span class="app-badge-txt"><small>Download on the</small><b>App Store</b></span>
+          </a></div>
       </div>
       <div class="footer-col">
         <h4>Delivery Policy</h4>

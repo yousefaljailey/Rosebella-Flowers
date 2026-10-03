@@ -167,6 +167,13 @@
     .info-block-body { font-family: var(--serif); font-size: 16px; color: #555; line-height: 1.7; }
 
     /* Footer strip */
+    /* App Store badge */
+    .app-badge { display: inline-flex; align-items: center; gap: 9px; padding: 7px 16px 7px 12px; background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 9px; text-decoration: none; line-height: 1; transition: border-color .2s, transform .2s; }
+    .app-badge:hover { border-color: var(--gold); transform: translateY(-1px); }
+    .app-badge svg { width: 24px; height: 24px; flex: none; }
+    .app-badge-txt { display: flex; flex-direction: column; gap: 3px; text-align: left; }
+    .app-badge-txt small { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; letter-spacing: .02em; }
+    .app-badge-txt b { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
     .contact-footer {
       background: var(--charcoal3); padding: 40px 64px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
@@ -349,6 +356,10 @@
     <div class="logo">ROSE<span>BELLA</span></div>
     <p>Luxury Flowers &amp; Chocolates — Doha, Qatar</p>
     <p>© 2026 Rosebella — All Rights Reserved</p>
+    <div style="margin-top:16px"><a class="app-badge" href="https://apps.apple.com/qa/app/rosebella-%D8%B1%D9%88%D8%B2%D8%A8%D9%8A%D9%84%D8%A7/id6741586783" target="_blank" rel="noopener" aria-label="Download the Rosebella app on the App Store">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+      <span class="app-badge-txt"><small>Download on the</small><b>App Store</b></span>
+    </a></div>
   </footer>
 
   <script>
