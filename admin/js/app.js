@@ -999,15 +999,19 @@ let homeDraft = null;   // edited copy, saved with the Save button
 
 function homeSections() {
   const saved = Array.isArray(state.settings?.homeSections) ? state.settings.homeSections : [];
-  if (!saved.length) return HOME_DEFAULTS.map(d => ({ ...d, productIds: [] }));
-  const list = saved.map(x => ({ ...HOME_DEFAULTS.find(d => d.id === x.id), ...x, productIds: [...(x.productIds || [])] }));
-  HOME_DEFAULTS.forEach(d => { if (!list.some(x => x.id === d.id)) list.push({ ...d, productIds: [] }); });
+  if (!saved.length) return HOME_DEFAULTS.map(d => ({ ...d, productIds: [], excludeIds: [] }));
+  const list = saved.map(x => ({ ...HOME_DEFAULTS.find(d => d.id === x.id), ...x, productIds: [...(x.productIds || [])], excludeIds: [...(x.excludeIds || [])] }));
+  HOME_DEFAULTS.forEach(d => { if (!list.some(x => x.id === d.id)) list.push({ ...d, productIds: [], excludeIds: [] }); });
   return list;
 }
 
+const isBuiltinSection = id => HOME_DEFAULTS.some(d => d.id === id);
+
 // Same automatic rules as the storefront (js/rb-home.js)
-function homeAutoPreview(id) {
-  const prods = (state.catalog?.products || []).filter(p => p.visible !== false && p.image);
+function homeAutoPreview(sec) {
+  const id = sec.id, skip = new Set(sec.excludeIds || []);
+  const prods = (state.catalog?.products || []).filter(p => p.visible !== false && p.image && !skip.has(p.id));
+  if (!isBuiltinSection(id)) return sec.collection ? prods.filter(p => p.cat === sec.collection).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, 12) : [];
   const newest = [...prods].sort((a, b) => (b.order ?? 0) - (a.order ?? 0));
   if (id === 'new') { const t = newest.filter(p => /new/i.test(p.badge || '') || p.badgeStyle === 'new'); return [...t, ...newest.filter(p => !t.includes(p))].slice(0, 10); }
   if (id === 'recent') return newest.slice(0, 10);
@@ -1020,13 +1024,22 @@ PAGES.home = {
     if (!state.settingsLoaded || !state.catalogLoaded) return loadingHTML();
     if (!homeDraft) homeDraft = homeSections();
     const byId = Object.fromEntries((state.catalog?.products || []).map(p => [p.id, p]));
+    const collectionNames = Object.fromEntries((state.catalog?.collections || []).map(c => [c.slug, c.name]));
     const thumb = p => `<span class="hp-thumb" style="${p.image ? `background-image:url('${esc(p.image)}')` : ''}"></span>`;
     return pageHd('Homepage <em>Sections</em>', 'The product rows on the homepage. Leave a section empty to fill it automatically, or hand-pick the products and their order.',
       '<button class="btn btn-gold" id="saveHome">Save sections</button>') +
       homeDraft.map((sec, si) => {
         const picked = sec.productIds.map(id => byId[id]).filter(Boolean);
         const auto = !picked.length;
-        const preview = auto ? homeAutoPreview(sec.id) : [];
+        const preview = auto ? homeAutoPreview(sec) : [];
+        const builtin = isBuiltinSection(sec.id);
+        const removed = (sec.excludeIds || []).length;
+        const autoText = !builtin
+          ? (sec.collection ? `Products from “${esc(collectionNames[sec.collection] || sec.collection)}”, in collection order.` : 'Choose a collection to fill this row automatically, or add products by hand below.')
+          : sec.id === 'recommended' ? 'Personalised for each visitor from what they viewed and added to their bag.'
+          : sec.id === 'best' ? 'Products with a “Bestseller” badge first, then the rest of your catalog.'
+          : sec.id === 'new' ? 'Products with a “New” badge first, then the most recently added.'
+          : 'The most recently added products.';
         return `<div class="card" data-si="${si}">
           <div class="row" style="justify-content:space-between;margin-bottom:12px">
             <div class="row"><b style="font-size:15px">${esc(sec.title)}</b>
@@ -1035,6 +1048,7 @@ PAGES.home = {
             <div class="row">
               <button class="btn btn-sm" data-act="up" title="Move section up">↑</button>
               <button class="btn btn-sm" data-act="down" title="Move section down">↓</button>
+              ${builtin ? '' : '<button class="btn btn-sm btn-danger" data-act="delsec" title="Delete this section">Delete section</button>'}
             </div>
           </div>
           <div class="grid-3">
@@ -1044,16 +1058,17 @@ PAGES.home = {
               <option value="slider" ${sec.layout !== 'grid' ? 'selected' : ''}>Sliding row</option>
               <option value="grid" ${sec.layout === 'grid' ? 'selected' : ''}>Grid</option></select></label>
           </div>
+          ${builtin ? '' : `<label class="field" style="margin-top:12px;max-width:420px"><span>Fill automatically from</span><select data-f="collection">
+              <option value="">— Nothing (hand-picked only) —</option>
+              ${(state.catalog?.collections || []).map(c => `<option value="${esc(c.slug)}" ${sec.collection === c.slug ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
+            </select></label>`}
           <label class="switch" style="margin-top:12px"><input type="checkbox" data-f="visible" ${sec.visible !== false ? 'checked' : ''}> Show on homepage</label>
           <div style="margin-top:16px">
             <div class="field"><span>Products ${auto ? '— filling automatically' : `— ${picked.length} hand-picked`}</span></div>
             ${auto
-              ? `<p class="order-meta" style="margin:6px 0 10px">${sec.id === 'recommended'
-                  ? 'Personalised for each visitor from what they viewed and added to their bag.'
-                  : sec.id === 'best' ? 'Products with a “Bestseller” badge first, then the rest of your catalog.'
-                  : sec.id === 'new' ? 'Products with a “New” badge first, then the most recently added.'
-                  : 'The most recently added products.'}</p>
-                 <div class="hp-list hp-preview">${preview.map(p => `<div class="hp-item">${thumb(p)}<span>${esc(p.name)}</span></div>`).join('')}</div>`
+              ? `<p class="order-meta" style="margin:6px 0 10px">${autoText}${removed ? ` &nbsp;·&nbsp; ${removed} removed <button class="btn btn-sm btn-ghost" data-act="restore">Restore</button>` : ''}</p>
+                 <div class="hp-list hp-preview">${preview.map(p => `<div class="hp-item" data-pid="${esc(p.id)}">${thumb(p)}<span>${esc(p.name)}</span>
+                   <span class="hp-acts"><button class="btn btn-sm btn-danger" data-act="xrm" title="Remove from this row">✕</button></span></div>`).join('')}</div>`
               : `<div class="hp-list">${picked.map((p, pi) => `<div class="hp-item" data-pi="${pi}">${thumb(p)}<span>${esc(p.name)}</span>
                    <span class="hp-acts"><button class="btn btn-sm" data-act="pup">‹</button><button class="btn btn-sm" data-act="pdown">›</button><button class="btn btn-sm btn-danger" data-act="prm">✕</button></span></div>`).join('')}</div>`}
             <div class="hp-add">
@@ -1063,16 +1078,24 @@ PAGES.home = {
             ${auto ? '' : '<button class="btn btn-sm btn-ghost" data-act="clear" style="margin-top:8px">Clear picks (fill automatically)</button>'}
           </div>
         </div>`;
-      }).join('');
+      }).join('') +
+      '<button class="btn" id="addHomeSection" style="width:100%;padding:16px;border-style:dashed">＋ Add a section</button>';
   },
   bind(el) {
+    el.querySelector('#addHomeSection').onclick = () => {
+      homeDraft.push({ id: 'custom-' + Date.now().toString(36), title: 'New section', subtitle: '', layout: 'slider', visible: true, collection: '', productIds: [], excludeIds: [] });
+      render();
+      const cards = document.querySelectorAll('.card[data-si]');
+      cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      cards[cards.length - 1]?.querySelector('[data-f=title]')?.select();
+    };
     const byName = (state.catalog?.products || []).filter(p => p.visible !== false);
     el.querySelectorAll('.card[data-si]').forEach(card => {
       const si = +card.dataset.si, sec = homeDraft[si];
       card.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener('input', () => {
         sec[inp.dataset.f] = inp.type === 'checkbox' ? inp.checked : inp.value;
       }));
-      card.querySelectorAll('[data-f=visible],[data-f=layout]').forEach(inp => inp.addEventListener('change', () => {
+      card.querySelectorAll('[data-f=visible],[data-f=layout],[data-f=collection]').forEach(inp => inp.addEventListener('change', () => {
         sec[inp.dataset.f] = inp.type === 'checkbox' ? inp.checked : inp.value; render();
       }));
       card.addEventListener('click', e => {
@@ -1084,6 +1107,9 @@ PAGES.home = {
         if (act === 'pup' && pi > 0) [sec.productIds[pi - 1], sec.productIds[pi]] = [sec.productIds[pi], sec.productIds[pi - 1]];
         if (act === 'pdown' && pi < sec.productIds.length - 1) [sec.productIds[pi + 1], sec.productIds[pi]] = [sec.productIds[pi], sec.productIds[pi + 1]];
         if (act === 'prm') sec.productIds.splice(pi, 1);
+        if (act === 'xrm') { const pid = b.closest('[data-pid]')?.dataset.pid; if (pid) (sec.excludeIds = sec.excludeIds || []).push(pid); }
+        if (act === 'restore') sec.excludeIds = [];
+        if (act === 'delsec') { if (!confirm(`Delete the section “${sec.title || 'Untitled'}”?`)) return; homeDraft.splice(si, 1); }
         if (act === 'clear') sec.productIds = [];
         render();
       });
@@ -1104,8 +1130,9 @@ PAGES.home = {
       addI.addEventListener('blur', () => setTimeout(() => { res.hidden = true; }, 150));
     });
     el.querySelector('#saveHome').onclick = async () => {
-      const clean = homeDraft.map(x => ({ id: x.id, title: (x.title || '').trim() || HOME_DEFAULTS.find(d => d.id === x.id)?.title || '',
-        subtitle: (x.subtitle || '').trim(), layout: x.layout === 'grid' ? 'grid' : 'slider', visible: x.visible !== false, productIds: x.productIds }));
+      const clean = homeDraft.map(x => ({ id: x.id, title: (x.title || '').trim() || HOME_DEFAULTS.find(d => d.id === x.id)?.title || 'New section',
+        subtitle: (x.subtitle || '').trim(), layout: x.layout === 'grid' ? 'grid' : 'slider', visible: x.visible !== false,
+        collection: isBuiltinSection(x.id) ? '' : (x.collection || ''), productIds: x.productIds, excludeIds: x.excludeIds || [] }));
       if (await saveSettings({ homeSections: clean })) homeDraft = null;
     };
   },

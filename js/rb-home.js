@@ -79,9 +79,14 @@
   }
 
   // Automatic picks when a section has no hand-picked products
-  function autoPick(id, products, used) {
-    // Automatic rows only use products that have a photo
-    const fresh = products.filter(p => !used.has(p.id) && p.image);
+  function autoPick(sec, products, used) {
+    const id = sec.id, skip = new Set(sec.excludeIds || []);
+    // Automatic rows only use products that have a photo (and weren't removed from this row in the admin)
+    const fresh = products.filter(p => !used.has(p.id) && p.image && !skip.has(p.id));
+    // Sections added in the admin fill from their chosen collection
+    if (!DEFAULT_SECTIONS.some(d => d.id === id)) {
+      return sec.collection ? fresh.filter(p => p.cat === sec.collection).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, 12) : [];
+    }
     const byNewest = [...fresh].sort((a, b) => (b.order ?? 0) - (a.order ?? 0));
     if (id === 'new') {
       const tagged = byNewest.filter(p => /new/i.test(p.badge || '') || p.badgeStyle === 'new');
@@ -142,7 +147,7 @@
     const used = new Set();
     const html = sectionsFrom(settings).filter(s => s.visible !== false).map(s => {
       let items = (s.productIds || []).map(id => byId[id]).filter(Boolean);
-      if (!items.length) items = autoPick(s.id, products, s.id === 'recommended' ? new Set() : used);
+      if (!items.length) items = autoPick(s, products, s.id === 'recommended' ? new Set() : used);
       items.forEach(p => used.add(p.id));
       if (!items.length) return '';
       const cards = items.map((p, i) => RB.productCardHTML(p, RB.collectionName(catalog, p.cat), i)).join('');
@@ -152,7 +157,7 @@
           <div><h2 class="rb-hs-title">${titleHTML(s.title)}</h2>${s.subtitle ? `<div class="rb-hs-sub">${RB.esc(s.subtitle)}</div>` : ''}</div>
           ${slider
             ? '<div class="rb-hs-nav"><button class="rb-hs-arrow rb-prev" aria-label="Scroll left">‹</button><button class="rb-hs-arrow rb-next" aria-label="Scroll right">›</button></div>'
-            : '<a class="rb-hs-link" href="shop.html">View all →</a>'}
+            : `<a class="rb-hs-link" href="${s.collection ? 'collection.html?cat=' + encodeURIComponent(s.collection) : 'shop.html'}">View all →</a>`}
         </div>
         ${slider ? `<div class="rb-row">${cards}</div><div class="rb-hs-progress"><span></span></div>` : `<div class="rb-grid">${cards}</div>`}
       </section>`;

@@ -224,9 +224,11 @@ td .input { padding: 7px 9px; }
 
 /* ── Homepage sections ─────────────────── */
 .hp-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
-.hp-item { flex: 0 0 120px; display: flex; flex-direction: column; gap: 6px; font-size: 11px; position: relative; }
+.hp-item { flex: 0 0 120px; width: 120px; min-width: 0; display: flex; flex-direction: column; gap: 6px; font-size: 11px; position: relative; }
 .hp-item > span:not(.hp-thumb):not(.hp-acts) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hp-preview .hp-item { opacity: .65; }
+.hp-preview .hp-thumb { opacity: .7; }
+.hp-preview .hp-acts { position: absolute; top: 5px; right: 5px; }
+.hp-preview .hp-acts .btn { padding: 2px 7px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
 .hp-thumb { display: block; width: 100%; aspect-ratio: 4/5; border-radius: 8px; background: #efe9dc center/cover no-repeat; border: 1px solid var(--line); }
 .hp-results .hp-thumb { width: 34px; flex: 0 0 34px; }
 .hp-acts { display: flex; gap: 4px; }
