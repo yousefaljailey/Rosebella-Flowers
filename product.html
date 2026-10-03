@@ -806,8 +806,8 @@ function renderProduct(catalog) {
   const root = document.getElementById('pdRoot');
   const p = (catalog?.products || []).find(x => x.id === PRODUCT_ID && x.visible !== false);
   if (!p) {
-    root.innerHTML = '<div class="pd-missing">This product isn’t available any more.<br><a href="shop.html">Browse all flowers →</a></div>';
-    document.getElementById('breadcrumbName').textContent = 'Not found';
+    // Might just be an older cached catalog — only say "not available" after the fresh one (loadProducts)
+    if (!pdProduct) root.innerHTML = '<div class="pd-missing">Loading…</div>';
     return;
   }
   const collName = RB.collectionName(catalog, p.cat);
@@ -1033,7 +1033,11 @@ function pdAddToBag() {
 
 function loadProducts() {
   return RB.load('catalog', renderProduct).then(data => {
-    if (!data) document.getElementById('pdRoot').innerHTML = '<div class="pd-missing">Unable to load this product. Please refresh.</div>';
+    if (!data) { document.getElementById('pdRoot').innerHTML = '<div class="pd-missing">Unable to load this product. Please refresh.</div>'; return; }
+    if (!pdProduct) {
+      document.getElementById('pdRoot').innerHTML = '<div class="pd-missing">This product isn’t available any more.<br><a href="shop.html">Browse all flowers →</a></div>';
+      document.getElementById('breadcrumbName').textContent = 'Not found';
+    }
   });
 }
 
