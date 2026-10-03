@@ -1041,8 +1041,7 @@ PAGES.store = {
     fetch(`${STOREFRONT_URL}/api/pay?action=applepay-domain`).then(r => r.json()).then(d => {
       apStatus.innerHTML = d.fileHosted
         ? '✓ Apple’s verification file is on the website. Press the button to register the domain with MyFatoorah.'
-        : '⚠ Step 1 still to do: the Apple Pay verification file from MyFatoorah (tech@myfatoorah.com) is not on the website yet. Send it to your developer to add at /.well-known/apple-developer-merchantid-domain-association.';
-      apBtn.disabled = !d.fileHosted;
+        : '⚠ Apple’s verification file is not on the website yet (it comes from MyFatoorah support, tech@myfatoorah.com). You can still press the button — MyFatoorah’s reply shows below.';
     }).catch(() => { apStatus.textContent = 'Could not check the website right now.'; });
     apBtn.onclick = async () => {
       apBtn.disabled = true; apOut.textContent = 'Registering with MyFatoorah…';

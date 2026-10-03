@@ -133,14 +133,13 @@ module.exports = async (req, res) => {
       if (req.method === 'GET') return res.status(200).json({ domain: host, fileHosted });
       if (req.method !== 'POST') throw httpError(405, 'Method not allowed.');
       await requireAdmin(req);
-      if (!fileHosted) throw httpError(400, 'The Apple Pay verification file is not on the website yet.');
       const domains = [host, 'www.' + host];
       const results = [];
       for (const DomainName of domains) {
         try { await mf('RegisterApplePayDomain', { DomainName }); results.push({ domain: DomainName, ok: true }); }
         catch (e) { results.push({ domain: DomainName, ok: false, error: e.message }); }
       }
-      return res.status(results.some(r => r.ok) ? 200 : 502).json({ results });
+      return res.status(results.some(r => r.ok) ? 200 : 502).json({ results, fileHosted });
     }
 
     if (req.method !== 'POST') throw httpError(405, 'Method not allowed.');
