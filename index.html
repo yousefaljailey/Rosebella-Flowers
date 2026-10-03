@@ -2358,6 +2358,9 @@
     .py-success-total-val { font-family: var(--serif); font-size: 24px; font-weight: 300; color: var(--charcoal); }
     .py-success-total-val sup { font-family: var(--sans); font-size: 10px; font-weight: 700; color: var(--gold); vertical-align: super; margin-right: 2px; }
     .py-success-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; }
+    .py-receipt-btn { width: 100%; padding: 14px; border: 1px solid var(--gold); background: transparent; color: var(--gold); font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: background .2s, color .2s; }
+    .py-receipt-btn:hover { background: var(--gold); color: #fff; }
+    .py-receipt-btn:disabled { opacity: .6; cursor: wait; }
     .py-wa-btn {
       display: flex; align-items: center; justify-content: center; gap: 10px;
       background: #25D366; color: #fff; border: none; cursor: pointer;
@@ -3005,6 +3008,7 @@
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALvVuQDLK93ZyUmwFhqRT5I32-sTwZOII&amp;loading=async&amp;callback=__mapsForReviews"></script>
 <script src="js/rb-data.js"></script>
 <script src="js/rb-cart.js"></script>
+<script src="js/rb-receipt.js" defer></script>
 <script src="js/rb-home.js?v=202610032110"></script>
 </head>
 <body>
@@ -3437,6 +3441,7 @@
       </div>
     </div>
     <div class="py-success-actions">
+      <button class="py-receipt-btn" id="pyReceiptBtn" onclick="pyDownloadReceipt()">⬇ Download receipt (PDF)</button>
       <button class="py-done-btn" onclick="pyDone()">Continue Shopping</button>
     </div>
   </div>
@@ -5802,6 +5807,8 @@
     orders.unshift({ id:orderId, createdAt:new Date().toISOString(), status:'pending', statusHistory:[{status:'pending',at:new Date().toISOString()}], items:snap.cart, total:snap.total, paymentMethod, paymentIntentId, payment: payment || null, appliedPromo: snap.appliedPromo || null, recipient:snap.recipient, buyer:snap.buyer || null, deliverySlot:snap.deliverySlot, giftMessage:snap.giftMessage });
     localStorage.setItem('rosebella_orders', JSON.stringify(orders));
     saveOrderToFirestore(orders[0]);
+    const slotForReceipt = findSlot(snap.deliverySlot.slot);
+    pyLastOrder = { ...orders[0], deliverySlot: { ...snap.deliverySlot, slotLabel: slotForReceipt ? formatDeliveryDate(snap.deliverySlot.date) + ' · ' + slotForReceipt.label : '' } };
     // Clear cart
     cart=[]; appliedPromo=null; giftMessage=''; deliverySlot={date:'',slot:''}; coExpressFee=0;
     recipient={name:'',phone:'',address:'',landmark:'',occasion:'',notes:''};
@@ -5857,6 +5864,16 @@
       if (snap.giftMessage) msg += `\n💌 "${snap.giftMessage}"\n`;
       window.open('https://wa.me/' + storeWhatsApp() + '?text=' + encodeURIComponent(msg), '_blank');
     }
+  }
+
+  let pyLastOrder = null;
+  async function pyDownloadReceipt() {
+    const b = document.getElementById('pyReceiptBtn');
+    if (!pyLastOrder || !window.RBReceipt) return;
+    const label = b.textContent; b.disabled = true; b.textContent = 'Preparing your receipt…';
+    try { await RBReceipt.download(pyLastOrder); }
+    catch (e) { alert('Sorry, the receipt could not be created. Please contact us and we will send it to you.'); }
+    b.disabled = false; b.textContent = label;
   }
 
   function pyDone() {
