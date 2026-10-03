@@ -3343,6 +3343,10 @@
       <div class="py-panel" id="pyCardPanel">
         <div id="mfUnified" class="py-mf-box"></div>
         <div id="py-card-errors"></div>
+        <button class="py-submit" id="pyCardSubmit" type="button" onclick="pyPayCard()" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
+          Pay <span id="pyCardBtnAmt">QR 0</span>
+        </button>
         <div class="py-or"><span>or</span></div>
         <button class="py-naps-btn" type="button" onclick="pyPayNaps()">
           <span class="py-naps-logo">NAPS</span> Pay with Qatar Debit Card
@@ -3364,7 +3368,8 @@
       <!-- Loading panel -->
       <div id="pyLoading">
         <div class="py-spinner"></div>
-        <span class="py-loading-txt">Processing payment…</span>
+        <span class="py-loading-txt" id="pyLoadingTxt">Processing payment…</span>
+        <button type="button" class="py-naps-btn" id="pyFocusWin" style="display:none;max-width:280px" onclick="pyFocusPayWindow()">Show the verification window</button>
       </div>
 
       <div class="py-footer">
@@ -5636,6 +5641,7 @@
   function pySetAmounts(total) {
     document.getElementById('pyAmountVal').textContent = Number(total).toFixed(0);
     document.getElementById('pyCodAmt').textContent    = Number(total).toFixed(0);
+    document.getElementById('pyCardBtnAmt').textContent = 'QR ' + Number(total).toFixed(0);
   }
 
   // What the server needs to price the order (it ignores any prices sent from here)
@@ -5693,6 +5699,7 @@
   async function pyInitMyFatoorah() {
     const box = document.getElementById('mfUnified');
     pyCardError('');
+    document.getElementById('pyCardSubmit').disabled = true;
     box.innerHTML = '<div class="py-mf-loading">Loading secure payment…</div>';
     try {
       const [, session] = await Promise.all([loadMfScript(), pyApi('session', { order: pyOrderPayload() })]);
@@ -5710,42 +5717,142 @@
         paymentOptions: ['ApplePay', 'GooglePay', 'Card'],
         supportedNetworks: ['visa', 'masterCard', 'amex'],
         language: 'en',
+        settings: { card: { style: { button: { useCustomButton: true } } } },   // we use our own Pay button
       });
+      document.getElementById('pyCardSubmit').disabled = false;
     } catch (e) {
       box.innerHTML = '';
       pyCardError(e.message || 'Online payment is unavailable right now. Please choose Cash on Delivery or try again.');
     }
   }
 
+  // ── Paying without leaving the site ──────────────
+  // Card details, Apple Pay and Google Pay are entered on this page. If the bank asks for
+  // its security check (3-D Secure / NAPS), it opens in a small window over the site that
+  // closes itself; this page never navigates away.
+  let pyPayWin = null, pyPayWinTimer = null, pyAwaitingCard = false;
+
+  function pyOpenPayWindow() {
+    const w = 460, h = 680;
+    const left = Math.max(0, (screen.width - w) / 2), top = Math.max(0, (screen.height - h) / 2);
+    const win = window.open('', 'rbPayWindow', `width=${w},height=${h},left=${left},top=${top}`);
+    if (!win) return null;
+    try {
+      win.document.write(`<!doctype html><title>Secure payment — Rosebella</title>
+        <body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#18160f;color:#FAF8F0;font-family:Montserrat,Arial,sans-serif;text-align:center">
+        <div><div style="font-size:28px;margin-bottom:12px">🔒</div><div style="font-size:13px;letter-spacing:.08em">Connecting to your bank securely…</div></div></body>`);
+    } catch (e) {}
+    return win;
+  }
+
+  function pyFocusPayWindow() { try { pyPayWin && pyPayWin.focus(); } catch (e) {} }
+
+  function pyShowWaiting(text, showFocus) {
+    document.getElementById('pyCardPanel').style.display = 'none';
+    document.getElementById('pyLoading').style.display   = 'flex';
+    document.getElementById('pyLoadingTxt').textContent  = text;
+    document.getElementById('pyFocusWin').style.display  = showFocus ? '' : 'none';
+  }
+  function pyBackToForm(msg) {
+    clearInterval(pyPayWinTimer);
+    try { pyPayWin && !pyPayWin.closed && pyPayWin.close(); } catch (e) {}
+    pyPayWin = null;
+    document.getElementById('pyLoading').style.display   = 'none';
+    document.getElementById('pyCardPanel').style.display = '';
+    pyCardError(msg || '');
+    pyInitMyFatoorah();   // a payment session can only be used once
+  }
+
+  // Our Pay button: open the (blank) secure window during the click so browsers allow it,
+  // then submit the card form inside MyFatoorah's fields.
+  function pyPayCard() {
+    pyCardError('');
+    pyAwaitingCard = true;
+    pyPayWin = pyOpenPayWindow();
+    document.getElementById('pyCardSubmit').disabled = true;
+    myfatoorah.submitCardPayment();
+  }
+
+  function pyPayNaps() {
+    pyPayWin = pyOpenPayWindow();
+    pyStartPayment({ method: 'naps' });
+  }
+
   async function pyMfCallback(response) {
+    const wasCard = pyAwaitingCard; pyAwaitingCard = false;
+    document.getElementById('pyCardSubmit').disabled = false;
     if (!response || !response.isSuccess) {
+      if (wasCard) { try { pyPayWin && pyPayWin.close(); } catch (e) {} pyPayWin = null; }
       pyCardError(response?.error || 'Payment details were not accepted. Please check them and try again.');
       return;
     }
-    await pyStartPayment({ sessionId: response.sessionId });
+    await pyStartPayment({ sessionId: response.sessionId, wallet: response.paymentType !== 'Card' });
   }
 
-  function pyPayNaps() { pyStartPayment({ method: 'naps' }); }
-
-  // Creates the MyFatoorah invoice and sends the shopper to complete it (3-D Secure / bank page)
   async function pyStartPayment(extra) {
+    const wallet = !!extra.wallet; delete extra.wallet;
     pyCardError('');
-    document.getElementById('pyCardPanel').style.display = 'none';
-    document.getElementById('pyLoading').style.display   = 'flex';
+    pyShowWaiting('Processing payment…', false);
     try {
       const orderId = 'RB-' + Date.now().toString(36).toUpperCase();
       pyOrderSnapshot.orderId = orderId;
       pyOrderSnapshot.coPayment = 'card';
       localStorage.setItem(PENDING_KEY, JSON.stringify(pyOrderSnapshot));
       const r = await pyApi('execute', { order: pyOrderPayload(), orderId, ...extra });
-      location.href = r.paymentUrl;
+
+      // Apple Pay / Google Pay are usually complete already — no bank page needed
+      if (wallet && r.invoiceId) {
+        const st = await pyCheckStatus({ invoiceId: r.invoiceId });
+        if (st && st.paid) return pyPaymentConfirmed(st);
+      }
+
+      if (!pyPayWin || pyPayWin.closed) pyPayWin = pyOpenPayWindow();
+      if (!pyPayWin) { location.href = r.paymentUrl; return; }   // window blocked: finish on MyFatoorah's page
+      pyPayWin.location.href = r.paymentUrl;
+      pyShowWaiting('Complete the security check from your bank in the window that opened.', true);
+      clearInterval(pyPayWinTimer);
+      pyPayWinTimer = setInterval(async () => {
+        if (pyPayWin && !pyPayWin.closed) return;
+        clearInterval(pyPayWinTimer);
+        // Window closed — maybe paid (message missed), maybe cancelled
+        const st = await pyCheckStatus({ invoiceId: r.invoiceId });
+        if (st && st.paid) pyPaymentConfirmed(st);
+        else if (document.getElementById('pyLoading').style.display !== 'none') pyBackToForm('The payment window was closed before the payment finished. You have not been charged.');
+      }, 800);
     } catch (e) {
-      document.getElementById('pyLoading').style.display = 'none';
-      document.getElementById('pyCardPanel').style.display = '';
-      pyCardError(e.message);
-      pyInitMyFatoorah();   // a payment session can only be used once
+      pyBackToForm(e.message);
     }
   }
+
+  async function pyCheckStatus(q) {
+    try {
+      const qs = q.paymentId ? `paymentId=${encodeURIComponent(q.paymentId)}` : `invoiceId=${encodeURIComponent(q.invoiceId)}`;
+      return await fetch(`${PAY_API}?action=status&${qs}`).then(r => r.json());
+    } catch (e) { return null; }
+  }
+
+  function pyPaymentConfirmed(st) {
+    const pending = pyOrderSnapshot;
+    if (!pending || st.reference !== pending.orderId) { pyBackToForm('We could not match this payment to your order. Please contact us on WhatsApp.'); return; }
+    clearInterval(pyPayWinTimer);
+    try { pyPayWin && !pyPayWin.closed && pyPayWin.close(); } catch (e) {}
+    pyPayWin = null;
+    localStorage.removeItem(PENDING_KEY);
+    pyShowSuccess(st.paymentId, 'card', { provider: 'myfatoorah', paymentId: st.paymentId, invoiceId: st.invoiceId, amount: st.amount, method: st.method });
+  }
+
+  // Message from the secure window when the bank sends the shopper back
+  window.addEventListener('message', async e => {
+    if (e.origin !== location.origin || e.data?.type !== 'rb-pay-return') return;
+    clearInterval(pyPayWinTimer);
+    try { pyPayWin && pyPayWin.close(); } catch (err) {}
+    pyPayWin = null;
+    if (e.data.mf !== 'return' || !e.data.paymentId) { pyBackToForm('The payment was cancelled or declined. You have not been charged.'); return; }
+    pyShowWaiting('Confirming your payment…', false);
+    const st = await pyCheckStatus({ paymentId: e.data.paymentId });
+    if (st && st.paid) pyPaymentConfirmed(st);
+    else pyBackToForm(st?.error || 'Your payment was not completed. You have not been charged.');
+  });
 
   // Back from MyFatoorah: confirm the payment with the server before showing success
   window.addEventListener('DOMContentLoaded', async () => {
@@ -5753,6 +5860,14 @@
     const mf = q.get('mf');
     if (!mf) return;
     const paymentId = q.get('paymentId') || q.get('PaymentId') || '';
+    if (window.opener && window.name === 'rbPayWindow') {
+      try {
+        window.opener.postMessage({ type: 'rb-pay-return', mf, paymentId }, location.origin);
+        document.body.innerHTML = '<p style="font-family:sans-serif;text-align:center;margin-top:40vh">Payment received — returning to Rosebella…</p>';
+        setTimeout(() => window.close(), 300);
+        return;
+      } catch (e) {}
+    }
     history.replaceState(null, '', location.pathname);
     let pending = null;
     try { pending = JSON.parse(localStorage.getItem(PENDING_KEY)); } catch (e) {}

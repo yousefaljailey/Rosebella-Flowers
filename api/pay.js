@@ -116,9 +116,16 @@ module.exports = async (req, res) => {
       // Status is non-sensitive (paid flag, amount, ids) — the admin portal reads it too
       res.setHeader('Access-Control-Allow-Origin', '*');
       const paymentId = String(req.query.paymentId || '');
-      if (!/^[\w-]{4,64}$/.test(paymentId)) throw httpError(400, 'Invalid payment id.');
-      const d = await mf('GetPaymentStatus', { Key: paymentId, KeyType: 'PaymentId' });
-      const tx = (d.InvoiceTransactions || []).find(t => String(t.PaymentId) === paymentId) || {};
+      const invoiceId = String(req.query.invoiceId || '');
+      let d;
+      if (paymentId) {
+        if (!/^[\w-]{4,64}$/.test(paymentId)) throw httpError(400, 'Invalid payment id.');
+        d = await mf('GetPaymentStatus', { Key: paymentId, KeyType: 'PaymentId' });
+      } else if (/^\d{3,15}$/.test(invoiceId)) {
+        d = await mf('GetPaymentStatus', { Key: invoiceId, KeyType: 'InvoiceId' });
+      } else throw httpError(400, 'Invalid payment id.');
+      const txs = d.InvoiceTransactions || [];
+      const tx = txs.find(t => String(t.PaymentId) === paymentId) || txs.find(t => t.TransactionStatus === 'Succss' || t.TransactionStatus === 'Success') || txs[txs.length - 1] || {};
       return res.status(200).json({
         paid: d.InvoiceStatus === 'Paid',
         status: d.InvoiceStatus,
@@ -128,6 +135,7 @@ module.exports = async (req, res) => {
         invoiceId: d.InvoiceId,
         reference: d.CustomerReference || '',
         method: tx.PaymentGateway || '',
+        paymentId: tx.PaymentId ? String(tx.PaymentId) : paymentId,
       });
     }
 
