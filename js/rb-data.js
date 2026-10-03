@@ -101,11 +101,47 @@
 
   function productUrl(p) { return 'product.html?id=' + encodeURIComponent(p.id); }
 
+  // Cards only need a ~600px photo (the product page uses the full 1200px one)
+  function cardImg(u) {
+    return String(u || '').replace('/image/upload/f_auto,q_auto,w_1200/', '/image/upload/f_auto,q_auto,w_600/');
+  }
+
+  // Card photos load when they come near the screen instead of all at once
+  const lazyObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      el.style.backgroundImage = `url("${el.dataset.bg}")`;
+      el.removeAttribute('data-bg');
+      lazyObserver.unobserve(el);
+    });
+  }, { rootMargin: '400px 0px' }) : null;
+  function lazyLoadImages(root) {
+    (root || document).querySelectorAll('[data-bg]').forEach(el => {
+      if (lazyObserver) lazyObserver.observe(el);
+      else { el.style.backgroundImage = `url("${el.dataset.bg}")`; el.removeAttribute('data-bg'); }
+    });
+  }
+  // A tap on a card loads its photo right away (the bag / extras popup read it)
+  document.addEventListener('click', e => {
+    const card = e.target.closest && e.target.closest('.prod-card');
+    const el = card && card.querySelector('[data-bg]');
+    if (el) { el.style.backgroundImage = `url("${el.dataset.bg}")`; el.removeAttribute('data-bg'); lazyObserver && lazyObserver.unobserve(el); }
+  }, true);
+  // Observe cards whenever any page inserts them
+  if (window.MutationObserver) {
+    new MutationObserver(muts => {
+      for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) {
+        if (n.dataset && n.dataset.bg) lazyLoadImages(n.parentNode); else if (n.querySelector && n.querySelector('[data-bg]')) lazyLoadImages(n);
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+
   // Matches the original storefront .prod-card markup; photo + name open the product page
   function productCardHTML(p, catName, index) {
     const go = `onclick="if(!event.target.closest('button'))location.href='${esc(productUrl(p))}'"`;
     const img = p.image
-      ? `<div class="prod-img-bg" style="background-image:url(&quot;${esc(cssUrl(p.image))}&quot;);background-size:cover;background-position:${esc(p.imagePos || 'center center')};"></div>`
+      ? `<div class="prod-img-bg" data-bg="${esc(cssUrl(cardImg(p.image)))}" style="background-size:cover;background-position:${esc(p.imagePos || 'center center')};"></div>`
       : `<div class="prod-img-bg ${esc(p.placeholder || '')}"></div>`;
     const badge = p.badge ? `<span class="prod-badge badge-${esc(p.badgeStyle || 'new')}">${esc(p.badge)}</span>` : '';
     return `<div class="prod-card show" data-cat="${esc(p.cat)}" data-id="${esc(p.id)}" data-original-index="${index}">
@@ -231,7 +267,7 @@
   }
 
   window.RB = {
-    load, esc, DEFAULT_ADDONS, activeAddons, addonVisual, productUrl,
+    load, esc, DEFAULT_ADDONS, activeAddons, addonVisual, productUrl, cardImg, lazyLoadImages,
     visibleCollections, visibleProducts, collectionName,
     productCardHTML, collCardHTML, applyStore,
   };

@@ -698,7 +698,7 @@
       grid.innerHTML = products.map((p, i) => {
         const badgeHTML = p.badge ? `<span class="sp-badge ${getBadgeClass(p.badge)}">${p.badge}</span>` : '';
         const imgHTML = p.imgSrc
-          ? `<div class="sp-card-img-bg" style="background-image:url('${escHTML(p.imgSrc)}')"></div>`
+          ? `<div class="sp-card-img-bg" data-bg="${escHTML(RB.cardImg(p.imgSrc))}"></div>`
           : `<div class="sp-card-img-bg" style="background:linear-gradient(135deg,#e8d09a,#c6922a)"></div>`;
 
         const go = `onclick="if(!event.target.closest('button'))location.href='${escAttr(RB.productUrl(p))}'"`;
