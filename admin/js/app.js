@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════
    ROSEBELLA ADMIN — dashboard
    Firestore documents:
-     catalog/main        { collections[], products[] }
+     catalog/main        { collections[], productChunks }  + catalog/products_N { products[] }
      config/settings     { deliverySlots[], delivery{}, store{}, announcement{}, promos[] }
      config/heroSlides   { slides[] }
      orders/{id}         storefront orders  (+ orderStatus/{id} public status)
@@ -58,8 +58,9 @@ function refresh(...pages) {
 
 // ── Live data ───────────────────────────────
 function subscribe() {
-  db.doc('catalog/main').onSnapshot(snap => {
-    state.catalog = snap.exists ? normalizeCatalog(snap.data()) : null;
+  subscribeCatalog(({ catalog, chunks }) => {
+    state.catalog = catalog ? normalizeCatalog(catalog) : null;
+    state.catalogChunks = chunks;
     state.catalogLoaded = true;
     refresh('catalog', 'home');
   }, e => toast(firestoreError(e), true));
@@ -109,7 +110,7 @@ async function importSeed() {
     const writes = [];
     if (!state.catalog) {
       const cat = await fetch('seed/catalog.json').then(r => r.json());
-      writes.push(db.doc('catalog/main').set({ ...cat, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }));
+      writes.push(writeCatalog(cat, state.catalogChunks));
     }
     if (!state.settings) {
       const set = await fetch('seed/settings.json').then(r => r.json());
@@ -123,10 +124,7 @@ async function importSeed() {
 // ── Save helpers ────────────────────────────
 async function saveCatalog(msg) {
   try {
-    await db.doc('catalog/main').set({
-      ...state.catalog,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    state.catalogChunks = await writeCatalog(state.catalog, state.catalogChunks);
     toast(msg || 'Saved — live on the storefront');
     return true;
   } catch (e) { toast(firestoreError(e), true); return false; }

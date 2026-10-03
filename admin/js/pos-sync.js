@@ -3,7 +3,7 @@
    • POS records (sales, inventory, CRM, wire orders, delivery statuses) are
      mirrored to adminData/pos so they follow you across devices.
    • Online storefront orders stream in from the `orders` collection.
-   • Products come from catalog/main.
+   • Products come from the catalog (catalog/main + catalog/products_N).
    ══════════════════════════════════════════════ */
 const POS_SYNC_KEYS = [
   'rosebella_pos_orders', 'rosebella_inventory', 'rosebella_del_status',
@@ -52,8 +52,8 @@ requireAdmin(async () => {
   updatePosUI();
 
   // 4. Live data
-  db.doc('catalog/main').onSnapshot(s => {
-    posCatalog = s.exists ? s.data() : null;
+  subscribeCatalog(({ catalog }) => {
+    posCatalog = catalog;
     renderPosProducts((document.getElementById('posSearch')?.value || '').trim().toLowerCase());
   }, e => toast(firestoreError(e), true));
 

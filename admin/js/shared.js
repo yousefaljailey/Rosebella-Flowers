@@ -139,3 +139,37 @@ async function uploadMedia(file, folder) {
   }
   return data.secure_url;
 }
+
+// ── Catalog storage ──────────────────────────
+// catalog/main { collections, version, productChunks } + catalog/products_0…N { products[] }
+// (split so ~1,000 products never hit Firestore's 1 MB-per-document limit)
+const CATALOG_CHUNK = 200;
+
+function assembleCatalog(querySnap) {
+  const docs = {};
+  querySnap.forEach(d => { docs[d.id] = d.data(); });
+  const main = docs.main;
+  if (!main) return { catalog: null, chunks: 0 };
+  const n = Number(main.productChunks) || 0;
+  const products = n ? Array.from({ length: n }, (_, i) => (docs['products_' + i]?.products) || []).flat() : (main.products || []);
+  return { catalog: { collections: main.collections || [], products, version: main.version || 1 }, chunks: n };
+}
+
+function subscribeCatalog(onChange, onError) {
+  return db.collection('catalog').onSnapshot(qs => onChange(assembleCatalog(qs)), onError);
+}
+
+async function writeCatalog(cat, previousChunks) {
+  const products = cat.products || [];
+  const chunks = [];
+  for (let i = 0; i < products.length; i += CATALOG_CHUNK) chunks.push(products.slice(i, i + CATALOG_CHUNK));
+  const batch = db.batch();
+  batch.set(db.doc('catalog/main'), {
+    collections: cat.collections || [], version: cat.version || 1,
+    productChunks: chunks.length, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  chunks.forEach((c, i) => batch.set(db.doc('catalog/products_' + i), { products: c }));
+  for (let i = chunks.length; i < (previousChunks || 0); i++) batch.delete(db.doc('catalog/products_' + i));
+  await batch.commit();
+  return chunks.length;
+}

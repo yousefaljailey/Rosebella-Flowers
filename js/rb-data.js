@@ -38,6 +38,12 @@
   }
 
   async function fetchFirestore(name) {
+    // The catalog comes from the cached /api/catalog feed (one compact download)
+    if (name === 'catalog') {
+      const res = await fetch('/api/catalog');
+      if (!res.ok) throw new Error('Catalog feed ' + res.status);
+      return res.json();
+    }
     const url = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/${DOCS[name]}?key=${API_KEY}`;
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('Firestore ' + res.status);

@@ -10,8 +10,7 @@
    never taken from the browser.
    ══════════════════════════════════════════════ */
 const MF_BASE  = process.env.MYFATOORAH_BASE_URL || 'https://api-qa.myfatoorah.com';  // Qatar live
-const PROJECT  = 'rosebella-bac0e';
-const FB_KEY   = 'AIzaSyCWaVcGjH3ZZ11Oy1vEBJOE9L_wbsgYET0';
+const { readDoc, loadCatalog } = require('./_catalog');
 const NAPS_METHOD_ID = 6;   // Qatar Debit Card (redirect only)
 
 const DEFAULT_ADDONS = [
@@ -24,29 +23,13 @@ const DEFAULT_SLOTS = [
   { id: 's5', fee: 25 }, { id: 's6', fee: 25 }, { id: 's_express', fee: 50 },
 ];
 
-// ── Firestore (public read) ─────────────────────
-function decode(v) {
-  if (!v || typeof v !== 'object') return null;
-  if ('stringValue' in v) return v.stringValue;
-  if ('integerValue' in v) return Number(v.integerValue);
-  if ('doubleValue' in v) return v.doubleValue;
-  if ('booleanValue' in v) return v.booleanValue;
-  if ('arrayValue' in v) return (v.arrayValue.values || []).map(decode);
-  if ('mapValue' in v) { const o = {}; for (const k in v.mapValue.fields || {}) o[k] = decode(v.mapValue.fields[k]); return o; }
-  return null;
-}
-async function readDoc(path) {
-  const r = await fetch(`https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/${path}?key=${FB_KEY}`);
-  if (!r.ok) throw new Error(`Could not load ${path}`);
-  const d = await r.json();
-  return decode({ mapValue: { fields: d.fields || {} } });
-}
-
 // ── Pricing ─────────────────────────────────────
 async function priceOrder(order) {
   if (!order || !Array.isArray(order.items) || !order.items.length) throw httpError(400, 'Your gift bag is empty.');
   if (order.items.length > 50) throw httpError(400, 'Too many items in one order.');
-  const [catalog, settings] = await Promise.all([readDoc('catalog/main'), readDoc('config/settings')]);
+  const [catalog, settings] = await Promise.all([loadCatalog(), readDoc('config/settings')]);
+  if (!catalog) throw httpError(503, 'The catalog is not available right now.');
+  if (!settings) throw httpError(503, 'Store settings are not available right now.');
   const hiddenCols = new Set((catalog.collections || []).filter(c => c.visible === false).map(c => c.slug));
   const products = (catalog.products || []).filter(p => p.visible !== false && !hiddenCols.has(p.cat));
   const addons = (Array.isArray(settings.addons) ? settings.addons : DEFAULT_ADDONS).filter(a => a.active !== false);
