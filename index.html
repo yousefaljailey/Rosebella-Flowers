@@ -2242,7 +2242,11 @@
     .co-toggle:checked::after { left: 25px; }
     .co-block-title { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 22px; color: var(--charcoal); margin: 4px 0 14px; }
     .co-block-title span { font-size: 16px; }
-    .co-pm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .co-pm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .co-pm-wrap { border-top: 1px solid rgba(198,146,42,0.1); }
+    #coRight .co-pm { min-height: 88px; padding: 10px 6px; border-radius: 12px; }
+    #coRight .co-pm-logo img { max-height: 28px; max-width: 60px; }
+    #coRight .co-pm-name { font-size: 9px; }
     .co-pm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 104px; padding: 14px 8px;
       border: 1.5px solid #e6e0d3; border-radius: 14px; background: #fff; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
     .co-pm:hover:not(:disabled) { border-color: rgba(198,146,42,0.55); }
@@ -3208,6 +3212,7 @@
               <input type="checkbox" id="coSendAsGift" class="co-toggle" onchange="coOnSendAsGiftChange()">
             </label>
 
+            <div id="coRecipFields" style="display:none">
             <div class="co-block-title"><span>👤</span> Recipient details</div>
 
             <!-- Recipient Name -->
@@ -3228,8 +3233,17 @@
               </div>
             </div>
 
+            </div><!-- /coRecipFields -->
+
             <div id="coAddrFields">
             <div class="co-block-title"><span>📍</span> Delivery address</div>
+            <div class="co-field">
+              <label class="co-label" for="coMyPhone">Your Phone Number <span class="co-req">*</span></label>
+              <div class="co-phone-row">
+                <div class="co-phone-prefix"><span class="co-phone-flag">🇶🇦</span><span class="co-phone-code">+974</span></div>
+                <input id="coMyPhone" class="co-input co-phone-input" type="tel" placeholder="5555 1234" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')">
+              </div>
+            </div>
             <!-- Location map -->
             <div class="co-field">
               <label class="co-label">
@@ -3319,20 +3333,6 @@
               </div>
             </div>
 
-            <!-- Payment method -->
-            <div class="co-block-title" style="margin-top:30px"><span>💳</span> Payment method</div>
-            <div class="co-pm-grid" id="coPmGrid"></div>
-            <div class="co-pm-pane" id="coPmCash" hidden>
-              <p>Pay <b>QR <span class="co-pm-amt">0</span></b> in cash when your order arrives.</p>
-            </div>
-            <div class="co-pm-pane" id="coPmNaps" hidden>
-              <p>You'll confirm with your <b>Qatar Debit Card</b> in a secure window from your bank when you place the order.</p>
-            </div>
-            <div class="co-pm-pane" id="coPmMf" hidden>
-              <div id="mfUnified" class="py-mf-box"></div>
-              <p class="co-pm-hint" id="coPmWalletHint" hidden></p>
-            </div>
-            <div id="py-card-errors"></div>
 
           </div>
         </div>
@@ -3373,6 +3373,24 @@
           <div class="co-gift-footer">
             <span class="co-gift-count" id="coGiftCount">0 / 250</span>
           </div>
+        </div>
+
+        <!-- Payment method (always visible, above Place order) -->
+        <div class="co-pm-wrap">
+            <!-- Payment method -->
+            <div class="co-sum-label" style="margin:22px 0 12px;">Payment Method</div>
+            <div class="co-pm-grid" id="coPmGrid"></div>
+            <div class="co-pm-pane" id="coPmCash" hidden>
+              <p>Pay <b>QR <span class="co-pm-amt">0</span></b> in cash when your order arrives.</p>
+            </div>
+            <div class="co-pm-pane" id="coPmNaps" hidden>
+              <p>You'll confirm with your <b>Qatar Debit Card</b> in a secure window from your bank when you place the order.</p>
+            </div>
+            <div class="co-pm-pane" id="coPmMf" hidden>
+              <div id="mfUnified" class="py-mf-box"></div>
+              <p class="co-pm-hint" id="coPmWalletHint" hidden></p>
+            </div>
+            <div id="py-card-errors"></div>
         </div>
 
         <!-- CTA -->
@@ -5214,12 +5232,15 @@
   function coPopulate() {
     // Pre-fill from saved recipient state
     const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
-    setVal('coName',     recipient.name);
-    setVal('coPhoneNum', recipient.phone ? recipient.phone.replace(/^\+?974\s?/, '') : '');
+    const wasGift = recipient.notes === 'gift';
+    const ph = recipient.phone ? recipient.phone.replace(/^\+?974\s?/, '') : '';
+    setVal('coName',     wasGift ? recipient.name : '');
+    setVal('coPhoneNum', wasGift ? ph : '');
+    setVal('coMyPhone',  wasGift ? '' : ph);
     // Find area from saved data
     const areaEl = document.getElementById('coArea');
     if (areaEl && recipient.landmark) areaEl.value = recipient.landmark;
-    setVal('coAddress', recipient.address);
+    setVal('coAddress', wasGift ? '' : recipient.address);
     if (recipient.notes) document.getElementById('coSendAsGift').checked = recipient.notes === 'gift';
     // Gift message
     const gm = document.getElementById('coGiftMsg');
@@ -5360,21 +5381,22 @@
   // Validates the checkout form and saves recipient + delivery. Returns true when ready to pay.
   function coValidateAndSave() {
     const isGift  = coIsGift();
-    const name    = document.getElementById('coName').value.trim();
-    const phone   = document.getElementById('coPhoneNum').value.trim();
+    const me      = (typeof authUser !== 'undefined' && authUser) ? authUser : {};
+    const name    = isGift ? document.getElementById('coName').value.trim() : (me.name && me.name !== 'Guest' ? me.name : 'Customer');
+    const phoneId = isGift ? 'coPhoneNum' : 'coMyPhone';
+    const phone   = document.getElementById(phoneId).value.trim();
     const area    = document.getElementById('coArea').value;
     const address = document.getElementById('coAddress').value.trim();
 
     let valid = true;
-    const required = [['coName', name], ['coPhoneNum', phone]];
-    if (!isGift) required.push(['coArea', area], ['coAddress', address]);
-    ['coArea', 'coAddress'].forEach(id => document.getElementById(id)?.classList.remove('err'));
+    const required = isGift ? [['coName', name], ['coPhoneNum', phone]]
+                            : [['coMyPhone', phone], ['coArea', area], ['coAddress', address]];
+    ['coName', 'coPhoneNum', 'coMyPhone', 'coArea', 'coAddress'].forEach(id => document.getElementById(id)?.classList.remove('err'));
     required.forEach(([id, v]) => {
       const el = document.getElementById(id);
       if (!v) { el?.classList.add('err'); valid = false; }
-      else      el?.classList.remove('err');
     });
-    if (phone && !/^\d{8}$/.test(phone)) { document.getElementById('coPhoneNum').classList.add('err'); valid = false; }
+    if (phone && !/^\d{8}$/.test(phone)) { document.getElementById(phoneId).classList.add('err'); valid = false; }
     if (!coDeliverySlotId) {
       document.getElementById('coDtTrigger').style.borderColor = '#e05060';
       valid = false;
@@ -5519,10 +5541,7 @@
 
   function coUpdatePlaceBtn() {
     const m = pmById(coPayMethod);
-    const label = !m ? 'Place order'
-      : m.id === 'cash' ? 'Place order'
-      : m.wallet ? `Continue to ${m.label}`
-      : 'Pay now';
+    const label = 'Place order';
     document.querySelectorAll('.co-place-lbl').forEach(el => el.textContent = label);
     const hint = document.getElementById('coPmWalletHint');
     if (hint) {
@@ -5757,6 +5776,8 @@
     const gift = coIsGift();
     const f = document.getElementById('coAddrFields');
     if (f) f.style.display = gift ? 'none' : '';
+    const r = document.getElementById('coRecipFields');
+    if (r) r.style.display = gift ? '' : 'none';
     const wasCash = coPayMethod === 'cash';
     coRenderPmTiles();
     if (gift && wasCash) coSelectPm('card');
