@@ -1863,6 +1863,9 @@
     }
     .co-back:hover { color: var(--charcoal); }
     .co-back svg { width: 16px; height: 16px; }
+    /* Logo centred in the checkout header (Back stays on the left) */
+    #coHeader { position: relative; }
+    #coHeader .co-logo { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
     .co-logo {
       font-family: var(--serif); font-size: 18px; font-weight: 500;
       letter-spacing: 0.2em; text-transform: uppercase; color: var(--charcoal);
