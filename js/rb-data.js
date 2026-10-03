@@ -113,7 +113,7 @@
   function lazyLoadImages() {
     if (lazyQueued) return;
     lazyQueued = true;
-    setTimeout(() => {
+    Promise.resolve().then(() => {      // microtask: runs right after the cards are inserted, never throttled
       lazyQueued = false;
       const vh = window.innerHeight || 800, vw = window.innerWidth || 1200;
       document.querySelectorAll('[data-bg]').forEach(el => {
@@ -121,7 +121,7 @@
         if (!r.width && !r.height) return;                 // not displayed (e.g. filtered out)
         if (r.top < vh + 500 && r.bottom > -500 && r.left < vw + 800 && r.right > -800) showBg(el);
       });
-    }, 30);
+    });
   }
   window.addEventListener('scroll', lazyLoadImages, { passive: true });
   window.addEventListener('resize', lazyLoadImages);
