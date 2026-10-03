@@ -3283,35 +3283,12 @@
             <!-- Recipient Area -->
             <div class="co-field">
               <label class="co-label" for="coArea">Recipient Area <span class="co-req co-addr-req">*</span></label>
-              <select id="coArea" class="co-select">
-                <option value="">Select area</option>
-                <optgroup label="Doha">
-                  <option value="West Bay">West Bay</option>
-                  <option value="The Pearl">The Pearl</option>
-                  <option value="Lusail">Lusail</option>
-                  <option value="Al Sadd">Al Sadd</option>
-                  <option value="Al Waab">Al Waab</option>
-                  <option value="Al Dafna">Al Dafna</option>
-                  <option value="Msheireb">Msheireb</option>
-                  <option value="Al Hilal">Al Hilal</option>
-                  <option value="Al Mansoura">Al Mansoura</option>
-                  <option value="Bin Omran">Bin Omran</option>
-                  <option value="Al Nuaija">Al Nuaija</option>
-                  <option value="Al Aziziya">Al Aziziya</option>
-                  <option value="Muntazah">Muntazah</option>
-                  <option value="Al Markhiya">Al Markhiya</option>
-                  <option value="C-Ring Area">C-Ring Area</option>
-                  <option value="Al Rayyan Road">Al Rayyan Road</option>
-                </optgroup>
-                <optgroup label="Other Areas">
-                  <option value="Al Rayyan">Al Rayyan</option>
-                  <option value="Al Daayen">Al Daayen</option>
-                  <option value="Al Khor">Al Khor</option>
-                  <option value="Al Wakrah">Al Wakrah</option>
-                  <option value="Mesaieed">Mesaieed</option>
-                  <option value="Umm Salal">Umm Salal</option>
-                </optgroup>
-              </select>
+              <div class="co-addr-search">
+                <svg class="co-addr-search-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+                <input id="coArea" class="co-input" type="text" autocomplete="off" placeholder="Search area — e.g. West Bay, Lusail, Al Waab"
+                  oninput="coAreaInput(this.value)" onfocus="coAreaInput(this.value)" onkeydown="coAreaKey(event)">
+                <div id="coAreaSuggest" class="co-addr-suggest" hidden></div>
+              </div>
             </div>
 
             <!-- Recipient Address -->
@@ -6184,16 +6161,84 @@
     }, () => alert('Unable to get your location. Please search for the address or pin it on the map.'));
   }
 
-  // Picks the matching option in the Recipient Area list
+  // ── Recipient area: type to search, pick to move the map there ──
+  const QATAR_AREAS = [
+    'West Bay','The Pearl','Lusail','Katara','Al Dafna','Al Sadd','Al Waab','Msheireb','Al Hilal','Al Mansoura',
+    'Bin Omran','Al Nuaija','Al Aziziya','Al Muntazah','Al Markhiya','C-Ring Road','Al Rayyan Road','Al Gharrafa',
+    'Al Duhail','Madinat Khalifa','Al Luqta','Onaiza','Al Thumama','Old Airport','Najma','Fereej Bin Mahmoud',
+    'Fereej Abdel Aziz','Al Mirqab','Al Asmakh','Al Najada','Abu Hamour','Ain Khaled','Muaither','Al Sakhama',
+    'Umm Lekhba','Al Messila','Wadi Al Banat','Leabaib','Al Ebb','Al Kheesa','Gharrafat Al Rayyan','Education City',
+    'Al Waab City','Aspire Zone','Doha Festival City','Al Hitmi','Rawdat Al Khail','Industrial Area','Barwa City',
+    'Al Rayyan','Al Daayen','Umm Salal','Umm Qarn','Al Wukair','Al Wakrah','Mesaieed','Al Khor','Simaisma',
+    'Al Thakhira','Al Shamal','Dukhan','Al Kharaitiyat','Izghawa','Al Shahaniya'
+  ];
+  let coAreaHits = [], coAreaIdx = -1;
+
+  function coAreaHide() { const b = document.getElementById('coAreaSuggest'); if (b) { b.hidden = true; b.innerHTML = ''; } coAreaHits = []; coAreaIdx = -1; }
+  function coAreaInput(q) {
+    const box = document.getElementById('coAreaSuggest');
+    document.getElementById('coArea').classList.remove('err');
+    q = (q || '').trim().toLowerCase();
+    const norm = t => t.toLowerCase().replace(/^al[\s-]/, '');
+    coAreaHits = (q ? QATAR_AREAS.filter(a => a.toLowerCase().includes(q) || norm(a).startsWith(q.replace(/^al[\s-]/, ''))) : QATAR_AREAS).slice(0, 8);
+    coAreaIdx = -1;
+    const typed = document.getElementById('coArea').value.trim();
+    const exact = coAreaHits.some(a => a.toLowerCase() === typed.toLowerCase());
+    box.innerHTML = coAreaHits.map((a, i) => `<button type="button" class="co-addr-opt" onmousedown="event.preventDefault();coPickArea(${i})"><span class="co-addr-main">${a}</span><span class="co-addr-sub">Qatar</span></button>`).join('')
+      + (typed && !exact ? `<button type="button" class="co-addr-opt" onmousedown="event.preventDefault();coPickArea(-1)"><span class="co-addr-main">Use “${typed.replace(/</g,'&lt;')}”</span><span class="co-addr-sub">Find it on the map</span></button>` : '');
+    box.hidden = !box.innerHTML;
+  }
+  function coAreaKey(e) {
+    const box = document.getElementById('coAreaSuggest');
+    const opts = box.querySelectorAll('.co-addr-opt');
+    if (box.hidden || !opts.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      coAreaIdx = (coAreaIdx + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length;
+      opts.forEach((b, i) => b.classList.toggle('active', i === coAreaIdx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const i = coAreaIdx >= 0 ? coAreaIdx : 0;
+      coPickArea(i < coAreaHits.length ? i : -1);
+    } else if (e.key === 'Escape') coAreaHide();
+  }
+  async function coPickArea(i) {
+    const input = document.getElementById('coArea');
+    const name = i >= 0 ? coAreaHits[i] : input.value.trim();
+    if (!name) return;
+    input.value = name;
+    coAreaHide();
+    coLocateArea(name);
+  }
+  // Centre the map on the chosen area so the shopper can drop the exact pin
+  async function coLocateArea(name) {
+    try {
+      await initCoMap();
+      if (osmMap || mapsFailed || window.__mapsError) {
+        const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(name + ', Qatar')}&limit=1&lang=en&bbox=${QATAR_BBOX}`).then(r => r.json());
+        const f = r.features?.[0];
+        if (f && osmMap) osmMap.setView([f.geometry.coordinates[1], f.geometry.coordinates[0]], 15);
+      } else if (coMap && google.maps.Geocoder) {
+        new google.maps.Geocoder().geocode({ address: name + ', Qatar', region: 'qa' }, (res, status) => {
+          if (status === 'OK' && res[0]) { coMap.setCenter(res[0].geometry.location); coMap.setZoom(15); }
+        });
+      }
+    } catch (e) {}
+  }
+  document.addEventListener('click', e => { if (!e.target.closest('#coArea, #coAreaSuggest')) coAreaHide(); });
+
+  // Fills the area from a picked address / pin (known area names first, otherwise the place's district)
   function coMatchArea(names) {
     const areaEl = document.getElementById('coArea');
     if (!areaEl) return;
-    const opts = Array.from(areaEl.options).filter(o => o.value);
-    for (const name of names.filter(Boolean)) {
+    const list = names.filter(Boolean);
+    for (const name of list) {
       const n = name.toLowerCase();
-      const match = opts.find(o => n.includes(o.value.toLowerCase()) || o.value.toLowerCase().includes(n));
-      if (match) { areaEl.value = match.value; return; }
+      const match = QATAR_AREAS.find(a => n.includes(a.toLowerCase()) || a.toLowerCase().includes(n));
+      if (match) { areaEl.value = match; areaEl.classList.remove('err'); return; }
     }
+    const short = list.find(n => n.length < 32 && !n.includes(',') && !/qatar|doha/i.test(n));
+    if (short) { areaEl.value = short; areaEl.classList.remove('err'); }
   }
 
   function coSetAddress(text) {
