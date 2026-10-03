@@ -51,7 +51,8 @@
   }
 
   function customerName(o) {
-    return o.buyer?.name || o.customer?.name || (o.recipient?.notes !== 'gift' ? o.recipient?.name : '') || '';
+    const real = n => n && !/^(guest|customer)$/i.test(String(n).trim()) ? n : '';
+    return real(o.buyer?.name) || real(o.customer?.name) || (o.recipient?.notes !== 'gift' ? real(o.recipient?.name) : '') || '';
   }
 
   function html(o) {
