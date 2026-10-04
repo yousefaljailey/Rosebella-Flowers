@@ -12,6 +12,7 @@
     .rbx-step { display:inline-flex; align-items:center; gap:8px; margin-top:4px; }
     .rbx-step button { width:24px; height:24px; border-radius:50%; border:1px solid var(--gold,#C6922A); background:transparent; color:var(--gold,#C6922A); font-size:14px; line-height:1; cursor:pointer; padding:0; }
     .rbx-step b { font-family:var(--sans,'Montserrat',sans-serif); font-size:12px; min-width:12px; text-align:center; color:inherit; }
+    .vm-addon .rbx-step b { color:#fff; }
     #rbxPick { position:fixed; inset:0; z-index:100001; background:rgba(0,0,0,0.55); display:none; align-items:flex-end; justify-content:center; }
     #rbxPick.show { display:flex; }
     #rbxPick .pdp-card { background:var(--ivory,#faf8f2); width:min(720px,100%); max-height:86vh; border-radius:18px 18px 0 0; display:flex; flex-direction:column; overflow:hidden; color:var(--charcoal,#2D2D2D); }
