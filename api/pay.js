@@ -40,13 +40,35 @@ async function priceOrder(order) {
     if (!p) throw httpError(400, `“${it.name}” is no longer available. Please remove it from your gift bag.`);
     const qty = Math.floor(Number(it.qty));
     if (!(qty >= 1 && qty <= 99)) throw httpError(400, 'Invalid quantity.');
-    const extras = (it.variants?.addons || []).map(label => {
-      const a = addons.find(x => x.label === label);
-      if (!a) throw httpError(400, `The extra “${label}” is no longer available.`);
-      return a;
-    });
-    const unit = (Number(p.price) || 0) + extras.reduce((s, a) => s + (Number(a.price) || 0), 0);
-    return { name: p.name + (extras.length ? ` + ${extras.map(a => a.label).join(', ')}` : ''), qty, unit };
+    // Gift extras: new format = [{ type:'product'|'addon', id, qty }] (several of each, e.g. 3 balloons);
+    // old format = list of extra names, one of each
+    let extras;
+    if (Array.isArray(it.variants?.extras) && it.variants.extras.length) {
+      if (it.variants.extras.length > 30) throw httpError(400, 'Too many extras on one item.');
+      extras = it.variants.extras.map(x => {
+        const n = Math.floor(Number(x.qty));
+        if (!(n >= 1 && n <= 50)) throw httpError(400, 'Invalid extra quantity.');
+        if (x.type === 'product') {
+          const ep = products.find(q => q.id === x.id);
+          if (!ep) throw httpError(400, 'One of the extras you chose is no longer available.');
+          // Chosen through an extra that charges its own price (e.g. any balloon colour = the Balloon extra's price)
+          const grp = addons.find(q => q.id === x.group);
+          if (grp && grp.ownPrice && grp.collection === ep.cat) return { label: ep.name, price: Number(grp.price) || 0, qty: n };
+          return { label: ep.name, price: Number(ep.price) || 0, qty: n };
+        }
+        const a = addons.find(q => q.id === x.id);
+        if (!a) throw httpError(400, 'One of the extras you chose is no longer available.');
+        return { label: a.label, price: Number(a.price) || 0, qty: n };
+      });
+    } else {
+      extras = (it.variants?.addons || []).map(label => {
+        const a = addons.find(x => x.label === label);
+        if (!a) throw httpError(400, `The extra “${label}” is no longer available.`);
+        return { label: a.label, price: Number(a.price) || 0, qty: 1 };
+      });
+    }
+    const unit = (Number(p.price) || 0) + extras.reduce((s, a) => s + a.price * a.qty, 0);
+    return { name: p.name + (extras.length ? ` + ${extras.map(a => (a.qty > 1 ? a.qty + '× ' : '') + a.label).join(', ')}` : ''), qty, unit };
   });
 
   const subtotal = lines.reduce((s, l) => s + l.unit * l.qty, 0);

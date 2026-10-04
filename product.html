@@ -472,6 +472,27 @@
     .pd-sec-title { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--charcoal); margin: 26px 0 4px; }
     .pd-sec-sub { font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--taupe); margin-bottom: 12px; }
     .pd-extras { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+    .pd-ex-step { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .pd-ex-step button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--gold); background: #fff; color: var(--gold); font-size: 14px; line-height: 1; cursor: pointer; padding: 0; }
+    .pd-ex-step b { font-family: var(--sans); font-size: 12px; min-width: 12px; text-align: center; }
+    #pdPick { position: fixed; inset: 0; z-index: 9995; background: rgba(0,0,0,0.5); display: none; align-items: flex-end; justify-content: center; }
+    #pdPick.show { display: flex; }
+    .pdp-card { background: var(--ivory, #faf8f2); width: min(720px, 100%); max-height: 86vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+    @media (min-width: 769px) { #pdPick { align-items: center; } .pdp-card { border-radius: 18px; } }
+    .pdp-hd { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid rgba(198,146,42,0.18); }
+    .pdp-hd b { font-family: var(--serif); font-size: 22px; font-weight: 500; }
+    .pdp-x { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+    .pdp-grid { overflow-y: auto; flex: 1 1 auto; min-height: 0; grid-auto-rows: max-content; align-content: start; padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .pdp-item { background: #fff; border: 1.5px solid rgba(198,146,42,0.15); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .pdp-item.on { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+    .pdp-img { position: relative; aspect-ratio: 1; background: #efe9dc center / cover no-repeat; cursor: pointer; }
+    .pdp-n { position: absolute; top: 6px; right: 6px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 12px; background: var(--gold); color: #fff; font: 700 12px/24px var(--sans); text-align: center; }
+    .pdp-name { font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--charcoal); padding: 8px 10px 0; line-height: 1.3; min-height: 2.6em; }
+    .pdp-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 10px 10px; }
+    .pdp-price { font-family: var(--sans); font-size: 11px; color: var(--taupe); }
+    .pdp-add { border: 1px solid var(--gold); background: #fff; color: var(--gold); border-radius: 999px; padding: 5px 10px; font: 700 10px var(--sans); cursor: pointer; }
+    .pdp-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(198,146,42,0.18); }
+    .pdp-done { width: 100%; border: none; border-radius: 999px; background: var(--gold); color: #fff; padding: 14px; font: 700 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
     .pd-extra { border: 1.5px solid rgba(198,146,42,0.18); border-radius: 10px; overflow: hidden; background: #fff; cursor: pointer; padding: 0; text-align: left; transition: border-color .2s, transform .2s; }
     .pd-extra:hover { transform: translateY(-2px); border-color: rgba(198,146,42,0.5); }
     .pd-extra.active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
@@ -800,6 +821,9 @@ function toggleWish(btn) { btn.classList.toggle('liked'); btn.textContent=btn.cl
 
 // ── Product page ────────────────────────────────
 let pdProduct = null, pdImages = [], pdIndex = 0, pdQty = 1, pdAddons = [];
+let pdCatalog = null;
+let pdSel = {};          // chosen extras: key → { type:'addon'|'product', id, group, label, price, qty }
+let pdPickGroup = '';    // extra whose collection picker is open
 const PD_ZOOM = 2.4;
 const pdNatural = {};   // url → { w, h } so hover zoom can magnify relative to the photo's real size
 function pdMeasure(url) {
@@ -815,6 +839,7 @@ function pdImagesOf(p) {
 }
 
 function renderProduct(catalog) {
+  if (catalog) pdCatalog = catalog;
   const root = document.getElementById('pdRoot');
   const p = (catalog?.products || []).find(x => x.id === PRODUCT_ID && x.visible !== false);
   if (!p) {
@@ -859,7 +884,7 @@ function renderProduct(catalog) {
       </div>
       <div id="pdExtrasWrap">
         <div class="pd-sec-title">Complete your gift</div>
-        <div class="pd-sec-sub">Select any extras to add to your arrangement</div>
+        <div class="pd-sec-sub">Add as many as you like — tap an extra to choose</div>
         <div class="pd-extras" id="pdExtras"></div>
       </div>
       <div class="pd-buy">
@@ -995,27 +1020,89 @@ function pdCloseLightbox() {
   });
 })();
 
+// ── Complete your gift ──────────────────────
+// An extra linked to a collection (e.g. Balloon → Balloons) opens a picker with that collection's
+// products (colours, boxes…) and how many of each; other extras get their own − / + count.
+function pdExtraProducts(a) {
+  if (!a.collection || !pdCatalog) return [];
+  const words = String(a.filter || '').toLowerCase().trim();
+  return (pdCatalog.products || []).filter(p => p.cat === a.collection && p.visible !== false && Number(p.price) > 0 && p.image
+      && (!words || p.name.toLowerCase().includes(words)))
+    .sort((x, y) => (x.order ?? 0) - (y.order ?? 0));
+}
+// Price of one product chosen through an extra: the extra's own price, or the product's price
+function pdExtraPrice(a, p) {
+  return a.ownPrice ? (Number(a.price) || 0) : (Number(p.price) || 0);
+}
+function pdGroupCount(a) {
+  return Object.values(pdSel).filter(x => x.group === a.id).reduce((n, x) => n + x.qty, 0);
+}
 function pdRenderExtras() {
   const box = document.getElementById('pdExtras');
   if (!box || !pdProduct) return;
-  pdAddons = pdAddons.filter(id => VARIANTS.addons.some(a => a.id === id));
+  // drop choices for extras that were switched off
+  Object.keys(pdSel).forEach(k => { if (!VARIANTS.addons.some(a => a.id === pdSel[k].group)) delete pdSel[k]; });
   document.getElementById('pdExtrasWrap').hidden = !VARIANTS.addons.length;
   box.innerHTML = VARIANTS.addons.map(a => {
-    const on = pdAddons.includes(a.id), v = RB.addonVisual(a);
-    return `<button type="button" class="pd-extra${on ? ' active' : ''}" onclick="pdToggleExtra('${RB.esc(a.id)}')">
-      <div class="vm-addon-visual" style="${v.style}">${v.inner}${on ? '<span class="vm-addon-tick">✓</span>' : ''}</div>
-      <div class="pd-extra-foot"><span class="pd-extra-label">${RB.esc(a.label)}</span><span class="pd-extra-price">+QR ${RB.esc(a.price)}</span></div>
-    </button>`;
+    const v = RB.addonVisual(a), n = pdGroupCount(a), linked = pdExtraProducts(a).length > 0;
+    const foot = linked
+      ? `<span class="pd-extra-price">${n ? `${n} chosen · tap to change` : `${a.ownPrice ? '' : 'from '}QR ${RB.esc(Math.min(...pdExtraProducts(a).map(p => pdExtraPrice(a, p))))} · choose`}</span>`
+      : n ? `<span class="pd-ex-step" onclick="event.stopPropagation()"><button type="button" onclick="pdAddonQty('${RB.esc(a.id)}',-1)" aria-label="One less">−</button><b>${n}</b><button type="button" onclick="pdAddonQty('${RB.esc(a.id)}',1)" aria-label="One more">+</button></span>`
+          : `<span class="pd-extra-price">+QR ${RB.esc(a.price)}</span>`;
+    return `<div role="button" tabindex="0" class="pd-extra${n ? ' active' : ''}" onclick="${linked ? `pdOpenPicker('${RB.esc(a.id)}')` : `pdAddonQty('${RB.esc(a.id)}',1)`}">
+      <div class="vm-addon-visual" style="${v.style}">${v.inner}${n ? `<span class="vm-addon-tick">${n > 1 ? '×' + n : '✓'}</span>` : ''}</div>
+      <div class="pd-extra-foot"><span class="pd-extra-label">${RB.esc(a.label)}</span>${foot}</div>
+    </div>`;
   }).join('');
   pdUpdateTotal();
 }
-function pdToggleExtra(id) {
-  const i = pdAddons.indexOf(id);
-  if (i === -1) pdAddons.push(id); else pdAddons.splice(i, 1);
+function pdAddonQty(id, d) {
+  const a = VARIANTS.addons.find(x => x.id === id); if (!a) return;
+  const k = 'a:' + id, cur = pdSel[k]?.qty || 0, n = Math.max(0, Math.min(20, cur + d));
+  if (n) pdSel[k] = { type: 'addon', id, group: id, label: a.label, price: Number(a.price) || 0, qty: n }; else delete pdSel[k];
   pdRenderExtras();
 }
+function pdProductQty(group, pid, d) {
+  const p = (pdCatalog?.products || []).find(x => x.id === pid), a = VARIANTS.addons.find(x => x.id === group); if (!p || !a) return;
+  const k = 'p:' + pid, cur = pdSel[k]?.qty || 0, n = Math.max(0, Math.min(20, cur + d));
+  if (n) pdSel[k] = { type: 'product', id: pid, group, label: p.name, price: pdExtraPrice(a, p), qty: n }; else delete pdSel[k];
+  pdRenderPicker(); pdRenderExtras();
+}
+function pdOpenPicker(id) {
+  pdPickGroup = id;
+  let el = document.getElementById('pdPick');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'pdPick';
+    el.innerHTML = '<div class="pdp-card" role="dialog" aria-modal="true"><div class="pdp-hd"><b id="pdpTitle"></b><button type="button" class="pdp-x" onclick="pdClosePicker()" aria-label="Close">✕</button></div><div class="pdp-grid" id="pdpGrid"></div><div class="pdp-foot"><button type="button" class="pdp-done" id="pdpDone" onclick="pdClosePicker()"></button></div></div>';
+    el.addEventListener('click', e => { if (e.target === el) pdClosePicker(); });
+    document.body.appendChild(el);
+  }
+  pdRenderPicker();
+  el.classList.add('show'); document.body.style.overflow = 'hidden';
+}
+function pdClosePicker() {
+  document.getElementById('pdPick')?.classList.remove('show'); document.body.style.overflow = '';
+}
+function pdRenderPicker() {
+  const a = VARIANTS.addons.find(x => x.id === pdPickGroup); if (!a || !document.getElementById('pdPick')) return;
+  const items = pdExtraProducts(a);
+  document.getElementById('pdpTitle').textContent = 'Choose ' + a.label.toLowerCase();
+  document.getElementById('pdpGrid').innerHTML = items.map(p => {
+    const n = pdSel['p:' + p.id]?.qty || 0;
+    return `<div class="pdp-item${n ? ' on' : ''}">
+      <div class="pdp-img" style="background-image:url(&quot;${RB.esc(RB.cardImg(p.image))}&quot;)" onclick="pdProductQty('${RB.esc(a.id)}','${RB.esc(p.id)}',1)">${n ? `<span class="pdp-n">${n}</span>` : ''}</div>
+      <div class="pdp-name">${RB.esc(p.name)}</div>
+      <div class="pdp-row"><span class="pdp-price">QR ${RB.esc(pdExtraPrice(a, p))}</span>
+        ${n ? `<span class="pd-ex-step"><button type="button" onclick="pdProductQty('${RB.esc(a.id)}','${RB.esc(p.id)}',-1)" aria-label="One less">−</button><b>${n}</b><button type="button" onclick="pdProductQty('${RB.esc(a.id)}','${RB.esc(p.id)}',1)" aria-label="One more">+</button></span>`
+            : `<button type="button" class="pdp-add" onclick="pdProductQty('${RB.esc(a.id)}','${RB.esc(p.id)}',1)">＋ Add</button>`}</div>
+    </div>`;
+  }).join('');
+  const chosen = Object.values(pdSel).filter(x => x.group === a.id);
+  const cnt = chosen.reduce((n, x) => n + x.qty, 0), sum = chosen.reduce((t, x) => t + x.qty * x.price, 0);
+  document.getElementById('pdpDone').textContent = cnt ? `Done · ${cnt} added · +QR ${sum}` : 'Done';
+}
 function pdUnitPrice() {
-  return (Number(pdProduct.price) || 0) + pdAddons.reduce((s, id) => s + (VARIANTS.addons.find(a => a.id === id)?.price || 0), 0);
+  return (Number(pdProduct.price) || 0) + Object.values(pdSel).reduce((s, x) => s + x.price * x.qty, 0);
 }
 function pdUpdateTotal() {
   const el = document.getElementById('pdTotal');
@@ -1029,12 +1116,14 @@ function pdSetQty(d) {
 function pdAddToBag() {
   if (!pdProduct) return;
   const price = pdUnitPrice();
-  const labels = pdAddons.map(id => VARIANTS.addons.find(a => a.id === id)?.label).filter(Boolean);
-  const vKey = `${pdProduct.name}|${[...pdAddons].sort().join(',')}`;
+  const chosen = Object.values(pdSel).sort((x, y) => (x.type + x.id).localeCompare(y.type + y.id));
+  const labels = chosen.map(x => (x.qty > 1 ? x.qty + '× ' : '') + x.label);
+  const extras = chosen.map(x => ({ type: x.type, id: x.id, qty: x.qty, group: x.group }));
+  const vKey = `${pdProduct.name}|${chosen.map(x => x.type + ':' + x.id + 'x' + x.qty).join(',')}`;
   const existing = cart.find(i => i.variantKey === vKey);
   if (existing) existing.qty += pdQty;
   else cart.push({ id: Date.now(), name: pdProduct.name, cat: pdProduct.catName, price, basePrice: Number(pdProduct.price) || 0,
-    qty: pdQty, variantKey: vKey, variants: { addons: labels }, img: pdImages[0] || '', piClass: pdProduct.placeholder || '' });
+    qty: pdQty, variantKey: vKey, variants: { addons: labels, extras }, img: pdImages[0] || '', piClass: pdProduct.placeholder || '' });
   saveCart(); updateCartUI();
   RB.cartUI.toast(pdQty > 1 ? `✦ ${pdQty} added to your gift bag` : undefined);
   const btn = document.getElementById('pdAddBtn');

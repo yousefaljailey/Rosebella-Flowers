@@ -62,7 +62,7 @@ function subscribe() {
     state.catalog = catalog ? normalizeCatalog(catalog) : null;
     state.catalogChunks = chunks;
     state.catalogLoaded = true;
-    refresh('catalog', 'home');
+    refresh('catalog', 'home', 'extras');
   }, e => toast(firestoreError(e), true));
 
   db.doc('config/settings').onSnapshot(snap => {
@@ -1134,7 +1134,7 @@ PAGES.extras = {
       <div class="card">${list.length ? list.map((a, i) => `<div class="slide-row">
         <div class="slide-thumb" style="${extraThumbStyle(a)};display:flex;align-items:center;justify-content:center;font-size:28px">${a.image ? '' : esc(a.icon || '')}</div>
         <div><b>${esc(a.label)}</b> <span class="order-meta">+QR ${esc(a.price)}</span>
-          <div class="order-meta">${a.active === false ? 'Hidden from customers' : 'Shown to customers'}${a.image ? '' : ' · no photo yet'}</div></div>
+          <div class="order-meta">${a.active === false ? 'Hidden from customers' : 'Shown to customers'}${a.image ? '' : ' · no photo yet'}${a.collection ? ` · customers pick from <b>${esc(state.catalog?.collections?.find(c => c.slug === a.collection)?.name || a.collection)}</b>` : ''}</div></div>
         <div class="row">
           <button class="btn btn-sm" onclick="moveExtra(${i},-1)" title="Move earlier">↑</button>
           <button class="btn btn-sm" onclick="moveExtra(${i},1)" title="Move later">↓</button>
@@ -1170,6 +1170,14 @@ function editExtra(i) {
         <label class="field" style="grid-column:span 2"><span>Name</span><input name="label" required value="${esc(a.label)}" placeholder="e.g. Teddy Bear"></label>
         <label class="field"><span>Price (QR)</span><input name="price" type="number" min="0" step="1" required value="${esc(a.price)}"></label>
       </div>
+      <label class="field"><span>Customers choose from a collection (optional)</span><select name="collection">
+        <option value="">— No, it is a single item (customers can still add several) —</option>
+        ${(state.catalog?.collections || []).map(c => `<option value="${esc(c.slug)}" ${a.collection === c.slug ? 'selected' : ''}>${esc(c.name)} (${(state.catalog.products || []).filter(p => p.cat === c.slug && p.visible !== false).length} products)</option>`).join('')}
+      </select><small class="order-meta">e.g. Balloon → Balloons collection: customers pick colours/designs and how many of each.</small></label>
+      <div class="grid-2">
+        <label class="field"><span>Only products whose name contains (optional)</span><input name="filter" value="${esc(a.filter || '')}" placeholder="e.g. Box Chocolate"></label>
+        <label class="switch" style="align-self:end;margin-bottom:10px"><input type="checkbox" name="ownPrice" ${a.ownPrice ? 'checked' : ''}> Charge this extra’s price for every choice (not each product’s own price)</label>
+      </div>
       <div class="field"><span>Photo</span>${mediaPickerHTML({ url: a.image, pos: a.imagePos, wide: true })}</div>
       <label class="field" style="max-width:200px"><span>Emoji (shown if there’s no photo)</span><input name="icon" value="${esc(a.icon || '')}" maxlength="8"></label>
       <label class="switch"><input type="checkbox" name="active" ${a.active !== false ? 'checked' : ''}> Show to customers</label>
@@ -1182,7 +1190,8 @@ function editExtra(i) {
       e.preventDefault();
       const f = new FormData(e.target);
       const next = { ...a, label: f.get('label').trim(), price: Number(f.get('price')) || 0,
-        icon: f.get('icon').trim(), image: media.url(), imagePos: media.pos(), active: !!f.get('active') };
+        icon: f.get('icon').trim(), image: media.url(), imagePos: media.pos(), active: !!f.get('active'),
+        collection: f.get('collection') || '', filter: (f.get('filter') || '').trim(), ownPrice: !!f.get('ownPrice') };
       if (isNew) list.push(next); else list[i] = next;
       if (await saveExtras(list)) closeModal();
     };
