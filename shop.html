@@ -355,6 +355,7 @@
   </style>
   <script src="js/rb-data.js"></script>
   <script src="js/rb-cart.js"></script>
+<script src="js/rb-wish.js"></script>
 </head>
 <body>
 
@@ -706,7 +707,7 @@
           <div class="sp-card-img" ${go} style="cursor:pointer">
             ${imgHTML}
             ${badgeHTML}
-            <button class="sp-wish" onclick="event.stopPropagation();this.classList.toggle('active')" aria-label="Wishlist">♡</button>
+            <button class="sp-wish" data-wish-id="${escAttr(p.id)}" onclick="event.stopPropagation();RB.wish.toggle(this.dataset.wishId,this)" aria-label="Save to liked">♡</button>
           </div>
           <div class="sp-body">
             <span class="sp-cat">${escHTML(p.catName)}</span>
@@ -786,7 +787,7 @@
     loadProducts();
   </script>
   <script>RB.load('settings', RB.applyStore);</script>
-<link rel="stylesheet" href="css/rb-mobile.css?v=7">
+<link rel="stylesheet" href="css/rb-mobile.css?v=8">
 <script src="js/rb-fontboost.js"></script>
 </body>
 </html>

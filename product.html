@@ -542,6 +542,7 @@
   </style>
   <script src="js/rb-data.js"></script>
   <script src="js/rb-cart.js"></script>
+<script src="js/rb-wish.js"></script>
 <script src="js/rb-extras.js"></script>
 </head>
 <body>
@@ -877,7 +878,7 @@ function renderProduct(catalog) {
     </div>
     <div class="pd-info">
       <a class="pd-cat" href="${bc.href}">${esc(collName)}</a>
-      <h1 class="pd-name">${esc(p.name)}</h1>
+      <h1 class="pd-name">${esc(p.name)}<button type="button" class="pd-like" data-wish-id="${esc(p.id)}" onclick="RB.wish.toggle(this.dataset.wishId,this)" aria-label="Save to liked">♡</button></h1>
       <div class="pd-price"><small>QR</small><span id="pdPrice">${esc(p.price)}</span></div>
       <div class="pd-perks">
         <div class="pd-perk"><span class="pd-perk-ico">🚚</span><div><b>Same-day delivery in Doha</b>Express delivery available at checkout</div></div>
@@ -1148,7 +1149,7 @@ try { updateCartUI(); } catch(e) {}
 loadProducts();
 </script>
   <script>RB.load('settings', st => { VARIANTS.addons = RB.activeAddons(st); RB.applyStore(st); pdRenderExtras(); });</script>
-<link rel="stylesheet" href="css/rb-mobile.css?v=7">
+<link rel="stylesheet" href="css/rb-mobile.css?v=8">
 <script src="js/rb-fontboost.js"></script>
 </body>
 </html>

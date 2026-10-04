@@ -70,6 +70,11 @@ html, body { max-width: 100%; overflow-x: clip; }
   body.rb-has-bar footer, body.rb-has-bar .story-footer, body.rb-has-bar .contact-footer { padding-bottom: 96px !important; }
 }
 
+@media (max-width: 480px) {
+  /* Room for logo + liked + bag: the breadcrumb below already links to Collections, the logo goes home */
+  nav .nav-right .nav-cta { display: none !important; }
+}
+
 @media (max-width: 380px) {
   nav .nav-wordmark { font-size: 13px !important; letter-spacing: .1em !important; }
   .prod-card .prod-body h3 { font-size: 14px !important; }
