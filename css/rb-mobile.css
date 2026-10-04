@@ -13,7 +13,8 @@ html, body { max-width: 100%; overflow-x: clip; }
   /* Homepage: language + "Shop Now" are in the ☰ menu */
   nav .nav-right #btnEN, nav .nav-right #btnAR, nav:has(.nav-hamburger) .nav-cta { display: none !important; }
   /* Other pages: smaller "All Collections" / "Home" button */
-  nav .nav-cta { padding: 9px 12px !important; font-size: 8.5px !important; letter-spacing: .12em !important; line-height: 1.2; white-space: nowrap; }
+  nav .nav-cta { padding: 8px 10px !important; font-size: 8px !important; letter-spacing: .06em !important; line-height: 1.2; white-space: nowrap; }
+  nav:has(.nav-cta) .nav-wordmark, nav:has(.nav-cta) .nav-logo { letter-spacing: .1em !important; }
 
   /* Our Story / Contact: the logo already goes home, so drop "Back to Home" */
   nav .nav-back { display: none !important; }
@@ -54,7 +55,7 @@ html, body { max-width: 100%; overflow-x: clip; }
   .pd-extra .vm-addon-visual { height: 64px !important; }
   .pd-extra-foot { padding: 6px 8px 8px !important; }
   .pd-extra-label { font-size: 10.5px !important; }
-  .pd-add { font-size: 10px !important; letter-spacing: .08em !important; gap: 7px !important; padding: 0 14px !important; white-space: nowrap; min-height: 50px; }
+  .pd-add { font-size: 9px !important; letter-spacing: .05em !important; gap: 6px !important; padding: 0 12px !important; white-space: nowrap; min-height: 50px; }
   .pd-add svg { flex-shrink: 0; }
 
   /* ── Checkout ── */
