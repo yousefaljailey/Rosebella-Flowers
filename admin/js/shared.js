@@ -11,7 +11,7 @@ firebase.initializeApp({
 });
 
 // Must match isAdmin() in firestore.rules
-const ADMIN_EMAILS = ['yousefaljailey@gmail.com'];
+const ADMIN_EMAILS = ['yousefaljailey@gmail.com', 'rosebellaflowersqa@gmail.com'];
 const STOREFRONT_URL = 'https://rosebella.qa';
 const CLOUDINARY = { cloud: 'dp6x1cfmj', preset: 'rosebella' };
 

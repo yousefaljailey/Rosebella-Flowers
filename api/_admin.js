@@ -5,7 +5,7 @@ const ADMIN_ORIGINS = ['https://rosebella-admin.vercel.app'];
 function httpError(status, message) { const e = new Error(message); e.status = status; return e; }
 
 function adminEmails() {
-  return (process.env.ADMIN_EMAILS || 'yousefaljailey@gmail.com').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  return (process.env.ADMIN_EMAILS || 'yousefaljailey@gmail.com,rosebellaflowersqa@gmail.com').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 }
 
 async function requireAdmin(req) {

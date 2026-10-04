@@ -13,7 +13,7 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email in ['yousefaljailey@gmail.com'];
+        && request.auth.token.email.lower() in ['yousefaljailey@gmail.com', 'rosebellaflowersqa@gmail.com'];
     }
 
     // Products + collections (single doc: catalog/main)
