@@ -60,12 +60,41 @@ function requireAdmin(onReady) {
     loginEl.hidden = false;
   });
 
+  // "Create" mode: first sign-in for an approved admin email that has no account yet
+  let creating = false;
+  const createBtn = document.getElementById('createBtn');
+  const submitBtn = document.querySelector('#loginForm [type=submit]');
+  const passI = document.getElementById('loginPass');
+  createBtn?.addEventListener('click', () => {
+    creating = !creating;
+    submitBtn.textContent = creating ? 'Create admin account' : 'Sign In';
+    createBtn.textContent = creating ? 'Back to sign in' : 'First time? Create your admin password';
+    passI.autocomplete = creating ? 'new-password' : 'current-password';
+    say(creating ? 'Enter your admin email and choose a password (at least 8 characters).' : '', true);
+  });
+
   document.getElementById('loginForm').onsubmit = async e => {
     e.preventDefault();
     say('');
-    const pass = document.getElementById('loginPass').value;
-    try { await auth.signInWithEmailAndPassword(emailI.value.trim(), pass); }
-    catch (err) { say(friendlyAuthError(err)); }
+    const email = emailI.value.trim(), pass = passI.value;
+    if (creating) {
+      if (!ADMIN_EMAILS.includes(email.toLowerCase())) { say('This email is not on the admin list.'); return; }
+      if (pass.length < 8) { say('Choose a password with at least 8 characters.'); return; }
+      try {
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await cred.user.sendEmailVerification();
+        await auth.signOut();
+        createBtn.click();   // back to sign-in mode
+        say(`Account created. A verification email was sent to ${email} — open the link in it (check spam), then sign in here.`, true);
+      } catch (err) {
+        say(err.code === 'auth/email-already-in-use'
+          ? 'An account with this email already exists. Use “Forgot password?” to set a new password.'
+          : friendlyAuthError(err));
+      }
+      return;
+    }
+    try { await auth.signInWithEmailAndPassword(email, pass); }
+    catch (err) { say(friendlyAuthError(err) + (err.code && /invalid-credential|user-not-found/.test(err.code) ? ' New admin? Use “First time? Create your admin password” below.' : '')); }
   };
 
   document.getElementById('forgotBtn').onclick = async () => {
