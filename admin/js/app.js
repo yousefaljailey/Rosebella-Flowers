@@ -85,6 +85,7 @@ function subscribe() {
       if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) newOrderAlert({ ...ch.doc.data(), id: ch.doc.id });
     });
     firstOrders = false;
+    autoConfirmPaidOrders();
     state.ordersError = null;
     const pending = state.orders.filter(o => (o.status || 'pending') === 'pending').length;
     const pc = document.getElementById('pendingCount');
@@ -340,7 +341,9 @@ function orderHTML(o) {
         ${o.payment?.paymentId ? `<h4 style="margin-top:14px">Payment</h4>
           <p class="order-meta">MyFatoorah invoice ${esc(o.payment.invoiceId || '—')} · payment ${esc(o.payment.paymentId)}${o.payment.method ? ' · ' + esc(o.payment.method) : ''}</p>
           <div class="row" style="margin-top:6px"><button class="btn btn-sm" data-verify="${esc(o.payment.paymentId)}" data-total="${esc(o.total)}" data-ref="${esc(o.id)}">Verify payment</button>
-          <span class="order-meta" data-verify-out="${esc(o.payment.paymentId)}"></span></div>` : ''}
+          <span class="order-meta" data-verify-out="${esc(o.payment.paymentId)}">${o.paymentCheck?.result === 'paid' ? '<b style="color:var(--ok)">✓ Paid — confirmed with MyFatoorah</b>'
+            : o.paymentCheck?.result === 'mismatch' ? '<b style="color:var(--bad)">⚠ Paid, but the amount or order number doesn’t match — check in MyFatoorah</b>'
+            : o.paymentCheck?.result === 'not-paid' ? `<b style="color:var(--bad)">✕ Not paid (${esc(o.paymentCheck.status || 'unknown')})</b>` : ''}</span></div>` : ''}
       </div>
     </div>` : ''}
   </div>`;
@@ -1247,6 +1250,37 @@ function bindGallery(root, initial) {
 }
 
 // Asks MyFatoorah (via the storefront's payment API) whether an online payment really went through
+// Card / Apple Pay / NAPS orders: confirm the payment with MyFatoorah (through our server) and move
+// paid orders straight to "Preparing". Cash orders stay "Pending" until you change them.
+const autoChecking = new Set();
+async function autoConfirmPaidOrders() {
+  const todo = state.orders.filter(o => (o.status || 'pending') === 'pending' && o.paymentMethod !== 'cash'
+    && o.payment?.paymentId && !o.paymentCheck && !autoChecking.has(o.id));
+  for (const o of todo) {
+    autoChecking.add(o.id);
+    try {
+      const st = await fetch(`${STOREFRONT_URL}/api/pay?action=status&paymentId=${encodeURIComponent(o.payment.paymentId)}`).then(r => r.json());
+      if (st.error) throw new Error(st.error);
+      const amountOk = Math.abs((st.amount || 0) - Number(o.total || 0)) < 1;
+      const refOk = st.reference === o.id;
+      if (st.paid && amountOk && refOk) {
+        const entry = { status: 'preparing', at: new Date().toISOString() };
+        const check = { result: 'paid', amount: st.amount, at: entry.at };
+        const batch = db.batch();
+        batch.update(db.collection('orders').doc(o.id), { status: 'preparing', paymentCheck: check, statusHistory: firebase.firestore.FieldValue.arrayUnion(entry) });
+        batch.set(db.collection('orderStatus').doc(o.id), { status: 'preparing', statusHistory: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
+        await batch.commit();
+        toast(`${o.id} paid ✓ — moved to Preparing`);
+      } else {
+        await db.collection('orders').doc(o.id).update({ paymentCheck: { result: st.paid ? 'mismatch' : 'not-paid', status: st.status || '', amount: st.amount || 0, at: new Date().toISOString() } });
+      }
+    } catch (e) {
+      autoChecking.delete(o.id);   // try again on the next update
+      console.warn('Payment check failed', o.id, e);
+    }
+  }
+}
+
 async function verifyPayment(btn) {
   const id = btn.dataset.verify;
   const out = document.querySelector(`[data-verify-out="${CSS.escape(id)}"]`);
