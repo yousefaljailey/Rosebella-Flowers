@@ -247,3 +247,20 @@ td .input { padding: 7px 9px; }
 .order-alert .oa-id { font-size: 14px; }
 .order-alert .oa-meta { font-size: 12px; color: #6b6259; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @keyframes oaIn { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ── Ordered items: photos + "How it's made" ── */
+.order-items li.oi { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; }
+.oi-thumb { flex: none; width: 92px; height: 92px; border-radius: 10px; background: #efe9dc center/cover no-repeat; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 26px; text-decoration: none; }
+.oi-body { flex: 1; min-width: 0; }
+.oi-top { display: flex; justify-content: space-between; gap: 10px; }
+.oi-extras { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.oi-extra { display: flex; align-items: center; gap: 6px; font-size: 12px; background: #faf6ee; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px 3px 3px; }
+.oi-xthumb { width: 28px; height: 28px; border-radius: 50%; background: #efe9dc center/cover no-repeat; flex: none; display: flex; align-items: center; justify-content: center; font-size: 13px; text-decoration: none; }
+.oi-how { margin-top: 8px; }
+.oi-how summary { cursor: pointer; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold, #c6922a); list-style: none; }
+.oi-how summary::-webkit-details-marker { display: none; }
+.oi-how summary::before { content: '▸ '; }
+.oi-how[open] summary::before { content: '▾ '; }
+.oi-how p { font-size: 13px; line-height: 1.6; margin-top: 6px; color: #4b443c; }
+.oi-gal { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.oi-gthumb { width: 64px; height: 64px; border-radius: 8px; background: #efe9dc center/cover no-repeat; display: block; }

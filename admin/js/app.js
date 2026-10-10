@@ -62,7 +62,7 @@ function subscribe() {
     state.catalog = catalog ? normalizeCatalog(catalog) : null;
     state.catalogChunks = chunks;
     state.catalogLoaded = true;
-    refresh('catalog', 'home', 'extras');
+    refresh('catalog', 'home', 'extras', 'orders');
   }, e => toast(firestoreError(e), true));
 
   db.doc('config/settings').onSnapshot(snap => {
@@ -312,9 +312,7 @@ function orderHTML(o) {
     ${open ? `<div class="order-body">
       <div>
         <h4>Items</h4>
-        <ul class="order-items">${(o.items || []).map(i => `<li><span>${esc(i.name)} ×${esc(i.qty || 1)}
-          ${i.variants?.addons?.length ? `<small>+ ${esc(i.variants.addons.join(', '))}</small>` : ''}</span>
-          <span>${money((i.price || 0) * (i.qty || 1))}</span></li>`).join('')}</ul>
+        <ul class="order-items">${(o.items || []).map(orderItemHTML).join('')}</ul>
         ${o.deliverySlot?.expressFee ? `<div class="order-meta" style="margin-top:6px">Includes delivery fee ${money(o.deliverySlot.expressFee)}</div>` : ''}
         ${o.giftMessage ? `<h4 style="margin-top:14px">Gift message</h4><p>“${esc(o.giftMessage)}”</p>` : ''}
         <div class="pipeline">${STATUSES.map(([k, l]) =>
@@ -576,6 +574,37 @@ async function shareReceipt(id) {
     const blob = await RBReceipt.pdf(receiptOrder(o));
     await navigator.share({ files: [new File([blob], `Rosebella-receipt-${o.id}.pdf`, { type: 'application/pdf' })], title: `Rosebella receipt ${o.id}` });
   } catch (e) { if (e.name !== 'AbortError') toast(e.message || String(e), true); }
+}
+
+// One ordered item: photo for reference, extras with their photos, and a fold-out "How it's made"
+function orderItemHTML(i) {
+  const prods = state.catalog?.products || [];
+  const p = prods.find(x => x.name === i.name);
+  const photo = (i.img && !String(i.img).startsWith('data:') ? i.img : '') || p?.image || '';
+  const thumb = (url, cls) => url ? `<a class="${cls}" href="${esc(url.replace(/\/w_\d+\//, '/w_1600/'))}" target="_blank" rel="noopener" title="Open full photo" style="background-image:url('${esc(url)}')"></a>` : `<span class="${cls} oi-noimg">🌸</span>`;
+  // Extras: picked products (balloon colours, chocolate boxes…) show their own photo
+  const extras = (i.variants?.extras || []).map(x => {
+    const ep = x.type === 'product' ? prods.find(q => q.id === x.id) : null;
+    const ad = x.type === 'addon' ? (state.settings?.addons || []).find(q => q.id === x.id) : null;
+    return { name: ep?.name || ad?.label || x.id, qty: x.qty || 1, img: ep?.image || ad?.image || '', desc: ep?.desc || '' };
+  });
+  const extrasHTML = extras.length
+    ? `<div class="oi-extras">${extras.map(e => `<div class="oi-extra">${thumb(e.img, 'oi-xthumb')}<span>${e.qty > 1 ? `<b>${e.qty}×</b> ` : ''}${esc(e.name)}</span></div>`).join('')}</div>`
+    : (i.variants?.addons?.length ? `<small>+ ${esc(i.variants.addons.join(', '))}</small>` : '');
+  const how = [p?.desc, ...extras.filter(e => e.desc).map(e => `${e.qty > 1 ? e.qty + '× ' : ''}${e.name}: ${e.desc}`)].filter(Boolean);
+  const gallery = (p?.images || []).filter(u => u && u !== photo).slice(0, 6);
+  return `<li class="oi">
+    ${thumb(photo, 'oi-thumb')}
+    <div class="oi-body">
+      <div class="oi-top"><span><b>${esc(i.name)}</b> ×${esc(i.qty || 1)}</span><span>${money((i.price || 0) * (i.qty || 1))}</span></div>
+      ${extrasHTML}
+      ${how.length || gallery.length ? `<details class="oi-how"><summary>How it’s made</summary>
+        ${how.map(t => `<p dir="auto">${esc(t)}</p>`).join('')}
+        ${gallery.length ? `<div class="oi-gal">${gallery.map(u => thumb(u, 'oi-gthumb')).join('')}</div>` : ''}
+        ${p ? '' : '<p class="order-meta">This product is no longer in the catalog.</p>'}
+      </details>` : ''}
+    </div>
+  </li>`;
 }
 
 function slotLabel(id) {
