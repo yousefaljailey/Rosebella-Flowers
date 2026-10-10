@@ -586,7 +586,9 @@ function orderItemHTML(i) {
   const extras = (i.variants?.extras || []).map(x => {
     const ep = x.type === 'product' ? prods.find(q => q.id === x.id) : null;
     const ad = x.type === 'addon' ? (state.settings?.addons || []).find(q => q.id === x.id) : null;
-    return { name: ep?.name || ad?.label || x.id, qty: x.qty || 1, img: ep?.image || ad?.image || '', desc: ep?.desc || '' };
+    // Extras charged at the extra's own price (e.g. single balloons) — the product's own description doesn't apply
+    const grp = (state.settings?.addons || []).find(q => q.id === x.group);
+    return { name: ep?.name || ad?.label || x.id, qty: x.qty || 1, img: ep?.image || ad?.image || '', desc: grp?.ownPrice ? '' : (ep?.desc || '') };
   });
   const extrasHTML = extras.length
     ? `<div class="oi-extras">${extras.map(e => `<div class="oi-extra">${thumb(e.img, 'oi-xthumb')}<span>${e.qty > 1 ? `<b>${e.qty}×</b> ` : ''}${esc(e.name)}</span></div>`).join('')}</div>`
