@@ -26,6 +26,15 @@ const STATUSES = [
 ];
 const STATUS_LABEL = Object.fromEntries(STATUSES);
 
+// Order number shown everywhere. New orders are already numbers; older "RB-…" ids hide the time the
+// order was placed (base 36), which is turned into a number in the same style (seconds since 1 Jan 2026 + 0).
+function orderNo(id) {
+  const m = /^RB-([A-Z0-9]+)$/.exec(String(id || ''));
+  if (!m) return String(id || '');
+  const ms = parseInt(m[1], 36);
+  return ms > 1.7e12 && ms < 2.5e12 ? String(Math.floor((ms - Date.UTC(2026, 0, 1)) / 1000)) + '0' : String(id);
+}
+
 requireAdmin(user => {
   document.getElementById('whoami').textContent = user.email;
   document.getElementById('storefrontLink').href = STOREFRONT_URL;
@@ -253,7 +262,7 @@ PAGES.orders = {
       const st = o.status || 'pending';
       if (state.orderFilter !== 'all' && st !== state.orderFilter) return false;
       if (!q) return true;
-      return [o.id, o.recipient?.name, o.recipient?.phone, o.recipient?.address, o.customer?.email]
+      return [o.id, orderNo(o.id), o.recipient?.name, o.recipient?.phone, o.recipient?.address, o.customer?.email]
         .join(' ').toLowerCase().includes(q);
     });
     const counts = {};
@@ -303,7 +312,7 @@ function orderHTML(o) {
   return `<div class="order">
     <div class="order-hd" data-toggle="${esc(o.id)}">
       <div>
-        <div class="order-id">${esc(o.id)} <span class="badge st-${esc(st)}">${esc(STATUS_LABEL[st] || st)}</span></div>
+        <div class="order-id">#${esc(orderNo(o.id))} <span class="badge st-${esc(st)}">${esc(STATUS_LABEL[st] || st)}</span></div>
         <div class="order-meta">${fmtDate(o.createdAt)} · ${esc(r.name || 'No recipient')} · ${esc(delivery)}</div>
       </div>
       <div class="row">
@@ -409,7 +418,7 @@ function syncAlarm() {
       ${list.map(o => {
         const ds = o.deliverySlot || {}, r = o.recipient || {};
         return `<div class="ao-order">
-          <div class="ao-top"><b>#${esc(o.id)}</b><span>${money(o.total)}</span></div>
+          <div class="ao-top"><b>#${esc(orderNo(o.id))}</b><span>${money(o.total)}</span></div>
           <div class="ao-meta">${esc((o.items || []).map(i => `${i.qty || 1}× ${i.name}`).join(' · '))}</div>
           <div class="ao-meta">🚚 ${esc(ds.type === 'express' ? 'Express — within 90 minutes' : [ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · '))} · ${esc(r.name || '')}</div>
           <div class="ao-meta">${o.paymentMethod === 'cash' ? '💵 Cash on delivery' : '💳 Paid online'}</div>
@@ -429,7 +438,7 @@ async function acceptOrder(id, btn) {
   try {
     await db.collection('orders').doc(id).update(upd);
     if (o) Object.assign(o, upd);
-    toast(`#${id} accepted ✓`);
+    toast(`#${orderNo(id)} accepted ✓`);
     state.orderFilter = 'all'; state.openOrders.add(id);
     if (location.hash !== '#orders') location.hash = 'orders'; else render();
   } catch (e) { toast(firestoreError(e), true); if (btn) { btn.disabled = false; btn.textContent = '✓ ACCEPT ORDER'; } }
@@ -444,7 +453,7 @@ function newOrderAlert(o) {
   // Desktop notification (shows even when this tab is in the background)
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
-      const n = new Notification(`🔔 New order #${o.id} — ${money(o.total)}`, { body: items + (r.name ? `\n${r.name}` : ''), tag: o.id, requireInteraction: true });
+      const n = new Notification(`🔔 New order #${orderNo(o.id)} — ${money(o.total)}`, { body: items + (r.name ? `\n${r.name}` : ''), tag: o.id, requireInteraction: true });
       n.onclick = () => { window.focus(); n.close(); };
     } catch (e) {}
   }
@@ -496,7 +505,7 @@ function invoiceText(o) {
   const store = state.settings?.store || {};
   const lines = [
     `🌹 *ROSEBELLA — Invoice*`,
-    `Order *${o.id}*`,
+    `Order *#${orderNo(o.id)}*`,
     `Date: ${fmtDate(o.createdAt)}`,
     '',
     ...items.map(i => `• ${i.name}${i.variants?.addons?.length ? ' + ' + i.variants.addons.join(', ') : ''} ×${i.qty || 1} — QR ${((Number(i.price) || 0) * (Number(i.qty) || 1)).toFixed(0)}`),
@@ -517,7 +526,7 @@ function invoiceText(o) {
 }
 // Receipt (RBReceipt from the storefront's js/rb-receipt.js — same layout as the Rosebella invoice)
 function receiptOrder(o) {
-  return { ...o, deliverySlot: { ...(o.deliverySlot || {}), slotLabel: slotLabel(o.deliverySlot?.slot) } };
+  return { ...o, id: orderNo(o.id), deliverySlot: { ...(o.deliverySlot || {}), slotLabel: slotLabel(o.deliverySlot?.slot) } };
 }
 function needReceiptLib() {
   if (window.RBReceipt) return true;
@@ -607,7 +616,7 @@ async function shareReceipt(id) {
   const o = state.orders.find(x => x.id === id); if (!o || !needReceiptLib()) return;
   try {
     const blob = await RBReceipt.pdf(receiptOrder(o));
-    await navigator.share({ files: [new File([blob], `Rosebella-receipt-${o.id}.pdf`, { type: 'application/pdf' })], title: `Rosebella receipt ${o.id}` });
+    await navigator.share({ files: [new File([blob], `Rosebella-receipt-${orderNo(o.id)}.pdf`, { type: 'application/pdf' })], title: `Rosebella receipt #${orderNo(o.id)}` });
   } catch (e) { if (e.name !== 'AbortError') toast(e.message || String(e), true); }
 }
 
@@ -644,57 +653,80 @@ function orderItemHTML(i) {
   </li>`;
 }
 
-// ── Print an 80 mm POS receipt (thermal printer) ──
+// ── Print an 80 mm POS receipt (thermal printer) — same layout as the delivery-app receipts ──
+const SHOP_LINE = 'Rosebella Flowers - Bin Mahmoud Bldg 30, 1st Floor Same Bldg with Chaya Cuppa';
 function printOrderReceipt(id) {
   const o = state.orders.find(x => x.id === id); if (!o) return;
-  const r = o.recipient || {}, ds = o.deliverySlot || {}, store = state.settings?.store || {};
-  const items = o.items || [];
+  const r = o.recipient || {}, ds = o.deliverySlot || {};
+  const items = o.items || [], prods = state.catalog?.products || [];
+  const count = items.reduce((n, i) => n + (Number(i.qty) || 1), 0);
   const sub = items.reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 1), 0);
   const fee = Number(ds.expressFee) || 0;
   const discount = Math.max(0, Math.round((sub + fee - (Number(o.total) || 0)) * 100) / 100);
-  const line = (a, b, cls = '') => `<div class="ln ${cls}"><span>${a}</span><span>${b}</span></div>`;
+  const q = n => 'QAR ' + (Number(n) || 0).toFixed(2);
   const d = new Date(o.createdAt || Date.now());
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Receipt #${esc(o.id)}</title><style>
+  const pad = n => String(n).padStart(2, '0');
+  const when = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const gift = r.notes === 'gift';
+  const custName = (o.buyer?.name || o.customer?.name || (!gift ? r.name : '') || '').replace(/^(Guest|Customer)$/i, '');
+  const custPhone = o.buyer?.phone || (!gift ? r.phone : '') || '';
+  const pay = o.paymentMethod === 'cash' ? 'Cash on Delivery' : (o.payment?.method || 'Card');
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Order ${esc(orderNo(o.id))}</title><style>
     @page { size: 80mm auto; margin: 0; }
     * { box-sizing: border-box; }
-    body { width: 80mm; margin: 0; padding: 4mm 4mm 8mm; font: 12px/1.35 'Helvetica Neue', Arial, sans-serif; color: #000; }
-    .c { text-align: center; } .b { font-weight: 700; }
-    .brand { font-size: 22px; letter-spacing: .18em; font-weight: 700; }
-    .sm { font-size: 10.5px; } .xl { font-size: 26px; font-weight: 800; letter-spacing: .02em; }
-    hr { border: none; border-top: 1px dashed #000; margin: 6px 0; }
-    .ln { display: flex; justify-content: space-between; gap: 8px; } .ln span:first-child { flex: 1; }
-    .it { margin: 4px 0; } .ex { padding-left: 10px; font-size: 11px; }
-    .tot { font-size: 16px; font-weight: 800; }
-    .box { border: 1.5px solid #000; padding: 4px 6px; margin: 6px 0; }
-    .ar { direction: rtl; }
+    body { width: 80mm; margin: 0; padding: 4mm 3.5mm 10mm; font: 11px/1.35 'Noto Sans', 'Segoe UI', Arial, sans-serif; color: #000; }
+    .c { text-align: center; } .b { font-weight: 700; } .sm { font-size: 9.5px; } .xs { font-size: 8.5px; }
+    .logo { font-size: 22px; font-weight: 800; letter-spacing: .14em; margin-bottom: 2px; }
+    .no { font-size: 28px; font-weight: 800; letter-spacing: .02em; margin: 2px 0; }
+    .tag { display: inline-block; background: #000; color: #fff; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
+    hr { border: none; border-top: 1px dashed #000; margin: 7px 0; }
+    hr.solid { border-top: 1px solid #000; }
+    .row { display: flex; justify-content: space-between; gap: 6px; }
+    .ar { direction: rtl; text-align: left; }
+    .lbl { margin-top: 5px; }
+    .it { display: grid; grid-template-columns: 16px 1fr auto; gap: 4px; margin: 4px 0; }
+    .opt { grid-column: 2 / 4; font-size: 9px; }
+    .opt .row { padding-left: 6px; }
   </style></head><body>
-    <div class="c brand">ROSEBELLA</div>
-    <div class="c sm">Luxury Flowers &amp; Chocolates · Doha, Qatar</div>
-    <div class="c sm">${esc(store.phone || '+974 3344 6618')} · rosebella.qa · CR 156868</div>
+    <div class="c logo">ROSEBELLA</div>
+    <div class="c b sm">${esc(SHOP_LINE)}</div>
+    <div class="c b sm">${ds.type === 'express' ? 'Express Delivery Order' : 'Delivery Order'}</div>
+    <div class="c b xs" style="margin-top:3px">${when}</div>
     <hr>
-    <div class="c sm">ORDER</div>
-    <div class="c xl">#${esc(o.id)}</div>
-    <div class="c sm">${d.toLocaleDateString('en-GB')} ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
-    <div class="box c b">${ds.type === 'express' ? 'EXPRESS — WITHIN 90 MIN' : 'DELIVERY: ' + esc([ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · '))}</div>
-    <div class="box c b">${o.paymentMethod === 'cash' ? 'CASH ON DELIVERY — COLLECT QR ' + Number(o.total || 0).toFixed(0) : 'PAID ONLINE' + (o.payment?.method ? ' (' + esc(o.payment.method) + ')' : '')}</div>
+    <div class="c b">Order Number</div>
+    <div class="c">رقم الطلب</div>
+    <div class="c no">${esc(orderNo(o.id))}</div>
+    <div class="c"><span class="tag">${ds.type === 'express' ? 'EXPRESS · 90 MIN' : esc(('DELIVERY ' + [ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · ')).toUpperCase())}</span></div>
     <hr>
-    ${items.map(i => `<div class="it">${line(`<b>${esc(i.qty || 1)}×</b> ${esc(i.name)}`, (Number(i.price || 0) * Number(i.qty || 1)).toFixed(0))}
-      ${(i.variants?.addons || []).map(a => `<div class="ex">+ ${esc(a)}</div>`).join('')}</div>`).join('')}
+    <div class="lbl">Customer: <b>${esc(custName || '—')}</b></div><div class="sm">العميل</div>
+    <div class="lbl">Customer Phone: <b>${esc(custPhone || '—')}</b></div><div class="sm">هاتف العميل</div>
+    ${gift ? `<div class="lbl">Recipient: <b>${esc(r.name || '')}</b> ${esc(r.phone || '')}</div><div class="sm">المستلم</div>` : ''}
+    <div class="lbl">Address: <b>${esc([r.landmark, r.address].filter(Boolean).join(', ') || '—')}</b></div><div class="sm">العنوان</div>
     <hr>
-    ${line('Subtotal', sub.toFixed(0))}
-    ${fee ? line('Delivery', fee.toFixed(0)) : ''}
-    ${discount ? line('Discount' + (o.appliedPromo?.code ? ' (' + esc(o.appliedPromo.code) + ')' : ''), '-' + discount.toFixed(0)) : ''}
-    ${line('TOTAL (QR)', Number(o.total || 0).toFixed(0), 'tot')}
+    ${items.map(i => {
+      const p = prods.find(x => x.name === i.name);
+      const qty = Number(i.qty) || 1, lineTotal = (Number(i.price) || 0) * qty;
+      const base = Number(i.basePrice) || Number(p?.price) || 0;
+      const extras = i.variants?.addons || [];
+      return `<div class="it">
+        <span class="b">${qty}</span>
+        <span><span class="b">${esc(i.name)}</span>${p?.nameAr ? `<br><span>${esc(p.nameAr)}</span>` : ''}</span>
+        <span class="b">${q(lineTotal)}</span>
+        ${extras.length ? `<div class="opt"><div class="b">Extras:</div>${extras.map(x => `<div class="row"><span>${esc(x)}</span></div>`).join('')}
+          ${base ? `<div class="row b" style="margin-top:2px"><span>Arrangement</span><span>${q(base)}</span></div>` : ''}</div>` : ''}
+      </div>`;
+    }).join('')}
+    ${o.giftMessage ? `<div class="opt" style="margin:4px 0 0 20px"><div class="b">Card message:</div><div dir="auto">${esc(o.giftMessage)}</div></div>` : ''}
+    <hr class="solid">
+    ${discount ? `<div class="row"><span>Discount${o.appliedPromo?.code ? ' (' + esc(o.appliedPromo.code) + ')' : ''}</span><span>- ${q(discount)}</span></div><div class="sm">الخصم</div>` : ''}
+    <div class="row lbl"><span>Delivery Fee</span><span>${q(fee)}</span></div><div class="sm">رسوم التوصيل</div>
+    <div class="row lbl b" style="font-size:12.5px"><span>Total (${count} item${count === 1 ? '' : 's'})</span><span>${q(o.total)}</span></div>
+    <div class="sm">المجموع (${count} ${count === 1 ? 'عنصر' : 'عناصر'})</div>
     <hr>
-    <div class="b">DELIVER TO</div>
-    <div>${esc(r.name || '')}${r.notes === 'gift' ? ' 🎁 (gift)' : ''}</div>
-    <div>${esc(r.phone || '')}</div>
-    <div>${esc([r.landmark, r.address].filter(Boolean).join(', '))}</div>
-    ${o.buyer?.phone && r.notes === 'gift' ? `<div class="sm" style="margin-top:4px">Ordered by: ${esc(o.buyer.name || '')} ${esc(o.buyer.phone)}</div>` : ''}
-    ${o.giftMessage ? `<hr><div class="b">GIFT CARD MESSAGE</div><div dir="auto">“${esc(o.giftMessage)}”</div>` : ''}
+    <div class="c b" style="font-size:13px">Thank you!</div>
+    <div class="c b" style="font-size:13px">شكرا!</div>
+    <div class="c b" style="font-size:13px;margin-top:6px">${esc(pay)}${o.paymentMethod === 'cash' ? '<br><span class="sm">Collect ' + q(o.total) + ' — يُحصّل عند التسليم</span>' : ''}</div>
     <hr>
-    <div class="c sm">Thank you for choosing Rosebella 🌹</div>
-    <div class="c sm ar">شكراً لاختياركم روزبيلا</div>
     <script>window.onload = () => { window.focus(); window.print(); };<\/script>
   </body></html>`;
   // Print from a hidden frame so the admin page stays as it is
@@ -719,7 +751,7 @@ async function sha256(t) {
 }
 function askCancelPasscode(id) {
   return new Promise(resolve => {
-    openModal(`<h3>Cancel order #${esc(id)}?</h3>
+    openModal(`<h3>Cancel order #${esc(orderNo(id))}?</h3>
       <form class="stack" id="cancelForm">
         <p class="order-meta">Cancelling can’t be undone. Enter the manager passcode to continue.</p>
         <label class="field"><span>Passcode</span><input name="code" type="password" inputmode="numeric" autocomplete="off" required autofocus></label>
@@ -743,7 +775,7 @@ async function setOrderStatus(id, status, opts = {}) {
   const o = state.orders.find(x => x.id === id);
   const cur = o?.status || 'pending';
   if (status === cur) return;
-  if (cur === 'cancelled' || cur === 'delivered') { toast(`#${id} is already ${STATUS_LABEL[cur].toLowerCase()} — it can’t be changed.`, true); return; }
+  if (cur === 'cancelled' || cur === 'delivered') { toast(`#${orderNo(id)} is already ${STATUS_LABEL[cur].toLowerCase()} — it can’t be changed.`, true); return; }
   if (status !== 'cancelled' && STATUS_STEP[status] < STATUS_STEP[cur]) { toast('Orders can only move forward — they can’t go back to an earlier status.', true); return; }
   if (status === 'cancelled' && !opts.quiet && !(await askCancelPasscode(id))) return;
   const entry = { status, at: new Date().toISOString(), by: firebase.auth().currentUser?.email || '' };
@@ -754,7 +786,7 @@ async function setOrderStatus(id, status, opts = {}) {
   batch.set(db.collection('orderStatus').doc(id), {
     status, statusHistory: firebase.firestore.FieldValue.arrayUnion({ status: entry.status, at: entry.at }),
   }, { merge: true });
-  try { await batch.commit(); if (!opts.quiet) toast(`#${id} → ${STATUS_LABEL[status]}`); }
+  try { await batch.commit(); if (!opts.quiet) toast(`#${orderNo(id)} → ${STATUS_LABEL[status]}`); }
   catch (e) { toast(firestoreError(e), true); throw e; }
 }
 
@@ -1447,7 +1479,7 @@ async function autoConfirmPaidOrders() {
         batch.update(db.collection('orders').doc(o.id), { status: 'preparing', paymentCheck: check, statusHistory: firebase.firestore.FieldValue.arrayUnion(entry) });
         batch.set(db.collection('orderStatus').doc(o.id), { status: 'preparing', statusHistory: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
         await batch.commit();
-        toast(`${o.id} paid ✓ — moved to Preparing`);
+        toast(`#${orderNo(o.id)} paid ✓ — moved to Preparing`);
       } else {
         await db.collection('orders').doc(o.id).update({ paymentCheck: { result: st.paid ? 'mismatch' : 'not-paid', status: st.status || '', amount: st.amount || 0, at: new Date().toISOString() } });
       }
