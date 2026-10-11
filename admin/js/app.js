@@ -86,6 +86,7 @@ function subscribe() {
     });
     firstOrders = false;
     autoConfirmPaidOrders();
+    syncAlarm();
     state.ordersError = null;
     const pending = state.orders.filter(o => (o.status || 'pending') === 'pending').length;
     const pc = document.getElementById('pendingCount');
@@ -280,9 +281,10 @@ PAGES.orders = {
       state.openOrders.has(id) ? state.openOrders.delete(id) : state.openOrders.add(id);
       render();
     });
-    el.querySelectorAll('[data-status]').forEach(b => b.onclick = () => setOrderStatus(b.dataset.id, b.dataset.status));
+    el.querySelectorAll('[data-status]').forEach(b => b.onclick = () => setOrderStatus(b.dataset.id, b.dataset.status).catch(() => {}));
     el.querySelectorAll('[data-verify]').forEach(b => b.onclick = () => verifyPayment(b));
     el.querySelectorAll('[data-invoice]').forEach(b => b.onclick = () => sendInvoice(b.dataset.invoice, b));
+    el.querySelectorAll('[data-print]').forEach(b => b.onclick = () => printOrderReceipt(b.dataset.print));
     el.querySelectorAll('[data-email]').forEach(b => b.onclick = () => emailReceipt(b.dataset.email));
     el.querySelectorAll('[data-pdf]').forEach(b => b.onclick = () => downloadReceipt(b.dataset.pdf));
     el.querySelectorAll('[data-share]').forEach(b => b.onclick = () => shareReceipt(b.dataset.share));
@@ -316,7 +318,10 @@ function orderHTML(o) {
         ${o.deliverySlot?.expressFee ? `<div class="order-meta" style="margin-top:6px">Includes delivery fee ${money(o.deliverySlot.expressFee)}</div>` : ''}
         ${o.giftMessage ? `<h4 style="margin-top:14px">Gift message</h4><p>“${esc(o.giftMessage)}”</p>` : ''}
         <div class="pipeline">${STATUSES.map(([k, l]) =>
-          `<button class="btn btn-sm ${st === k ? 'btn-dark' : ''}" data-status="${k}" data-id="${esc(o.id)}">${l}</button>`).join('')}</div>
+          `<button class="btn btn-sm ${st === k ? 'btn-dark' : ''}" data-status="${k}" data-id="${esc(o.id)}"
+            ${st === k || st === 'cancelled' || st === 'delivered' || (k !== 'cancelled' && STATUS_STEP[k] < STATUS_STEP[st]) ? 'disabled' : ''}>${k === 'cancelled' ? '🔒 ' : ''}${l}</button>`).join('')}</div>
+        <div class="row" style="margin-top:10px"><button class="btn btn-sm btn-dark" data-print="${esc(o.id)}">🖨 Print receipt</button>
+          ${o.acceptedAt ? `<span class="order-meta">✓ Accepted ${fmtDate(o.acceptedAt)}${o.acceptedBy ? ' by ' + esc(o.acceptedBy) : ''}</span>` : ''}</div>
       </div>
       <div>
         <h4>Recipient</h4>
@@ -352,81 +357,99 @@ const ALERTS_KEY = 'rb_order_alerts';
 let audioCtx = null, unseenOrders = 0;
 const alertsOn = () => { try { return localStorage.getItem(ALERTS_KEY) !== 'off'; } catch (e) { return true; } };
 
-function chime() {
+
+// ── New-order ALARM: loud siren every few seconds until someone presses ACCEPT ──
+// (orders are already confirmed — "Accept" just tells the team someone has seen it)
+const ALARM_SINCE = '2026-10-11T00:00:00';     // older orders never ring
+function siren() {
   try {
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const t0 = audioCtx.currentTime;
-    // Loud doorbell: three bright ding-dongs through a limiter (so it is loud without distorting)
     const out = audioCtx.createDynamicsCompressor();
-    out.threshold.value = -6; out.ratio.value = 12;
-    const master = audioCtx.createGain(); master.gain.value = 1;
+    out.threshold.value = -3; out.ratio.value = 20;
+    const master = audioCtx.createGain(); master.gain.value = 1.6;
     out.connect(master).connect(audioCtx.destination);
-    [0, 0.75, 1.5].forEach(start => [[0, 1046.5], [0.22, 1568]].forEach(([at, f]) => {
-      [['triangle', 1], ['square', 0.18]].forEach(([type, vol]) => {
+    // Alarm-clock style: fast alternating high/low beeps for ~1.8 s
+    for (let k = 0; k < 8; k++) {
+      const f = k % 2 ? 1320 : 990, t = t0 + k * 0.22;
+      [['square', 0.55], ['sawtooth', 0.35]].forEach(([type, vol]) => {
         const o = audioCtx.createOscillator(), g = audioCtx.createGain();
         o.type = type; o.frequency.value = f;
-        const t = t0 + start + at;
         g.gain.setValueAtTime(0.0001, t);
         g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
-        o.connect(g).connect(out);
-        o.start(t); o.stop(t + 0.65);
+        g.gain.setValueAtTime(vol, t + 0.17);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+        o.connect(g).connect(out); o.start(t); o.stop(t + 0.21);
       });
-    }));
+    }
   } catch (e) {}
 }
-
-// Keeps ringing every 20 s until the new-order pop-up is opened or dismissed (max 10 minutes)
-let ringTimer = null, ringUntil = 0;
-function startRinging() {
-  chime();
-  ringUntil = Date.now() + 10 * 60 * 1000;
-  clearInterval(ringTimer);
-  ringTimer = setInterval(() => {
-    if (!document.querySelector('.order-alert') || Date.now() > ringUntil) { stopRinging(); return; }
-    chime();
-  }, 20000);
+let alarmTimer = null;
+function unacceptedOrders() {
+  return (state.orders || []).filter(o => !o.acceptedAt && ['pending', 'preparing'].includes(o.status || 'pending')
+    && String(o.createdAt || '') >= ALARM_SINCE);
 }
-function stopRinging() { clearInterval(ringTimer); ringTimer = null; }
+function syncAlarm() {
+  const list = unacceptedOrders();
+  let ov = document.getElementById('acceptOverlay');
+  if (!list.length) {
+    ov?.remove(); clearInterval(alarmTimer); alarmTimer = null;
+    document.title = 'Rosebella Admin';
+    return;
+  }
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'acceptOverlay';
+    ov.addEventListener('pointerdown', () => { try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) {} });
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `<div class="ao-card">
+      <div class="ao-bell">🔔</div>
+      <h2>${list.length > 1 ? list.length + ' new orders' : 'New order'}</h2>
+      ${list.map(o => {
+        const ds = o.deliverySlot || {}, r = o.recipient || {};
+        return `<div class="ao-order">
+          <div class="ao-top"><b>#${esc(o.id)}</b><span>${money(o.total)}</span></div>
+          <div class="ao-meta">${esc((o.items || []).map(i => `${i.qty || 1}× ${i.name}`).join(' · '))}</div>
+          <div class="ao-meta">🚚 ${esc(ds.type === 'express' ? 'Express — within 90 minutes' : [ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · '))} · ${esc(r.name || '')}</div>
+          <div class="ao-meta">${o.paymentMethod === 'cash' ? '💵 Cash on delivery' : '💳 Paid online'}</div>
+          <button class="ao-accept" data-accept="${esc(o.id)}">✓ ACCEPT ORDER</button>
+        </div>`;
+      }).join('')}
+      <div class="ao-hint">${audioCtx && audioCtx.state === 'running' ? '' : 'Tap anywhere here to turn the alarm sound on.'}</div>
+    </div>`;
+  ov.querySelectorAll('[data-accept]').forEach(b => b.onclick = () => acceptOrder(b.dataset.accept, b));
+  document.title = `🔔 (${list.length}) NEW ORDER — Rosebella Admin`;
+  if (!alarmTimer) { siren(); alarmTimer = setInterval(() => { if (unacceptedOrders().length) siren(); else syncAlarm(); }, 2600); }
+}
+async function acceptOrder(id, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Accepting…'; }
+  const o = state.orders.find(x => x.id === id);
+  const upd = { acceptedAt: new Date().toISOString(), acceptedBy: firebase.auth().currentUser?.email || '' };
+  try {
+    await db.collection('orders').doc(id).update(upd);
+    if (o) Object.assign(o, upd);
+    toast(`#${id} accepted ✓`);
+    state.orderFilter = 'all'; state.openOrders.add(id);
+    if (location.hash !== '#orders') location.hash = 'orders'; else render();
+  } catch (e) { toast(firestoreError(e), true); if (btn) { btn.disabled = false; btn.textContent = '✓ ACCEPT ORDER'; } }
+  syncAlarm();
+}
 
 function newOrderAlert(o) {
+  syncAlarm();
   if (!alertsOn()) return;
-  startRinging();
   const r = o.recipient || {};
   const items = (o.items || []).map(i => `${i.name} ×${i.qty || 1}`).join(', ');
-  // Pop-up inside the portal
-  const box = document.createElement('div');
-  box.className = 'order-alert';
-  box.innerHTML = `<div class="oa-hd"><b>🛎 New order</b><button class="oa-x" title="Dismiss">✕</button></div>
-    <div class="oa-id">${esc(o.id)} · <b>${money(o.total)}</b></div>
-    <div class="oa-meta">${esc(items)}</div>
-    <div class="oa-meta">${esc(r.name || '')} · ${esc(o.paymentMethod === 'cash' ? 'Cash on delivery' : 'Paid online')}</div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn btn-sm btn-gold" data-a="view">View order</button>
-      ${invoicePhone(o) ? '<button class="btn btn-sm" data-a="inv">Send receipt on WhatsApp</button>' : ''}
-    </div>`;
-  box.querySelector('.oa-x').onclick = () => { box.remove(); if (!document.querySelector('.order-alert')) stopRinging(); };
-  box.querySelector('[data-a=view]').onclick = () => {
-    state.orderFilter = 'all'; state.openOrders.add(o.id);
-    location.hash = 'orders'; render(); box.remove(); stopRinging();
-    setTimeout(() => document.querySelector(`[data-toggle="${CSS.escape(o.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
-  };
-  box.querySelector('[data-a=inv]')?.addEventListener('click', () => { sendInvoice(o.id); box.remove(); stopRinging(); });
-  document.getElementById('orderAlerts').prepend(box);
   // Desktop notification (shows even when this tab is in the background)
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
-      const n = new Notification(`New order ${o.id} — ${money(o.total)}`, { body: items + (r.name ? `\n${r.name}` : ''), tag: o.id, requireInteraction: true });
-      n.onclick = () => { window.focus(); box.querySelector('[data-a=view]').click(); n.close(); };
+      const n = new Notification(`🔔 New order #${o.id} — ${money(o.total)}`, { body: items + (r.name ? `\n${r.name}` : ''), tag: o.id, requireInteraction: true });
+      n.onclick = () => { window.focus(); n.close(); };
     } catch (e) {}
   }
-  // Tab title counter until the portal is looked at
-  if (document.hidden) { unseenOrders++; document.title = `(${unseenOrders}) New order — Rosebella Admin`; }
 }
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) { unseenOrders = 0; document.title = 'Rosebella Admin'; }
-});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncAlarm(); });
 
 function syncAlertsBtn() {
   const st = document.getElementById('alertsState'); if (!st) return;
@@ -438,12 +461,24 @@ document.getElementById('alertsBtn')?.addEventListener('click', async () => {
   if (alertsOn() && perm === 'default') { await Notification.requestPermission(); }
   else { try { localStorage.setItem(ALERTS_KEY, alertsOn() ? 'off' : 'on'); } catch (e) {} }
   syncAlertsBtn();
-  if (alertsOn()) { chime(); toast(Notification.permission === 'granted' ? 'Order alerts on — sound + pop-up + desktop notification' : 'Order alerts on (sound + pop-up). Allow notifications in the browser for desktop pop-ups.'); }
-  else toast('Order alerts off');
+  if (alertsOn()) { siren(); toast(Notification.permission === 'granted' ? 'Desktop notifications on (the new-order alarm always rings)' : 'Allow notifications in the browser to also get desktop pop-ups.'); }
+  else toast('Desktop notifications off — the new-order alarm still rings');
 });
 // Browsers only allow sound after a click on the page — unlock it on the first click
-document.addEventListener('pointerdown', () => { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }, { once: true });
+document.addEventListener('pointerdown', () => {
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state !== 'running') audioCtx.resume(); } catch (e) {}
+  document.getElementById('alarmArm')?.remove();
+});
 syncAlertsBtn();
+// Sound is blocked until the first click — keep a banner up until the alarm is armed
+(function armBanner() {
+  if (document.getElementById('alarmArm')) return;
+  const b = document.createElement('button');
+  b.id = 'alarmArm'; b.type = 'button';
+  b.textContent = '🔔 Click here to switch on the new-order alarm';
+  b.onclick = () => { try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); siren(); } catch (e) {} b.remove(); };
+  document.body.appendChild(b);
+})();
 
 // ── Invoice by WhatsApp ──
 // Goes to the person who placed the order; for gifts never to the recipient
@@ -609,22 +644,118 @@ function orderItemHTML(i) {
   </li>`;
 }
 
+// ── Print an 80 mm POS receipt (thermal printer) ──
+function printOrderReceipt(id) {
+  const o = state.orders.find(x => x.id === id); if (!o) return;
+  const r = o.recipient || {}, ds = o.deliverySlot || {}, store = state.settings?.store || {};
+  const items = o.items || [];
+  const sub = items.reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 1), 0);
+  const fee = Number(ds.expressFee) || 0;
+  const discount = Math.max(0, Math.round((sub + fee - (Number(o.total) || 0)) * 100) / 100);
+  const line = (a, b, cls = '') => `<div class="ln ${cls}"><span>${a}</span><span>${b}</span></div>`;
+  const d = new Date(o.createdAt || Date.now());
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Receipt #${esc(o.id)}</title><style>
+    @page { size: 80mm auto; margin: 0; }
+    * { box-sizing: border-box; }
+    body { width: 80mm; margin: 0; padding: 4mm 4mm 8mm; font: 12px/1.35 'Helvetica Neue', Arial, sans-serif; color: #000; }
+    .c { text-align: center; } .b { font-weight: 700; }
+    .brand { font-size: 22px; letter-spacing: .18em; font-weight: 700; }
+    .sm { font-size: 10.5px; } .xl { font-size: 26px; font-weight: 800; letter-spacing: .02em; }
+    hr { border: none; border-top: 1px dashed #000; margin: 6px 0; }
+    .ln { display: flex; justify-content: space-between; gap: 8px; } .ln span:first-child { flex: 1; }
+    .it { margin: 4px 0; } .ex { padding-left: 10px; font-size: 11px; }
+    .tot { font-size: 16px; font-weight: 800; }
+    .box { border: 1.5px solid #000; padding: 4px 6px; margin: 6px 0; }
+    .ar { direction: rtl; }
+  </style></head><body>
+    <div class="c brand">ROSEBELLA</div>
+    <div class="c sm">Luxury Flowers &amp; Chocolates · Doha, Qatar</div>
+    <div class="c sm">${esc(store.phone || '+974 3344 6618')} · rosebella.qa · CR 156868</div>
+    <hr>
+    <div class="c sm">ORDER</div>
+    <div class="c xl">#${esc(o.id)}</div>
+    <div class="c sm">${d.toLocaleDateString('en-GB')} ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+    <div class="box c b">${ds.type === 'express' ? 'EXPRESS — WITHIN 90 MIN' : 'DELIVERY: ' + esc([ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · '))}</div>
+    <div class="box c b">${o.paymentMethod === 'cash' ? 'CASH ON DELIVERY — COLLECT QR ' + Number(o.total || 0).toFixed(0) : 'PAID ONLINE' + (o.payment?.method ? ' (' + esc(o.payment.method) + ')' : '')}</div>
+    <hr>
+    ${items.map(i => `<div class="it">${line(`<b>${esc(i.qty || 1)}×</b> ${esc(i.name)}`, (Number(i.price || 0) * Number(i.qty || 1)).toFixed(0))}
+      ${(i.variants?.addons || []).map(a => `<div class="ex">+ ${esc(a)}</div>`).join('')}</div>`).join('')}
+    <hr>
+    ${line('Subtotal', sub.toFixed(0))}
+    ${fee ? line('Delivery', fee.toFixed(0)) : ''}
+    ${discount ? line('Discount' + (o.appliedPromo?.code ? ' (' + esc(o.appliedPromo.code) + ')' : ''), '-' + discount.toFixed(0)) : ''}
+    ${line('TOTAL (QR)', Number(o.total || 0).toFixed(0), 'tot')}
+    <hr>
+    <div class="b">DELIVER TO</div>
+    <div>${esc(r.name || '')}${r.notes === 'gift' ? ' 🎁 (gift)' : ''}</div>
+    <div>${esc(r.phone || '')}</div>
+    <div>${esc([r.landmark, r.address].filter(Boolean).join(', '))}</div>
+    ${o.buyer?.phone && r.notes === 'gift' ? `<div class="sm" style="margin-top:4px">Ordered by: ${esc(o.buyer.name || '')} ${esc(o.buyer.phone)}</div>` : ''}
+    ${o.giftMessage ? `<hr><div class="b">GIFT CARD MESSAGE</div><div dir="auto">“${esc(o.giftMessage)}”</div>` : ''}
+    <hr>
+    <div class="c sm">Thank you for choosing Rosebella 🌹</div>
+    <div class="c sm ar">شكراً لاختياركم روزبيلا</div>
+    <script>window.onload = () => { window.focus(); window.print(); };<\/script>
+  </body></html>`;
+  // Print from a hidden frame so the admin page stays as it is
+  const f = document.createElement('iframe');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(f);
+  f.contentDocument.open(); f.contentDocument.write(html); f.contentDocument.close();
+  setTimeout(() => f.remove(), 60000);
+}
+
 function slotLabel(id) {
   if (!id) return '';
   return (state.settings?.deliverySlots || []).find(s => s.id === id)?.label || id;
 }
 
-async function setOrderStatus(id, status) {
-  const entry = { status, at: new Date().toISOString() };
+const STATUS_STEP = { pending: 0, preparing: 1, out: 2, delivered: 3, cancelled: 9 };
+// Passcode for cancelling (stored as a SHA-256 hash, not in plain text)
+const CANCEL_HASH = 'a3f0fbc167fd10964710c3140c056bf91b2a27403ce706f74b9dc03c230ff8cd';
+async function sha256(t) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function askCancelPasscode(id) {
+  return new Promise(resolve => {
+    openModal(`<h3>Cancel order #${esc(id)}?</h3>
+      <form class="stack" id="cancelForm">
+        <p class="order-meta">Cancelling can’t be undone. Enter the manager passcode to continue.</p>
+        <label class="field"><span>Passcode</span><input name="code" type="password" inputmode="numeric" autocomplete="off" required autofocus></label>
+        <div class="login-err" id="cancelErr"></div>
+        <div class="modal-foot"><div></div><div class="row">
+          <button type="button" class="btn" id="cancelNo">Keep order</button>
+          <button class="btn btn-danger" type="submit">Cancel order</button></div></div>
+      </form>`, m => {
+      m.querySelector('#cancelNo').onclick = () => { closeModal(); resolve(false); };
+      m.querySelector('[name=code]').focus();
+      m.querySelector('#cancelForm').onsubmit = async e => {
+        e.preventDefault();
+        const ok = (await sha256(m.querySelector('[name=code]').value.trim())) === CANCEL_HASH;
+        if (!ok) { m.querySelector('#cancelErr').textContent = 'Wrong passcode.'; return; }
+        closeModal(); resolve(true);
+      };
+    });
+  });
+}
+async function setOrderStatus(id, status, opts = {}) {
+  const o = state.orders.find(x => x.id === id);
+  const cur = o?.status || 'pending';
+  if (status === cur) return;
+  if (cur === 'cancelled' || cur === 'delivered') { toast(`#${id} is already ${STATUS_LABEL[cur].toLowerCase()} — it can’t be changed.`, true); return; }
+  if (status !== 'cancelled' && STATUS_STEP[status] < STATUS_STEP[cur]) { toast('Orders can only move forward — they can’t go back to an earlier status.', true); return; }
+  if (status === 'cancelled' && !opts.quiet && !(await askCancelPasscode(id))) return;
+  const entry = { status, at: new Date().toISOString(), by: firebase.auth().currentUser?.email || '' };
   const batch = db.batch();
   batch.update(db.collection('orders').doc(id), {
     status, statusHistory: firebase.firestore.FieldValue.arrayUnion(entry),
   });
   batch.set(db.collection('orderStatus').doc(id), {
-    status, statusHistory: firebase.firestore.FieldValue.arrayUnion(entry),
+    status, statusHistory: firebase.firestore.FieldValue.arrayUnion({ status: entry.status, at: entry.at }),
   }, { merge: true });
-  try { await batch.commit(); toast(`${id} → ${STATUS_LABEL[status]}`); }
-  catch (e) { toast(firestoreError(e), true); }
+  try { await batch.commit(); if (!opts.quiet) toast(`#${id} → ${STATUS_LABEL[status]}`); }
+  catch (e) { toast(firestoreError(e), true); throw e; }
 }
 
 // ── Products & collections ──────────────────
@@ -1294,6 +1425,12 @@ function bindGallery(root, initial) {
 // paid orders straight to "Preparing". Cash orders stay "Pending" until you change them.
 const autoChecking = new Set();
 async function autoConfirmPaidOrders() {
+  // Cash on delivery: nothing to verify — straight to Preparing
+  for (const o of state.orders.filter(o => (o.status || 'pending') === 'pending' && o.paymentMethod === 'cash' && !autoChecking.has(o.id)
+      && String(o.createdAt || '') >= ALARM_SINCE)) {
+    autoChecking.add(o.id);
+    setOrderStatus(o.id, 'preparing', { quiet: true }).catch(() => autoChecking.delete(o.id));
+  }
   const todo = state.orders.filter(o => (o.status || 'pending') === 'pending' && o.paymentMethod !== 'cash'
     && o.payment?.paymentId && !o.paymentCheck && !autoChecking.has(o.id));
   for (const o of todo) {

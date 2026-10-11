@@ -3505,7 +3505,7 @@
     </div>
 
     <div class="trk-search-wrap">
-      <input id="trkSearchInp" class="trk-search-inp" type="text" placeholder="Enter order ID — e.g. RB-AB12CD" autocomplete="off" onkeydown="if(event.key==='Enter')trkSearch()">
+      <input id="trkSearchInp" class="trk-search-inp" type="text" placeholder="Enter order number — e.g. 244512378" autocomplete="off" onkeydown="if(event.key==='Enter')trkSearch()">
       <button class="trk-search-btn" onclick="trkSearch()">Track</button>
     </div>
 
@@ -5724,12 +5724,18 @@
     await pyStartPayment({ sessionId: response.sessionId, wallet });
   }
 
+  // Order numbers: seconds since 1 Jan 2026 + 1 random digit, e.g. 244512378 (numbers only, practically never repeats)
+  function rbNewOrderId() {
+    const secs = Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 1000);
+    return String(secs) + String(Math.floor(Math.random() * 10));
+  }
+
   async function pyStartPayment(extra) {
     const wallet = !!extra.wallet; delete extra.wallet;
     pyCardError('');
     pyShowWaiting('Processing payment…', false);
     try {
-      const orderId = 'RB-' + Date.now().toString(36).toUpperCase();
+      const orderId = rbNewOrderId();
       pyOrderSnapshot.orderId = orderId;
       pyOrderSnapshot.coPayment = 'card';
       localStorage.setItem(PENDING_KEY, JSON.stringify(pyOrderSnapshot));
@@ -5842,7 +5848,7 @@
     closePayment();
     mfInitKey = '';
     const snap = pyOrderSnapshot;
-    const orderId = snap.orderId || ('RB-' + (Date.now().toString(36).toUpperCase()));
+    const orderId = snap.orderId || rbNewOrderId();
     document.getElementById('pyOrderNum').textContent = orderId;
     document.getElementById('pySuccessItems').innerHTML = snap.cart.map(i =>
       `<div class="py-success-item"><span class="py-success-item-name">${i.name} ×${i.qty}</span><span class="py-success-item-price">QR ${(i.price*i.qty).toFixed(0)}</span></div>`

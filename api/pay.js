@@ -175,7 +175,7 @@ module.exports = async (req, res) => {
 
     if (action === 'execute') {
       const orderId = cleanText(body.orderId, 40);
-      if (!/^RB-[A-Z0-9]{4,20}$/.test(orderId)) throw httpError(400, 'Invalid order id.');
+      if (!/^(RB-[A-Z0-9]{4,20}|\d{6,12})$/.test(orderId)) throw httpError(400, 'Invalid order id.');
       const r = body.order.recipient || {};
       const phone = String(r.phone || '').replace(/\D/g, '').replace(/^974/, '');
       const origin = siteOrigin(req);

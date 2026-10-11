@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const orderId = String(body.orderId || '');
-    if (!/^RB-[A-Z0-9]{4,20}$/.test(orderId)) throw httpError(400, 'Invalid order id.');
+    if (!/^(RB-[A-Z0-9]{4,20}|\d{6,12})$/.test(orderId)) throw httpError(400, 'Invalid order id.');
     let phone = String(body.phone || '').replace(/\D/g, '');
     if (phone.length === 8) phone = '974' + phone;
     if (!/^\d{10,15}$/.test(phone)) throw httpError(400, 'Invalid customer phone number.');
