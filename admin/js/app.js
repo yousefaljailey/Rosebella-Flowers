@@ -308,7 +308,7 @@ function orderHTML(o) {
   const delivery = ds.type === 'express' ? 'Express (90 min)'
     : [ds.date, slotLabel(ds.slot)].filter(Boolean).join(' · ') || '—';
   const phone = String(r.phone || '').replace(/\D/g, '');
-  const addr = [r.landmark, r.address].filter(Boolean).join(', ');
+  const addr = [r.landmark, r.placeText, r.address].filter(Boolean).join(', ');
   return `<div class="order">
     <div class="order-hd" data-toggle="${esc(o.id)}">
       <div>
@@ -702,6 +702,7 @@ function printOrderReceipt(id) {
     <div class="lbl">Customer Phone: <b>${esc(custPhone || '—')}</b></div><div class="sm">هاتف العميل</div>
     ${gift ? `<div class="lbl">Recipient: <b>${esc(r.name || '')}</b> ${esc(r.phone || '')}</div><div class="sm">المستلم</div>` : ''}
     <div class="lbl">Address: <b>${esc([r.landmark, r.address].filter(Boolean).join(', ') || '—')}</b></div><div class="sm">العنوان</div>
+    ${r.place ? `<div class="lbl">${esc(r.place.label)}: ${(r.place.fields || []).map(f => `${esc(f.label)} <b>${esc(f.value)}</b>`).join(' · ')}</div>` : ''}
     <hr>
     ${items.map(i => {
       const p = prods.find(x => x.name === i.name);

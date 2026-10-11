@@ -1946,6 +1946,18 @@
     /* Form fields */
     .co-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .co-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .co-place-types { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .co-ptype { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border: 1.5px solid #e0dbd0; border-radius: 10px; background: #fff; cursor: pointer; font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--charcoal); text-align: center; line-height: 1.2; transition: border-color .15s, background .15s; }
+    .co-ptype span { font-size: 20px; }
+    .co-ptype:hover { border-color: rgba(198,146,42,0.5); }
+    .co-ptype.sel { border-color: var(--gold); background: rgba(198,146,42,0.08); box-shadow: 0 0 0 1px var(--gold); }
+    .co-place-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 4px; }
+    .co-place-fields:empty { display: none; }
+    .co-place-f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .co-place-f .co-input, .co-place-f .co-textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+    .co-place-f.wide { grid-column: 1 / -1; }
+    .co-place-f span { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--taupe); }
+    @media (max-width: 480px) { .co-place-types { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     .co-field:last-child { margin-bottom: 0; }
     .co-label {
       font-family: var(--sans); font-size: 9px; font-weight: 700;
@@ -3342,9 +3354,16 @@
               </div>
             </div>
 
+            <!-- Type of place (optional): House / Apartment-Hotel / Office / Other -->
+            <div class="co-field" id="coPlaceField">
+              <label class="co-label">Type of place <small class="co-opt-tag">optional</small></label>
+              <div class="co-place-types" id="coPlaceTypes"></div>
+              <div class="co-place-fields" id="coPlaceFields"></div>
+            </div>
+
             <!-- Recipient Address -->
             <div class="co-field">
-              <label class="co-label" for="coAddress">Recipient Address <span class="co-req co-addr-req">*</span></label>
+              <label class="co-label" for="coAddress">Recipient Address <span class="co-req co-addr-req">*</span> <small class="co-opt-tag co-addr-or" hidden>or fill in the place above</small></label>
               <textarea id="coAddress" class="co-textarea" rows="3" placeholder="Apartment/villa number, floor, building name and street"></textarea>
             </div>
 
@@ -5286,7 +5305,16 @@
     // Find area from saved data
     const areaEl = document.getElementById('coArea');
     if (areaEl && recipient.landmark) areaEl.value = recipient.landmark;
-    setVal('coAddress', /^Gift — |^\(area only/.test(recipient.address || '') ? '' : recipient.address);
+    // Type of place: restore what was used last time
+    coPlaceType = ''; coPlaceVals = {};
+    if (recipient.place && CO_PLACES[recipient.place.type]) {
+      coPlaceType = recipient.place.type;
+      const defs = CO_PLACES[coPlaceType].fields;
+      (recipient.place.fields || []).forEach(({ label, value }) => { const d = defs.find(([, l]) => l === label); if (d) coPlaceVals[coPlaceType + '.' + d[0]] = value; });
+    }
+    coRenderPlace();
+    const savedAddr = /^Gift — |^\(area only/.test(recipient.address || '') || (recipient.place && !recipient.placeText && recipient.address?.startsWith(recipient.place.label + ':')) ? '' : recipient.address;
+    setVal('coAddress', savedAddr);
     if (recipient.notes) document.getElementById('coSendAsGift').checked = recipient.notes === 'gift';
     // Gift message
     const gm = document.getElementById('coGiftMsg');
@@ -5423,6 +5451,42 @@
     if (arrow) arrow.style.transform = open ? 'rotate(180deg)' : '';
   }
 
+  // ── Type of place (optional) ─────────────────
+  const CO_PLACES = {
+    house:  { label: 'House',             icon: '🏠', fields: [['building', 'Building number'], ['door', 'Door number']] },
+    apt:    { label: 'Apartment / Hotel', icon: '🏢', fields: [['building', 'Building name'], ['entrance', 'Entrance number'], ['floor', 'Floor'], ['unit', 'Apartment / Room']] },
+    office: { label: 'Office',            icon: '💼', fields: [['building', 'Building name'], ['floor', 'Floor number'], ['office', 'Office number']] },
+    other:  { label: 'Other',             icon: '✏️', fields: [['details', 'Details']] },
+  };
+  let coPlaceType = '';
+  let coPlaceVals = {};          // remembered per field while switching types
+  function coRenderPlace() {
+    const types = document.getElementById('coPlaceTypes'), box = document.getElementById('coPlaceFields');
+    if (!types || !box) return;
+    types.innerHTML = Object.entries(CO_PLACES).map(([k, t]) =>
+      `<button type="button" class="co-ptype ${coPlaceType === k ? 'sel' : ''}" onclick="coSetPlace('${k}')"><span>${t.icon}</span>${t.label}</button>`).join('');
+    const t = CO_PLACES[coPlaceType];
+    box.innerHTML = !t ? '' : t.fields.map(([f, label]) => {
+      const v = (coPlaceVals[coPlaceType + '.' + f] || '').replace(/"/g, '&quot;');
+      return f === 'details'
+        ? `<label class="co-place-f wide"><span>${label}</span><textarea class="co-textarea" rows="2" data-place="${f}" placeholder="e.g. compound name, villa colour, landmark…">${v}</textarea></label>`
+        : `<label class="co-place-f"><span>${label}</span><input class="co-input" data-place="${f}" value="${v}" ${/number|Floor|Room/.test(label) ? 'inputmode="text"' : ''}></label>`;
+    }).join('');
+    box.querySelectorAll('[data-place]').forEach(el => el.addEventListener('input', () => { coPlaceVals[coPlaceType + '.' + el.dataset.place] = el.value; }));
+  }
+  function coSetPlace(k) {
+    coPlaceType = coPlaceType === k ? '' : k;   // tap again to clear
+    coRenderPlace();
+    document.querySelector('#coPlaceFields [data-place]')?.focus();
+  }
+  // { type, label, fields:[[label, value]], text } — or null when nothing was filled in
+  function coPlaceInfo() {
+    const t = CO_PLACES[coPlaceType]; if (!t) return null;
+    const fields = t.fields.map(([f, label]) => [label, (coPlaceVals[coPlaceType + '.' + f] || '').trim()]).filter(([, v]) => v);
+    if (!fields.length) return null;
+    return { type: coPlaceType, label: t.label, fields, text: `${t.label}: ` + fields.map(([l, v]) => coPlaceType === 'other' ? v : `${l} ${v}`).join(', ') };
+  }
+
   // ── Validate + proceed to payment ────────────
   // Validates the checkout form and saves recipient + delivery. Returns true when ready to pay.
   function coValidateAndSave() {
@@ -5434,10 +5498,11 @@
     const myPhone = document.getElementById('coMyPhone').value.trim();
     const area    = document.getElementById('coArea').value;
     const address = document.getElementById('coAddress').value.trim();
+    const place   = coPlaceInfo();
 
     let valid = true;
     const required = isGift ? [['coName', name], ['coPhoneNum', phone], ['coMyPhone', myPhone]]
-                            : [['coMyPhone', phone], ['coArea', area], ['coAddress', address]];
+                            : [['coMyPhone', phone], ['coArea', area], ['coAddress', address || (place ? place.text : '')]];
     ['coName', 'coPhoneNum', 'coMyPhone', 'coArea', 'coAddress'].forEach(id => document.getElementById(id)?.classList.remove('err'));
     required.forEach(([id, v]) => {
       const el = document.getElementById(id);
@@ -5461,11 +5526,13 @@
       return false;
     }
 
-    const knownAddress = !isGift || !!(address || area);
+    const knownAddress = !isGift || !!(address || area || place);
     recipient = {
       name,
       phone: '+974 ' + phone,
-      address: knownAddress ? (address || '(area only — confirm details with the recipient)') : 'Gift — contact the recipient for the address',
+      address: knownAddress ? (address || (place ? place.text : '(area only — confirm details with the recipient)')) : 'Gift — contact the recipient for the address',
+      place: place ? { type: place.type, label: place.label, fields: place.fields.map(([label, value]) => ({ label, value })) } : null,
+      placeText: place && address ? place.text : '',
       landmark: area,
       occasion: '',
       notes: isGift ? 'gift' : ''
