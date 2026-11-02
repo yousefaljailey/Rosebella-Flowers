@@ -218,6 +218,9 @@
       transition: border-color 0.25s, transform 0.25s;
       position: relative;
     }
+    #shopMore { text-align: center; padding: 28px 0 10px; }
+    .sp-more-btn { border: 1px solid var(--gold); background: #fff; color: var(--gold); border-radius: 999px; padding: 13px 28px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+    .sp-more-btn:hover { background: var(--gold); color: #fff; }
     .sp-card:hover { border-color: rgba(198,146,42,0.3); transform: translateY(-3px); }
     .sp-card-img {
       width: 100%; aspect-ratio: 3/4; overflow: hidden;
@@ -684,26 +687,17 @@
       document.getElementById('skeletonGrid').style.display = 'none';
     }
 
-    function renderProductList(products) {
-      const grid = document.getElementById('productGrid');
-      const empty = document.getElementById('emptyState');
+    // Shown in batches: building ~1,000 product cards at once made iPhones run out of memory and reload the page
+    const SHOP_BATCH = 48;
+    let shopList = [], shopShown = 0, shopMoreObs = null;
 
-      if (products.length === 0) {
-        grid.style.display = 'none';
-        empty.style.display = 'block';
-        return;
-      }
-      empty.style.display = 'none';
-      grid.style.display = 'grid';
-
-      grid.innerHTML = products.map((p, i) => {
-        const badgeHTML = p.badge ? `<span class="sp-badge ${getBadgeClass(p.badge)}">${p.badge}</span>` : '';
-        const imgHTML = p.imgSrc
-          ? `<div class="sp-card-img-bg" data-bg="${escHTML(RB.cardImg(p.imgSrc))}"></div>`
-          : `<div class="sp-card-img-bg" style="background:linear-gradient(135deg,#e8d09a,#c6922a)"></div>`;
-
-        const go = `onclick="if(!event.target.closest('button'))location.href='${escAttr(RB.productUrl(p))}'"`;
-        return `<div class="sp-card" style="animation-delay:${i*0.04}s">
+    function shopCardHTML(p, i) {
+      const badgeHTML = p.badge ? `<span class="sp-badge ${getBadgeClass(p.badge)}">${p.badge}</span>` : '';
+      const imgHTML = p.imgSrc
+        ? `<div class="sp-card-img-bg" data-bg="${escHTML(RB.cardImg(p.imgSrc))}"></div>`
+        : `<div class="sp-card-img-bg" style="background:linear-gradient(135deg,#e8d09a,#c6922a)"></div>`;
+      const go = `onclick="if(!event.target.closest('button'))location.href='${escAttr(RB.productUrl(p))}'"`;
+      return `<div class="sp-card" style="animation-delay:${Math.min(i % SHOP_BATCH, 12) * 0.04}s">
           <div class="sp-card-img" ${go} style="cursor:pointer">
             ${imgHTML}
             ${badgeHTML}
@@ -722,8 +716,45 @@
             </div>
           </div>
         </div>`;
-      }).join('');
+    }
+
+    function renderProductList(products) {
+      const grid = document.getElementById('productGrid');
+      const empty = document.getElementById('emptyState');
+      shopList = products; shopShown = 0;
+      document.getElementById('shopMore')?.remove();
+      if (products.length === 0) {
+        grid.innerHTML = '';
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      grid.style.display = 'grid';
+      grid.innerHTML = '';
+      showMoreProducts();
+    }
+
+    function showMoreProducts() {
+      const grid = document.getElementById('productGrid');
+      const next = shopList.slice(shopShown, shopShown + SHOP_BATCH);
+      grid.insertAdjacentHTML('beforeend', next.map((p, k) => shopCardHTML(p, shopShown + k)).join(''));
+      shopShown += next.length;
       RB.cartUI.sync();
+      // "Show more" button under the grid (also triggered automatically when it scrolls into view)
+      let more = document.getElementById('shopMore');
+      if (shopShown >= shopList.length) { more?.remove(); return; }
+      if (!more) {
+        more = document.createElement('div'); more.id = 'shopMore';
+        more.innerHTML = '<button type="button" class="sp-more-btn" onclick="showMoreProducts()"></button>';
+        grid.after(more);
+        if ('IntersectionObserver' in window) {
+          shopMoreObs?.disconnect();
+          shopMoreObs = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) showMoreProducts(); }, { rootMargin: '600px 0px' });
+          shopMoreObs.observe(more);
+        }
+      }
+      more.querySelector('button').textContent = `Show more (${shopList.length - shopShown} more)`;
     }
 
     function getBadgeClass(badge) {
